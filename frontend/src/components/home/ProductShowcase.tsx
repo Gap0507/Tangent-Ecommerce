@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import useEmblaCarousel from "embla-carousel-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,6 +14,7 @@ const products = [
   {
     id: 1,
     bgSrc: "/can1bg.png",
+    mobileBgSrc: "/mobilecan1.png",
     nameA: "Citrus",
     nameB: "Surge",
     flavor: "Zesty Citrus Blast",
@@ -21,6 +24,7 @@ const products = [
   {
     id: 2,
     bgSrc: "/can2bg.png",
+    mobileBgSrc: "/mobilecan2.png",
     nameA: "Berry",
     nameB: "Focus",
     flavor: "Wild Mixed Berry",
@@ -30,6 +34,7 @@ const products = [
   {
     id: 3,
     bgSrc: "/can3bg.png",
+    mobileBgSrc: "/mobilecan3.png",
     nameA: "Tropical",
     nameB: "Rush",
     flavor: "Mango Pineapple",
@@ -39,6 +44,7 @@ const products = [
   {
     id: 4,
     bgSrc: "/can4bg.png",
+    mobileBgSrc: "/mobilecan4.png",
     nameA: "Midnight",
     nameB: "Mint",
     flavor: "Cool Spearmint",
@@ -75,7 +81,130 @@ const features = [
   },
 ];
 
-export function ProductShowcase() {
+// ─────────────────────────────────────────────
+// MOBILE: Embla swipe carousel
+// ─────────────────────────────────────────────
+function MobileProductCarousel() {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, dragFree: false });
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setActiveIdx(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.on("select", onSelect);
+    return () => { emblaApi.off("select", onSelect); };
+  }, [emblaApi, onSelect]);
+
+  return (
+    <div className="relative w-full bg-cream" style={{ height: "100svh" }}>
+      {/* Embla viewport */}
+      <div ref={emblaRef} className="overflow-hidden w-full h-full">
+        <div className="flex h-full">
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="relative flex-[0_0_100%] min-w-0 h-full overflow-hidden"
+            >
+              {/* Background image */}
+              <Image
+                src={product.mobileBgSrc}
+                alt={`${product.nameA} ${product.nameB}`}
+                fill
+                className="object-cover object-top"
+                sizes="100vw"
+                unoptimized
+              />
+
+              {/* Gradient overlay — top cream fade for text */}
+              <div className="absolute inset-0 z-10 pointer-events-none"
+                style={{
+                  background: "linear-gradient(to bottom, rgba(249,246,238,0.92) 0%, rgba(249,246,238,0.7) 45%, transparent 65%)"
+                }}
+              />
+
+              {/* Text content — top aligned */}
+              <div className="absolute inset-x-0 top-0 z-20 px-6 pt-[13vh]">
+                {/* Name */}
+                <div className="mb-2">
+                  <h2
+                    className="font-fraunces font-black text-navy leading-[1.0] drop-shadow-sm"
+                    style={{ fontSize: "clamp(44px, 12vw, 72px)" }}
+                  >
+                    {product.nameA}
+                  </h2>
+                  <h2
+                    className="font-fraunces font-black text-coral leading-[1.0] drop-shadow-sm"
+                    style={{ fontSize: "clamp(44px, 12vw, 72px)" }}
+                  >
+                    {product.nameB}
+                  </h2>
+                </div>
+
+                {/* Divider */}
+                <div className="w-10 h-[3px] bg-coral rounded-full mb-3" />
+
+                {/* Flavor */}
+                <p className="text-[11px] font-bold tracking-[.16em] uppercase text-navy/70 mb-2">
+                  {product.flavor}
+                </p>
+
+                {/* Description */}
+                <p className="text-[13px] text-ink/80 leading-[1.5] max-w-[300px] mb-4 font-medium">
+                  {product.desc}
+                </p>
+
+                {/* CTA */}
+                <Link
+                  href="/shop"
+                  className="inline-flex items-center gap-2 bg-navy text-cream font-bold text-[13px] px-5 py-2.5 rounded-full"
+                >
+                  Shop Now
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Progress dots — bottom center */}
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2.5 z-30">
+        {products.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => emblaApi?.scrollTo(i)}
+            className="pdot w-2 h-2 rounded-full bg-navy transition-all duration-300"
+            style={{
+              opacity: i === activeIdx ? 1 : 0.3,
+              transform: i === activeIdx ? "scale(1.6)" : "scale(1)",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Swipe hint */}
+      <div className="absolute bottom-6 right-6 z-30 flex items-center gap-1 text-navy/40">
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+        </svg>
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// DESKTOP: GSAP scroll-jacking (unchanged)
+// ─────────────────────────────────────────────
+function DesktopProductShowcase() {
   const outerRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const slidesRef = useRef<HTMLDivElement>(null);
@@ -136,18 +265,18 @@ export function ProductShowcase() {
   }, []);
 
   return (
-    <div ref={outerRef} style={{ height: `${products.length * 600}vh` }} className="relative">
-      <div ref={stickyRef} className="sticky top-0 h-screen w-full overflow-hidden bg-cream">
+    <div ref={outerRef} className="relative">
+      <div ref={stickyRef} className="h-screen w-full overflow-hidden bg-cream">
 
         {/* Slides */}
         <div ref={slidesRef} className="relative w-full h-full">
           {products.map((product, i) => (
             <div
               key={product.id}
-              className="slide absolute inset-0 w-full h-full"
+              className="slide absolute inset-0 w-full h-full overflow-hidden"
               style={{ willChange: "transform" }}
             >
-              {/* ── FULL BLEED IMAGE — cover fills screen, image has its own left cream area ── */}
+              {/* Desktop image */}
               <Image
                 src={product.bgSrc}
                 alt={`${product.nameA} ${product.nameB}`}
@@ -158,71 +287,63 @@ export function ProductShowcase() {
                 unoptimized
               />
 
-              {/* ── Subtle gradient just to ensure text stays readable ── */}
-              <div className="absolute inset-0 bg-gradient-to-r from-cream/40 via-transparent to-transparent z-10" />
+              {/* Gradient */}
+              <div className="absolute inset-0 bg-gradient-to-r from-cream/40 via-transparent to-transparent z-10 pointer-events-none" />
 
-              {/* ── TEXT CONTENT ── */}
-              <div
-                className="absolute left-0 top-0 h-full z-20 flex flex-col justify-center px-12 md:px-16"
-                style={{ width: "42vw" }}
-              >
-                {/* Tag */}
-                <div className="inline-flex self-start items-center gap-1.5 bg-sand text-navy text-[11px] font-bold tracking-[.12em] uppercase px-3 py-1.5 rounded-full mb-5">
-                  <span>⭐</span>
-                  <span>{product.tag}</span>
-                </div>
+              {/* Text content */}
+              <div className="absolute left-[8vw] top-0 h-full z-20 flex flex-col justify-center pr-4 pt-[4vh]" style={{ width: "45vw" }}>
 
-                {/* Name — two-line two-color */}
-                <div className="mb-3">
+                {/* Name */}
+                <div className="mb-4">
                   <h2
-                    className="font-fraunces font-black text-navy leading-[1.0] block"
-                    style={{ fontSize: "clamp(50px, 6.5vw, 92px)" }}
+                    className="font-fraunces font-black text-navy leading-[1.0] block hover:scale-[1.03] transition-transform origin-left cursor-pointer drop-shadow-sm"
+                    style={{ fontSize: "clamp(48px, 6.5vw, 90px)" }}
                   >
                     {product.nameA}
                   </h2>
                   <h2
-                    className="font-fraunces font-black text-coral leading-[1.0] block"
-                    style={{ fontSize: "clamp(50px, 6.5vw, 92px)" }}
+                    className="font-fraunces font-black text-coral leading-[1.0] block hover:scale-[1.03] transition-transform origin-left cursor-pointer drop-shadow-sm"
+                    style={{ fontSize: "clamp(48px, 6.5vw, 90px)" }}
                   >
                     {product.nameB}
                   </h2>
                 </div>
 
                 {/* Divider */}
-                <div className="w-10 h-[3px] bg-coral rounded-full mb-4" />
+                <div className="w-12 h-[4px] bg-coral rounded-full mb-5" />
 
                 {/* Flavor */}
-                <p className="text-[12px] font-bold tracking-[.16em] uppercase text-navy/60 mb-3">
+                <p className="text-[13px] font-bold tracking-[.16em] uppercase text-navy/70 mb-4">
                   {product.flavor}
                 </p>
 
                 {/* Description */}
-                <p className="text-[15px] text-ink/75 leading-[1.7] max-w-[340px] mb-7">
+                <p className="text-[16px] text-ink/80 leading-[1.6] max-w-[380px] mb-6 font-medium">
                   {product.desc}
                 </p>
 
                 {/* CTA row */}
-                <div className="flex items-center gap-5 mb-10">
+                <div className="flex items-center gap-6 mb-8">
                   <Link
                     href="/shop"
-                    className="inline-flex items-center gap-2.5 bg-navy text-cream font-bold text-[14px] px-6 py-3 rounded-full hover:bg-blue transition-all duration-200 hover:scale-105"
+                    className="inline-flex items-center gap-3 bg-navy text-cream font-bold text-[15px] px-8 py-3.5 rounded-full hover:bg-blue transition-all duration-300 hover:scale-105 hover:shadow-md"
                   >
                     Shop Now
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                    <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                     </svg>
                   </Link>
-                  <span className="text-[13px] text-navy/50 font-semibold">{i + 1} / {products.length}</span>
+                  <span className="text-[14px] text-navy/50 font-semibold">{i + 1} / {products.length}</span>
                 </div>
 
                 {/* Feature icons */}
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-8">
                   {features.map((f) => (
-                    <div key={f.label} className="flex flex-col items-center gap-2">
-                      <div className="w-10 h-10 rounded-full border-2 border-navy/30 bg-cream/60 flex items-center justify-center text-navy/70">
+                    <div key={f.label} className="flex flex-col items-center gap-3 group">
+                      <div className="w-12 h-12 rounded-full bg-white/90 shadow-sm flex items-center justify-center text-navy group-hover:scale-110 group-hover:bg-white group-hover:shadow-md transition-all cursor-pointer">
                         {f.icon}
                       </div>
-                      <span className="text-[10px] font-bold tracking-[.14em] uppercase text-navy/60 text-center">
+                      <span className="text-[11px] font-bold tracking-[.15em] uppercase text-navy/80 text-center group-hover:text-navy transition-colors">
                         {f.label}
                       </span>
                     </div>
@@ -254,4 +375,16 @@ export function ProductShowcase() {
       </div>
     </div>
   );
+}
+
+// ─────────────────────────────────────────────
+// ROOT: pick the right version per device
+// ─────────────────────────────────────────────
+export function ProductShowcase() {
+  const isMobile = useIsMobile();
+
+  // Avoid flash of wrong version during SSR hydration
+  if (isMobile === undefined) return null;
+
+  return isMobile ? <MobileProductCarousel /> : <DesktopProductShowcase />;
 }
