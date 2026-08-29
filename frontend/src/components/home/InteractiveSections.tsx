@@ -13,9 +13,15 @@ const FlavorPicker = dynamic(
   { ssr: false }
 );
 
+const Juice3DShowcase = dynamic(
+  () => import("@/components/home/Juice3DShowcase").then((m) => m.Juice3DShowcase),
+  { ssr: false }
+);
+
 export function InteractiveSections() {
   return (
     <>
+      <Juice3DShowcase />
       <TasteOfWonder />
       <MomentsSection />
       <FlavorPicker />

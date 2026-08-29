@@ -44,7 +44,9 @@ const features = [
 export function TasteOfWonder() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const accentRef = useRef<HTMLDivElement>(null);
+  const parasRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,61 +54,70 @@ export function TasteOfWonder() {
     if (!section) return;
 
     const ctx = gsap.context(() => {
-      // 1. Image entrance
+      // 1. Image entrance — slides up with scale & fade
       if (imageRef.current) {
-        gsap.from(imageRef.current, {
-          scrollTrigger: {
-            trigger: section,
-            start: "top 75%",
-          },
-          y: 80,
-          scale: 0.9,
-          opacity: 0,
-          duration: 1.2,
-          ease: "power3.out",
-        });
+        gsap.fromTo(imageRef.current, 
+          { y: 80, scale: 0.9, opacity: 0 },
+          {
+            scrollTrigger: { trigger: section, start: "top 75%" },
+            y: 0, scale: 1, opacity: 1, duration: 1.2, ease: "power3.out"
+          }
+        );
       }
 
-      // 2. Text entrance stagger (Nicer animation)
-      if (textRef.current) {
-        gsap.from(textRef.current.children, {
-          scrollTrigger: {
-            trigger: section,
-            start: "top 75%",
-          },
-          x: 40,
-          opacity: 0,
-          duration: 1,
-          stagger: 0.2,
-          ease: "power4.out",
-        });
+      // 2. Heading — word-by-word reveal (Redwood-style)
+      if (headingRef.current) {
+        const words = headingRef.current.querySelectorAll(".reveal-word");
+        gsap.fromTo(words, 
+          { y: 40, opacity: 0, rotateX: 20 },
+          {
+            scrollTrigger: { trigger: section, start: "top 75%" },
+            y: 0, opacity: 1, rotateX: 0, duration: 0.8, stagger: 0.12, ease: "power4.out"
+          }
+        );
       }
 
-      // 3. Features entrance stagger
+      // 3. Blue accent bar — slides in width
+      if (accentRef.current) {
+        gsap.fromTo(accentRef.current, 
+          { scaleX: 0 },
+          {
+            scrollTrigger: { trigger: section, start: "top 75%" },
+            scaleX: 1, transformOrigin: "left center", duration: 0.8, delay: 0.5, ease: "power3.out"
+          }
+        );
+      }
+
+      // 4. Paragraphs — staggered slide-up reveal per paragraph
+      if (parasRef.current) {
+        const paras = parasRef.current.querySelectorAll("p");
+        gsap.fromTo(paras, 
+          { y: 30, opacity: 0 },
+          {
+            scrollTrigger: { trigger: section, start: "top 70%" },
+            y: 0, opacity: 1, duration: 0.9, stagger: 0.2, delay: 0.4, ease: "power3.out"
+          }
+        );
+      }
+
+      // 5. Features bar container — slide up
       if (featuresRef.current) {
-        gsap.from(featuresRef.current, {
-          scrollTrigger: {
-            trigger: section,
-            start: "top 85%",
-          },
-          y: 30,
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.out",
-        });
+        gsap.fromTo(featuresRef.current, 
+          { y: 40, opacity: 0 },
+          {
+            scrollTrigger: { trigger: featuresRef.current, start: "top 90%" },
+            y: 0, opacity: 1, duration: 0.8, ease: "power2.out"
+          }
+        );
 
-        gsap.from(featuresRef.current.querySelectorAll(".feature-item"), {
-          scrollTrigger: {
-            trigger: section,
-            start: "top 85%",
-          },
-          opacity: 0,
-          y: 20,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "power2.out",
-          delay: 0.2,
-        });
+        // Individual feature items — staggered cascade
+        gsap.fromTo(featuresRef.current.querySelectorAll(".feature-item"), 
+          { opacity: 0, y: 25, scale: 0.95 },
+          {
+            scrollTrigger: { trigger: featuresRef.current, start: "top 90%" },
+            opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.3
+          }
+        );
       }
     }, section);
 
@@ -135,15 +146,20 @@ export function TasteOfWonder() {
           </div>
 
           {/* Right: Text Content */}
-          <div ref={textRef} className="flex-1 max-w-[600px]">
-            <h2 className="font-fraunces font-black text-[clamp(44px,5vw,64px)] leading-[1.0] mb-4">
-              <span className="text-navy block">Taste of</span>
-              <span className="text-coral block">wonder!</span>
+          <div className="flex-1 max-w-[600px]">
+            <h2 ref={headingRef} className="font-fraunces font-black text-[clamp(44px,5vw,64px)] leading-[1.0] mb-4" style={{ perspective: "600px" }}>
+              <span className="text-navy block overflow-hidden">
+                <span className="reveal-word inline-block">Taste</span>{" "}
+                <span className="reveal-word inline-block">of</span>
+              </span>
+              <span className="text-coral block overflow-hidden">
+                <span className="reveal-word inline-block">wonder!</span>
+              </span>
             </h2>
             
-            <div className="w-16 h-[4px] bg-sky rounded-full mb-5" />
+            <div ref={accentRef} className="w-16 h-[4px] bg-sky rounded-full mb-5" />
             
-            <div className="space-y-4 text-ink/70 font-medium text-[14px] lg:text-[15.5px] leading-[1.6]">
+            <div ref={parasRef} className="space-y-4 text-ink/70 font-medium text-[14px] lg:text-[15.5px] leading-[1.6]">
               <p>
                 Our brand is crafted for people who seek real refreshment with real ingredients. We bring together thoughtfully balanced fruit blends like Watermelon & Cranberry for a juicy, vibrant lift, and Lemon & Mint for a crisp, cooling refresh.
               </p>
@@ -189,3 +205,4 @@ export function TasteOfWonder() {
     </section>
   );
 }
+
