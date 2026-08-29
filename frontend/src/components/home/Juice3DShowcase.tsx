@@ -63,7 +63,7 @@ export function Juice3DShowcase() {
   const handleNext = () => {
     if (isAnimating) return;
     setIsAnimating(true);
-    
+
     // Rotate clockwise, bringing the can from bottom-left to top
     const nextIndex = (currentIndex - 1 + CANS.length) % CANS.length;
     setCurrentIndex(nextIndex);
@@ -83,7 +83,7 @@ export function Juice3DShowcase() {
   const handlePrev = () => {
     if (isAnimating) return;
     setIsAnimating(true);
-    
+
     // Rotate counter-clockwise, bringing can from bottom-right to top
     const prevIndex = (currentIndex + 1) % CANS.length;
     setCurrentIndex(prevIndex);
@@ -121,17 +121,17 @@ export function Juice3DShowcase() {
               className="absolute top-0 left-0 w-full h-full z-[0] bg-black/5"
               style={{ backdropFilter: "blur(0px)" }}
             />
-            
+
             {/* GSAP Animated Background */}
             <AnimatedBackground backgroundColor={activeCan.color} />
 
             {/* Background text */}
-            <div className="absolute z-[0] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full pointer-events-none text-center">
-              <h1 
-                className="text-[#F2F2F2] uppercase select-none leading-none inline-block opacity-40 mix-blend-overlay"
-                style={{ 
+            <div className="absolute z-[0] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full pointer-events-none text-center px-1">
+              <h1
+                className="text-[#F2F2F2] uppercase select-none leading-none inline-block opacity-40 mix-blend-overlay max-w-full"
+                style={{
                   fontFamily: "var(--font-thunder)",
-                  fontSize: "clamp(8rem, 10rem + 12vw, 26rem)",
+                  fontSize: isMobile ? "clamp(5.8rem, 23.5vw, 14rem)" : "clamp(8rem, 10rem + 12vw, 26rem)",
                   letterSpacing: "0.02em"
                 }}
               >
@@ -145,7 +145,7 @@ export function Juice3DShowcase() {
                 const baseAngle = i * 120;
                 const currentAngleDeg = baseAngle + wheelAngle;
                 const rad = (currentAngleDeg * Math.PI) / 180;
-                
+
                 // Trigonometric arc coordinates
                 const x = radius * Math.sin(rad);
                 const y = radius * (1 - Math.cos(rad));
@@ -167,22 +167,44 @@ export function Juice3DShowcase() {
                 );
               })}
             </div>
-            
+
+            {/* Active Flavor Details & Shop Now Button */}
+            <div
+              key={activeCan.id}
+              className="absolute bottom-24 left-5 sm:bottom-28 sm:left-48 z-30 pointer-events-auto flex flex-col items-start max-w-[280px] sm:max-w-[400px] transition-all duration-500 animate-in fade-in slide-in-from-bottom-4"
+            >
+              <span className="text-[10px] sm:text-xs uppercase tracking-widest text-white/70 font-semibold mb-1">
+                Featured Flavor
+              </span>
+              <h2 className="text-xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-md leading-tight">
+                {activeCan.name}
+              </h2>
+              <p className="text-xs sm:text-sm text-white/80 mt-1 sm:mt-2 font-medium line-clamp-2 drop-shadow-sm">
+                Zero added sugar. Crisp, sparkling infusion crafted with 100% natural ingredients.
+              </p>
+              <button
+                className="mt-3 sm:mt-4 px-5 py-2 sm:px-7 sm:py-3 rounded-full bg-white text-slate-900 font-bold text-xs sm:text-base transition-all duration-300 shadow-xl hover:bg-white/90 hover:scale-105 active:scale-95 flex items-center gap-2 group cursor-pointer"
+              >
+                <span>Shop Now</span>
+                <ChevronRight size={16} className="sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1" />
+              </button>
+            </div>
+
             {/* Navigation Buttons */}
-            <div className="absolute bottom-10 sm:bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-4 z-40">
-              <button 
+            <div className="absolute bottom-6 sm:bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-3 sm:gap-4 z-40">
+              <button
                 onClick={handlePrev}
-                className="w-12 h-12 rounded-full border-2 border-white/30 flex items-center justify-center text-white hover:bg-white/10 transition-colors backdrop-blur-sm"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white/30 flex items-center justify-center text-white hover:bg-white/10 transition-colors backdrop-blur-sm"
                 aria-label="Previous Flavor"
               >
-                <ChevronLeft size={24} />
+                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
-              <button 
+              <button
                 onClick={handleNext}
-                className="w-12 h-12 rounded-full border-2 border-white/30 flex items-center justify-center text-white hover:bg-white/10 transition-colors backdrop-blur-sm"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white/30 flex items-center justify-center text-white hover:bg-white/10 transition-colors backdrop-blur-sm"
                 aria-label="Next Flavor"
               >
-                <ChevronRight size={24} />
+                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
           </div>

@@ -199,7 +199,7 @@ export function FlavorPicker() {
             <div ref={canContainerRef} className="relative">
               {/* Background glow circle */}
               <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] md:w-[360px] md:h-[360px] rounded-full transition-all duration-700 blur-[60px] opacity-30"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] md:w-[360px] md:h-[360px] rounded-full transition-all duration-700 blur-[25px] md:blur-[50px] opacity-20 pointer-events-none"
                 style={{ backgroundColor: active.accentColor }}
               />
               <Image
