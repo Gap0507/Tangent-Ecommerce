@@ -39,6 +39,7 @@ export function IceElement({ element, side, mounted, index }: ElementProps) {
           width={element.size}
           height={element.size}
           className="object-contain"
+          style={{ width: "auto" }}
         />
       )}
     </div>

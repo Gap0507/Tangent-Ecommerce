@@ -47,6 +47,7 @@ export function IceRowElement({ element, side, mounted, index }: IceRowElementPr
           width={element.size}
           height={element.size}
           className="object-contain"
+          style={{ width: "auto" }}
         />
       )}
     </div>
