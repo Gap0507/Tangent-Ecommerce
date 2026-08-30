@@ -19,6 +19,11 @@ const FlavorPicker = dynamic(
   { ssr: false }
 );
 
+const TangentStandard = dynamic(
+  () => import("@/components/home/TangentStandard").then((m) => m.TangentStandard),
+  { ssr: false }
+);
+
 export function InteractiveSections() {
   return (
     <>
@@ -27,8 +32,11 @@ export function InteractiveSections() {
       <ProductShowcaseClient />
       <TasteOfWonder />
       <FlavorPicker />
+      <TangentStandard />
     </>
   );
 }
+
+
 
 

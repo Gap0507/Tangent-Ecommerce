@@ -2,120 +2,151 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Leaf, Cuboid, Droplets, Zap, Smile, Heart } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const features = [
+const pastelCards = [
   {
-    icon: <Leaf className="w-5 h-5 text-navy" strokeWidth={1.5} />,
-    title: "Real Ingredients",
-    desc: "Made with real fruit extracts and natural goodness.",
+    id: 1,
+    title: "100% Natural",
+    desc: "Made with real fruit extracts and natural botanicals.",
+    bg: "bg-[#EEF3E6]",
+    accent: "bg-[#4A6038]",
+    iconColor: "text-[#4A6038]",
+    cornerImage: "/gingerfruit.png",
+    cornerPos: "bottom-1 left-1",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.6} stroke="currentColor" className="w-7 h-7">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21c4.418 0 8-3.582 8-8 0-4.418-5.5-9-8-11-2.5 2-8 6.582-8 11 0 4.418 3.582 8 8 8z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21V10" />
+      </svg>
+    ),
   },
   {
-    icon: <Cuboid className="w-5 h-5 text-navy" strokeWidth={1.5} />,
+    id: 2,
     title: "Zero Sugar",
-    desc: "No added sugar. Just pure, guilt-free refreshment.",
+    desc: "No added sugar. No guilt. Just pure refreshment.",
+    bg: "bg-[#FDF0EC]",
+    accent: "bg-[#E55347]",
+    iconColor: "text-[#E55347]",
+    cornerImage: "/watermelonfruit.png",
+    cornerPos: "bottom-1 left-1",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.6} stroke="currentColor" className="w-7 h-7">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+      </svg>
+    ),
   },
   {
-    icon: <Droplets className="w-5 h-5 text-navy" strokeWidth={1.5} />,
-    title: "Hydrating",
-    desc: "Electrolytes and hydration that keep you going.",
+    id: 3,
+    title: "Plant Energy",
+    desc: "Clean caffeine with L-theanine for a calm, sustained lift.",
+    bg: "bg-[#EBF5F8]",
+    accent: "bg-[#3B82F6]",
+    iconColor: "text-[#3B82F6]",
+    cornerImage: "/can3fruit.png",
+    cornerPos: "bottom-1 left-1",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.6} stroke="currentColor" className="w-7 h-7">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+      </svg>
+    ),
   },
   {
-    icon: <Zap className="w-5 h-5 text-navy" strokeWidth={1.5} />,
-    title: "Natural Caffeine",
-    desc: "From green coffee beans for smooth, sustained energy.",
-  },
-  {
-    icon: <Smile className="w-5 h-5 text-navy" strokeWidth={1.5} />,
-    title: "No Crash",
-    desc: "Clean energy that keeps you sharp without the crash.",
-  },
-  {
-    icon: <Heart className="w-5 h-5 text-navy" strokeWidth={1.5} />,
-    title: "Vegan & Clean",
-    desc: "Vegan friendly and made with clean, conscious ingredients.",
+    id: 4,
+    title: "Guilt-Free",
+    desc: "Naturally sweetened with monk fruit & stevia.",
+    bg: "bg-[#FDF9E7]",
+    accent: "bg-[#EAB308]",
+    iconColor: "text-[#EAB308]",
+    cornerImage: "/can3fruit.png",
+    cornerPos: "bottom-1 right-1",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.6} stroke="currentColor" className="w-7 h-7">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21.75c-4.97 0-9-3.92-9-8.75 0-4.8 5.76-10.9 8.28-13.4a1 1 0 011.44 0C15.24 2.1 21 8.2 21 13c0 4.83-4.03 8.75-9 8.75z" />
+      </svg>
+    ),
   },
 ];
 
 export function TasteOfWonder() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  const accentRef = useRef<HTMLDivElement>(null);
-  const parasRef = useRef<HTMLDivElement>(null);
-  const featuresRef = useRef<HTMLDivElement>(null);
+  const leftCanRef = useRef<HTMLDivElement>(null);
+  const rightCanRef = useRef<HTMLDivElement>(null);
+  const centerTextRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
     const ctx = gsap.context(() => {
-      // 1. Image entrance — slides up with scale & fade
-      if (imageRef.current) {
-        gsap.fromTo(imageRef.current, 
-          { y: 80, scale: 0.9, opacity: 0 },
+      // Left can entrance
+      if (leftCanRef.current) {
+        gsap.fromTo(
+          leftCanRef.current,
+          { x: -60, opacity: 0, scale: 0.95 },
           {
             scrollTrigger: { trigger: section, start: "top 75%" },
-            y: 0, scale: 1, opacity: 1, duration: 1.2, ease: "power3.out"
+            x: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            ease: "power3.out",
           }
         );
       }
 
-      // 2. Heading — word-by-word reveal (Redwood-style)
-      if (headingRef.current) {
-        const words = headingRef.current.querySelectorAll(".reveal-word");
-        gsap.fromTo(words, 
-          { y: 40, opacity: 0, rotateX: 20 },
+      // Right can entrance
+      if (rightCanRef.current) {
+        gsap.fromTo(
+          rightCanRef.current,
+          { x: 60, opacity: 0, scale: 0.95 },
           {
             scrollTrigger: { trigger: section, start: "top 75%" },
-            y: 0, opacity: 1, rotateX: 0, duration: 0.8, stagger: 0.12, ease: "power4.out"
+            x: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            ease: "power3.out",
           }
         );
       }
 
-      // 3. Blue accent bar — slides in width
-      if (accentRef.current) {
-        gsap.fromTo(accentRef.current, 
-          { scaleX: 0 },
-          {
-            scrollTrigger: { trigger: section, start: "top 75%" },
-            scaleX: 1, transformOrigin: "left center", duration: 0.8, delay: 0.5, ease: "power3.out"
-          }
-        );
-      }
-
-      // 4. Paragraphs — staggered slide-up reveal per paragraph
-      if (parasRef.current) {
-        const paras = parasRef.current.querySelectorAll("p");
-        gsap.fromTo(paras, 
+      // Center text entrance
+      if (centerTextRef.current) {
+        gsap.fromTo(
+          centerTextRef.current.children,
           { y: 30, opacity: 0 },
           {
-            scrollTrigger: { trigger: section, start: "top 70%" },
-            y: 0, opacity: 1, duration: 0.9, stagger: 0.2, delay: 0.4, ease: "power3.out"
+            scrollTrigger: { trigger: section, start: "top 75%" },
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.12,
+            ease: "power3.out",
           }
         );
       }
 
-      // 5. Features bar container — slide up
-      if (featuresRef.current) {
-        gsap.fromTo(featuresRef.current, 
-          { y: 40, opacity: 0 },
+      // Cards entrance
+      if (cardsRef.current) {
+        const cards = cardsRef.current.querySelectorAll(".pastel-card");
+        gsap.fromTo(
+          cards,
+          { y: 45, opacity: 0, scale: 0.96 },
           {
-            scrollTrigger: { trigger: featuresRef.current, start: "top 90%" },
-            y: 0, opacity: 1, duration: 0.8, ease: "power2.out"
-          }
-        );
-
-        // Individual feature items — staggered cascade
-        gsap.fromTo(featuresRef.current.querySelectorAll(".feature-item"), 
-          { opacity: 0, y: 25, scale: 0.95 },
-          {
-            scrollTrigger: { trigger: featuresRef.current, start: "top 90%" },
-            opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.3
+            scrollTrigger: { trigger: cardsRef.current, start: "top 88%" },
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.7,
+            stagger: 0.1,
+            ease: "power3.out",
           }
         );
       }
@@ -125,84 +156,115 @@ export function TasteOfWonder() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative flex flex-col justify-center overflow-hidden bg-[#E9F3FC] py-12 px-6">
-      <div className="max-w-[1300px] mx-auto w-full">
+    <section ref={sectionRef} className="relative bg-cream overflow-hidden py-16 md:py-24 px-6 md:px-12">
+      
+      {/* ── TOP SECTION: LEFT CAN + CENTER TEXT + RIGHT CAN ── */}
+      <div className="max-w-[1380px] mx-auto relative min-h-[460px] md:min-h-[500px] flex items-center justify-center mb-16 md:mb-20">
         
-        {/* TOP: Image & Text Split */}
-        <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 mb-8">
-          
-          {/* Left: Cans Image */}
-          <div className="flex-1 w-full max-w-[500px] flex justify-center">
-            <div ref={imageRef} className="relative w-full aspect-[4/3] lg:aspect-[1.1]">
-              <Image
-                src="/all4can.png"
-                alt="Tangent flavors exploding with freshness"
-                fill
-                className="object-contain"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority
-              />
-            </div>
-          </div>
-
-          {/* Right: Text Content */}
-          <div className="flex-1 max-w-[600px]">
-            <h2 ref={headingRef} className="font-fraunces font-black text-[clamp(44px,5vw,64px)] leading-[1.0] mb-4" style={{ perspective: "600px" }}>
-              <span className="text-navy block overflow-hidden">
-                <span className="reveal-word inline-block">Taste</span>{" "}
-                <span className="reveal-word inline-block">of</span>
-              </span>
-              <span className="text-coral block overflow-hidden">
-                <span className="reveal-word inline-block">wonder!</span>
-              </span>
-            </h2>
-            
-            <div ref={accentRef} className="w-16 h-[4px] bg-sky rounded-full mb-5" />
-            
-            <div ref={parasRef} className="space-y-4 text-ink/70 font-medium text-[14px] lg:text-[15.5px] leading-[1.6]">
-              <p>
-                Our brand is crafted for people who seek real refreshment with real ingredients. We bring together thoughtfully balanced fruit blends like Watermelon & Cranberry for a juicy, vibrant lift, and Lemon & Mint for a crisp, cooling refresh.
-              </p>
-              <p>
-                Packed in both cans and bottles, our juices are made to fit seamlessly into modern routines—perfectly blending cravings for quality with everyday moments.
-              </p>
-              <p>
-                Every sip reflects our commitment to clean flavors, natural freshness, and reliably moments of feel-good hydration simple, honest, and incredibly refreshing.
-              </p>
-            </div>
-          </div>
-
+        {/* LEFT CAN SHOWCASE */}
+        <div
+          ref={leftCanRef}
+          className="absolute left-[-80px] lg:left-[-40px] xl:left-[-10px] top-1/2 -translate-y-1/2 w-[300px] md:w-[380px] lg:w-[440px] h-[360px] md:h-[460px] z-10 pointer-events-none hidden md:block"
+        >
+          <Image
+            src="/leftcansection.png"
+            alt="Tangent Ginger Ale Refreshment"
+            fill
+            className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
+            priority
+            unoptimized
+          />
         </div>
 
-        {/* BOTTOM: Features Bar */}
-        <div 
-          ref={featuresRef} 
-          className="bg-white/80 backdrop-blur-md rounded-[24px] p-5 lg:px-8 lg:py-6 shadow-[0_8px_32px_rgba(18,59,115,0.05)] border border-white"
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-8 xl:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-navy/5">
-            {features.map((feature, i) => (
-              <div 
-                key={i} 
-                className={`feature-item flex flex-col items-center xl:items-start text-center xl:text-left ${
-                  i !== 0 && i !== 2 && i !== 4 ? "pt-6 sm:pt-0 sm:pl-6 xl:pl-6" : "pt-6 sm:pt-0 xl:pl-6 xl:pt-0"
-                } ${i === 0 ? "pt-0 xl:pl-0" : ""} ${i === 2 || i === 4 ? "xl:pl-6" : ""}`}
-              >
-                <div className="w-10 h-10 rounded-full bg-[#F0F5FA] flex items-center justify-center mb-3">
-                  {feature.icon}
-                </div>
-                <h4 className="font-fraunces font-bold text-navy text-[15px] mb-1.5">
-                  {feature.title}
-                </h4>
-                <p className="text-[12.5px] text-ink/60 leading-[1.5] max-w-[200px]">
-                  {feature.desc}
-                </p>
-              </div>
-            ))}
+        {/* CENTER CONTENT */}
+        <div ref={centerTextRef} className="relative z-20 text-center max-w-[540px] mx-auto px-4 py-4">
+          <p className="text-[12px] font-bold tracking-[.22em] uppercase text-[#4A6038] mb-3">
+            THE TANGENT DIFFERENCE
+          </p>
+
+          <h2 className="font-fraunces font-black text-navy text-[clamp(38px,4.8vw,62px)] leading-[1.06] mb-5">
+            Real Ingredients. <br />
+            <span className="text-[#3B5828] relative inline-block">
+              Real Difference.
+              <svg className="absolute -bottom-2 left-0 w-full h-3 text-[#E5C05E]" viewBox="0 0 200 12" fill="none" preserveAspectRatio="none">
+                <path d="M2 9C50 3 150 3 198 9" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" />
+              </svg>
+            </span>
+          </h2>
+
+          <p className="text-ink/75 text-[15px] md:text-[16px] leading-[1.65] font-medium max-w-[460px] mx-auto mb-8">
+            At Tangent, we keep it real. No shortcuts. No artificial stuff. Just honest ingredients and refreshing flavors that fit your lifestyle.
+          </p>
+
+          <div>
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-3 bg-[#1A2A3A] hover:bg-[#111D2A] text-white font-bold text-[14px] px-8 py-3.5 rounded-full transition-all duration-300 hover:scale-105 shadow-xl cursor-pointer"
+            >
+              <span>Explore All Flavors</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
+        </div>
+
+        {/* RIGHT CAN SHOWCASE */}
+        <div
+          ref={rightCanRef}
+          className="absolute right-[-80px] lg:right-[-40px] xl:right-[-10px] top-1/2 -translate-y-1/2 w-[300px] md:w-[380px] lg:w-[440px] h-[360px] md:h-[460px] z-10 pointer-events-none hidden md:block"
+        >
+          <Image
+            src="/rightcansection.png"
+            alt="Tangent Tonic Water Refreshment"
+            fill
+            className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
+            priority
+            unoptimized
+          />
         </div>
 
       </div>
+
+      {/* ── BOTTOM SECTION: 4 PASTEL FEATURE CARDS ── */}
+      <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-[1340px] mx-auto relative z-20">
+        {pastelCards.map((card) => (
+          <div
+            key={card.id}
+            className={`pastel-card relative ${card.bg} rounded-[24px] p-8 md:p-10 text-center flex flex-col items-center justify-between min-h-[300px] border border-black/5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-300 overflow-hidden group cursor-pointer`}
+          >
+            {/* Top White Circular Icon Badge */}
+            <div className={`w-14 h-14 rounded-full bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)] flex items-center justify-center mb-6 ${card.iconColor} group-hover:scale-110 transition-transform duration-300`}>
+              {card.icon}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 flex flex-col items-center">
+              <h3 className="font-fraunces font-bold text-navy text-[22px] mb-2">
+                {card.title}
+              </h3>
+              
+              <div className={`w-8 h-[2.5px] ${card.accent} rounded-full mb-4`} />
+              
+              <p className="text-ink/70 text-[13.5px] leading-[1.5] font-medium max-w-[220px]">
+                {card.desc}
+              </p>
+            </div>
+
+            {/* Bottom Corner Fruit Decoration */}
+            <div className={`absolute ${card.cornerPos} w-16 h-16 pointer-events-none opacity-80 group-hover:scale-110 transition-transform duration-500`}>
+              <Image
+                src={card.cornerImage}
+                alt=""
+                fill
+                className="object-contain"
+                unoptimized
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
     </section>
   );
 }
+
 

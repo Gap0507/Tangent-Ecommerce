@@ -12,54 +12,54 @@ const flavors = [
   {
     id: 1,
     name: "Watermelon Cranberry",
-    tagline: "Summer in every sip.",
+    tagline: "No added sugar. Zero crash.",
     canSrc: "/can1.png",
     bgGradient: "from-[#87CEEB] via-[#B0DFF5] to-[#E8F4F8]",
     accentColor: "#E8604B",
     dotColor: "bg-[#E8604B]",
     ringColor: "ring-[#E8604B]",
-    notes: ["Watermelon", "Cranberry", "Citrus"],
-    calories: "15",
-    caffeine: "80mg",
+    notes: ["Watermelon", "Cranberry", "Prebiotic"],
+    calories: "Low",
+    caffeine: "0mg",
   },
   {
     id: 2,
-    name: "Ginger Ale",
-    tagline: "Bold roots. Clean finish.",
+    name: "Watermelon Mint",
+    tagline: "Enriched with Vitamins B12, B6, B1.",
     canSrc: "/can2.png",
     bgGradient: "from-[#6B8E5A] via-[#9AB88A] to-[#D4E4CC]",
     accentColor: "#6B8E5A",
     dotColor: "bg-[#6B8E5A]",
     ringColor: "ring-[#6B8E5A]",
-    notes: ["Ginger", "Lemon", "Herb"],
-    calories: "10",
-    caffeine: "80mg",
+    notes: ["Watermelon", "Mint", "Vitamins"],
+    calories: "Low",
+    caffeine: "0mg",
   },
   {
     id: 3,
-    name: "Tonic Water",
-    tagline: "Elegant. Crisp. Timeless.",
+    name: "Guava Chilli",
+    tagline: "A sweet & spicy twist.",
     canSrc: "/can3.png",
     bgGradient: "from-[#D4A843] via-[#E5C96E] to-[#F5E6B0]",
     accentColor: "#B8942E",
     dotColor: "bg-[#D4A843]",
     ringColor: "ring-[#D4A843]",
-    notes: ["Quinine", "Citrus", "Botanical"],
-    calories: "5",
+    notes: ["Guava", "Chilli", "Prebiotic"],
+    calories: "Low",
     caffeine: "0mg",
   },
   {
     id: 4,
-    name: "Lemon & Mint",
-    tagline: "Cool clarity on demand.",
+    name: "Yuzu Mint",
+    tagline: "Crisp and refreshing.",
     canSrc: "/can4.png",
     bgGradient: "from-[#C9D84D] via-[#DDE88A] to-[#F0F4C8]",
     accentColor: "#8B9A2E",
     dotColor: "bg-[#8B9A2E]",
     ringColor: "ring-[#8B9A2E]",
-    notes: ["Lemon", "Spearmint", "Lime"],
-    calories: "10",
-    caffeine: "80mg",
+    notes: ["Yuzu", "Mint", "Zero Sugar"],
+    calories: "Low",
+    caffeine: "0mg",
   },
 ];
 
@@ -244,26 +244,6 @@ export function FlavorPicker() {
               </div>
             </div>
 
-            {/* Stats row */}
-            <div>
-              <div className="flex gap-8 mb-8">
-                <div className="flex flex-col">
-                  <span className="font-fraunces font-black text-[36px] text-navy leading-none">{active.calories}</span>
-                  <span className="text-[11px] font-bold tracking-[.12em] uppercase text-navy/35 mt-1">Calories</span>
-                </div>
-                <div className="w-px bg-navy/10" />
-                <div className="flex flex-col">
-                  <span className="font-fraunces font-black text-[36px] text-navy leading-none">{active.caffeine}</span>
-                  <span className="text-[11px] font-bold tracking-[.12em] uppercase text-navy/35 mt-1">Caffeine</span>
-                </div>
-                <div className="w-px bg-navy/10" />
-                <div className="flex flex-col">
-                  <span className="font-fraunces font-black text-[36px] text-navy leading-none">0g</span>
-                  <span className="text-[11px] font-bold tracking-[.12em] uppercase text-navy/35 mt-1">Sugar</span>
-                </div>
-              </div>
-            </div>
-
             {/* CTA */}
             <div>
               <Link
@@ -271,7 +251,7 @@ export function FlavorPicker() {
                 className="inline-flex items-center gap-3 text-cream font-bold text-[15px] px-8 py-3.5 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
                 style={{ backgroundColor: active.accentColor }}
               >
-                Add to Cart — ₹149
+                Add to Cart
                 <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                 </svg>

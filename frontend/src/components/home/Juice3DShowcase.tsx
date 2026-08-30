@@ -20,26 +20,34 @@ const WaterWave = dynamic(() => import("react-water-wave"), {
 const CANS = [
   {
     id: 1,
-    name: "Watermelon Cranberry",
+    name: "Guava Chilli",
     image: "/can1.png",
-    color: "#85C7D3", // Light Blue to match the can
-    model: "/assets/3d/can/Tangent_Watermelon_Cranberry_FINAL_4K.glb",
+    color: "#E8706B",
+    model: "/assets/3d/can/Tangent_Guava_Chilli_FINAL_4K.glb",
     rotation: [0, Math.PI / 3, 0],
   },
   {
     id: 2,
-    name: "Ginger Ale",
+    name: "Watermelon Cranberry",
     image: "/can2.png",
-    color: "#435B47", // Dark Green to match the can
-    model: "/assets/3d/can/Tangent_Ginger_Lemon_FINAL_4K.glb",
-    rotation: [0, 5 * Math.PI / 6, 0],
+    color: "#85C7D3",
+    model: "/assets/3d/can/Tangent_Watermelon_Cranberry_v2_FINAL_4K.glb",
+    rotation: [0, Math.PI / 3, 0],
   },
   {
     id: 3,
-    name: "Tonic Water",
+    name: "Watermelon Mint",
     image: "/can3.png",
-    color: "#D4AF37", // Gold to match the can
-    model: "/assets/3d/can/Tangent_Tonic_Water_FINAL_4K.glb",
+    color: "#F28C8C",
+    model: "/assets/3d/can/Tangent_Watermelon_Mint.glb",
+    rotation: [0, Math.PI / 3, 0],
+  },
+  {
+    id: 4,
+    name: "Yuzu Mint",
+    image: "/can4.png",
+    color: "#F9D949",
+    model: "/assets/3d/can/Tangent_Yuzu_Mint_FINAL_4K.glb",
     rotation: [0, Math.PI / 3, 0],
   },
 ];
@@ -68,7 +76,7 @@ export function Juice3DShowcase() {
     const nextIndex = (currentIndex - 1 + CANS.length) % CANS.length;
     setCurrentIndex(nextIndex);
 
-    const targetAngle = wheelStateRef.current.angle + 120;
+    const targetAngle = wheelStateRef.current.angle + 90;
     gsap.to(wheelStateRef.current, {
       angle: targetAngle,
       duration: 1.2,
@@ -88,7 +96,7 @@ export function Juice3DShowcase() {
     const prevIndex = (currentIndex + 1) % CANS.length;
     setCurrentIndex(prevIndex);
 
-    const targetAngle = wheelStateRef.current.angle - 120;
+    const targetAngle = wheelStateRef.current.angle - 90;
     gsap.to(wheelStateRef.current, {
       angle: targetAngle,
       duration: 1.2,
@@ -142,7 +150,7 @@ export function Juice3DShowcase() {
             {/* 3D GLB Models on Circular Arc Path (Zero CSS rotation to prevent WebGL GPU clipping) */}
             <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
               {CANS.map((can, i) => {
-                const baseAngle = i * 120;
+                const baseAngle = i * 90;
                 const currentAngleDeg = baseAngle + wheelAngle;
                 const rad = (currentAngleDeg * Math.PI) / 180;
 
