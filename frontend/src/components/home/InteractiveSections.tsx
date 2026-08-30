@@ -24,15 +24,21 @@ const TangentStandard = dynamic(
   { ssr: false }
 );
 
+const RealRefreshment = dynamic(
+  () => import("@/components/home/RealRefreshment").then((m) => m.RealRefreshment),
+  { ssr: false }
+);
+
 export function InteractiveSections() {
   return (
     <>
+      <TasteOfWonder />
       <Juice3DShowcase />
+      <FlavorPicker />
       <MomentsSection />
       <ProductShowcaseClient />
-      <TasteOfWonder />
-      <FlavorPicker />
       <TangentStandard />
+      <RealRefreshment />
     </>
   );
 }

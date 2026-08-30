@@ -27,11 +27,11 @@ export function Navbar() {
 
         <div className="flex-1 flex justify-center md:justify-center md:flex-none">
           <Link href="/" className="flex items-center">
-            <Image 
-              src="/tangent-logo.avif" 
-              alt="Tangent Logo" 
-              width={180} 
-              height={46} 
+            <Image
+              src="/tangent-logo.avif"
+              alt="Tangent Logo"
+              width={180}
+              height={46}
               className="h-[46px] w-auto object-contain"
               style={{ width: "auto" }}
               priority
@@ -40,9 +40,6 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-[26px]">
-          <Link href="/login" className="hidden md:block text-[14px] font-semibold text-navy">
-            Log In
-          </Link>
           <button className="bg-transparent p-0.5 flex items-center group">
             <User className="w-[21px] h-[21px] stroke-navy group-hover:stroke-coral transition-colors" />
           </button>

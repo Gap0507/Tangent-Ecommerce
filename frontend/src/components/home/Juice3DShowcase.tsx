@@ -20,14 +20,6 @@ const WaterWave = dynamic(() => import("react-water-wave"), {
 const CANS = [
   {
     id: 1,
-    name: "Guava Chilli",
-    image: "/can1.png",
-    color: "#E8706B",
-    model: "/assets/3d/can/Tangent_Guava_Chilli_FINAL_4K.glb",
-    rotation: [0, Math.PI / 3, 0],
-  },
-  {
-    id: 2,
     name: "Watermelon Cranberry",
     image: "/can2.png",
     color: "#85C7D3",
@@ -35,11 +27,19 @@ const CANS = [
     rotation: [0, Math.PI / 3, 0],
   },
   {
-    id: 3,
+    id: 2,
     name: "Watermelon Mint",
     image: "/can3.png",
     color: "#F28C8C",
     model: "/assets/3d/can/Tangent_Watermelon_Mint.glb",
+    rotation: [0, Math.PI / 3, 0],
+  },
+  {
+    id: 3,
+    name: "Guava Chilli",
+    image: "/can1.png",
+    color: "#E8706B",
+    model: "/assets/3d/can/Tangent_Guava_Chilli_FINAL_4K.glb",
     rotation: [0, Math.PI / 3, 0],
   },
   {

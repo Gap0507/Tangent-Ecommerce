@@ -1,264 +1,278 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { ArrowLeft, ArrowRight, ShoppingCart, Ban, Droplet, HeartPulse, Zap } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const flavors = [
   {
     id: 1,
-    name: "Watermelon Cranberry",
+    nameA: "Watermelon",
+    nameB: "Cranberry",
+    flavorLabel: "Watermelon Cranberry",
     tagline: "No added sugar. Zero crash.",
+    desc: "The perfect blend of juicy watermelon and tart cranberry. Refreshing, hydrating, and packed with goodness.",
     canSrc: "/can1.png",
-    bgGradient: "from-[#87CEEB] via-[#B0DFF5] to-[#E8F4F8]",
+    cardSrc: "/flavourcard1.png",
     accentColor: "#E8604B",
-    dotColor: "bg-[#E8604B]",
-    ringColor: "ring-[#E8604B]",
     notes: ["Watermelon", "Cranberry", "Prebiotic"],
-    calories: "Low",
-    caffeine: "0mg",
+    features: [
+      { icon: Ban, label: "No Added\nSugar" },
+      { icon: Droplet, label: "Low\nCalorie" },
+      { icon: HeartPulse, label: "Prebiotic\nGoodness" },
+      { icon: Zap, label: "Zero\nCaffeine" },
+    ]
   },
   {
     id: 2,
-    name: "Watermelon Mint",
+    nameA: "Watermelon",
+    nameB: "Mint",
+    flavorLabel: "Watermelon Mint",
     tagline: "Enriched with Vitamins B12, B6, B1.",
+    desc: "A cool twist of fresh mint and sweet watermelon. Rejuvenating and perfect for hot afternoons.",
     canSrc: "/can2.png",
-    bgGradient: "from-[#6B8E5A] via-[#9AB88A] to-[#D4E4CC]",
+    cardSrc: "/flavourcard2.png",
     accentColor: "#6B8E5A",
-    dotColor: "bg-[#6B8E5A]",
-    ringColor: "ring-[#6B8E5A]",
     notes: ["Watermelon", "Mint", "Vitamins"],
-    calories: "Low",
-    caffeine: "0mg",
+    features: [
+      { icon: Ban, label: "No Added\nSugar" },
+      { icon: Droplet, label: "Low\nCalorie" },
+      { icon: HeartPulse, label: "Prebiotic\nGoodness" },
+      { icon: Zap, label: "Zero\nCaffeine" },
+    ]
   },
   {
     id: 3,
-    name: "Guava Chilli",
+    nameA: "Guava",
+    nameB: "Chilli",
+    flavorLabel: "Guava Chilli",
     tagline: "A sweet & spicy twist.",
+    desc: "Tropical guava meets a surprising kick of chilli. A bold, unapologetic flavor for those who dare.",
     canSrc: "/can3.png",
-    bgGradient: "from-[#D4A843] via-[#E5C96E] to-[#F5E6B0]",
+    cardSrc: "/flavourcard3.png",
     accentColor: "#B8942E",
-    dotColor: "bg-[#D4A843]",
-    ringColor: "ring-[#D4A843]",
     notes: ["Guava", "Chilli", "Prebiotic"],
-    calories: "Low",
-    caffeine: "0mg",
+    features: [
+      { icon: Ban, label: "No Added\nSugar" },
+      { icon: Droplet, label: "Low\nCalorie" },
+      { icon: HeartPulse, label: "Prebiotic\nGoodness" },
+      { icon: Zap, label: "Zero\nCaffeine" },
+    ]
   },
   {
     id: 4,
-    name: "Yuzu Mint",
+    nameA: "Yuzu",
+    nameB: "Mint",
+    flavorLabel: "Yuzu Mint",
     tagline: "Crisp and refreshing.",
+    desc: "Bright citrus yuzu perfectly balanced with cool mint. Zesty, uplifting, and totally unique.",
     canSrc: "/can4.png",
-    bgGradient: "from-[#C9D84D] via-[#DDE88A] to-[#F0F4C8]",
+    cardSrc: "/flavourcard4.png",
     accentColor: "#8B9A2E",
-    dotColor: "bg-[#8B9A2E]",
-    ringColor: "ring-[#8B9A2E]",
     notes: ["Yuzu", "Mint", "Zero Sugar"],
-    calories: "Low",
-    caffeine: "0mg",
+    features: [
+      { icon: Ban, label: "No Added\nSugar" },
+      { icon: Droplet, label: "Low\nCalorie" },
+      { icon: HeartPulse, label: "Prebiotic\nGoodness" },
+      { icon: Zap, label: "Zero\nCaffeine" },
+    ]
   },
 ];
 
 export function FlavorPicker() {
   const [activeIdx, setActiveIdx] = useState(0);
-  const canContainerRef = useRef<HTMLDivElement>(null);
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const detailsRef = useRef<HTMLDivElement>(null);
   const active = flavors[activeIdx];
 
-  const switchFlavor = (idx: number) => {
-    if (idx === activeIdx) return;
+  const handleNext = useCallback(() => setActiveIdx((prev) => (prev + 1) % flavors.length), []);
+  const handlePrev = useCallback(() => setActiveIdx((prev) => (prev - 1 + flavors.length) % flavors.length), []);
 
-    const canEl = canContainerRef.current;
-    const detailsEl = detailsRef.current;
-    if (!canEl || !detailsEl) {
-      setActiveIdx(idx);
-      return;
-    }
-
-    // Animate out
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setActiveIdx(idx);
-        // Animate in (after React re-renders with new state)
-        requestAnimationFrame(() => {
-          gsap.fromTo(
-            canEl,
-            { y: 60, opacity: 0, rotateZ: 8 },
-            { y: 0, opacity: 1, rotateZ: 0, duration: 0.6, ease: "back.out(1.6)" }
-          );
-          gsap.fromTo(
-            detailsEl.children,
-            { y: 20, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.4, stagger: 0.08, ease: "power3.out" }
-          );
-        });
-      },
-    });
-
-    tl.to(canEl, {
-      y: -40,
-      opacity: 0,
-      rotateZ: -6,
-      duration: 0.35,
-      ease: "power2.in",
-    });
-    tl.to(
-      detailsEl.children,
-      { y: -15, opacity: 0, duration: 0.25, stagger: 0.04, ease: "power2.in" },
-      0
-    );
-  };
-
-  // Scroll-triggered entrance
+  // Auto-play carousel
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const ctx = gsap.context(() => {
-      gsap.from(section.querySelectorAll(".flavor-reveal"), {
-        scrollTrigger: { trigger: section, start: "top 75%" },
-        y: 50,
-        opacity: 0,
-        duration: 0.7,
-        stagger: 0.12,
-        ease: "power3.out",
-      });
-    }, section);
-
-    return () => ctx.revert();
-  }, []);
+    const timer = setInterval(() => {
+      handleNext();
+    }, 4500); // 4.5 seconds
+    
+    // Cleanup interval on unmount or when user interacts (activeIdx changes)
+    return () => clearInterval(timer);
+  }, [activeIdx, handleNext]);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative overflow-hidden py-20 md:py-28 transition-all duration-700"
-      style={{
-        background: `linear-gradient(135deg, #FAF6EC 0%, #FAF6EC 50%, ${active.accentColor}08 100%)`,
-      }}
-    >
-      {/* Decorative circle */}
-      <div
-        className="absolute -right-32 -top-32 w-[500px] h-[500px] rounded-full opacity-[0.04] pointer-events-none transition-colors duration-700"
-        style={{ backgroundColor: active.accentColor }}
-      />
-      <div
-        className="absolute -left-24 -bottom-24 w-[400px] h-[400px] rounded-full opacity-[0.03] pointer-events-none transition-colors duration-700"
-        style={{ backgroundColor: active.accentColor }}
-      />
-
-      <div className="max-w-[1200px] mx-auto px-6">
-        {/* Header */}
-        <div className="text-center mb-14 md:mb-20 flavor-reveal">
-          <p className="text-[12px] font-bold tracking-[.2em] uppercase text-coral mb-3">
-            Find Your Flavor
+    <section className="relative w-full py-10 md:py-12 bg-[#FAF7F2] overflow-hidden flex items-center min-h-[100vh]">
+      <div className="max-w-[1300px] w-full mx-auto px-4 md:px-8">
+        
+        {/* Header - Compact */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center mb-6 md:mb-8"
+        >
+          <p className="text-[10px] md:text-[11px] font-bold tracking-[.18em] uppercase text-[#F36B5B] mb-2">
+            FIND YOUR FLAVOR
           </p>
-          <h2 className="font-fraunces font-black text-navy text-[clamp(30px,4.5vw,52px)] leading-[1.05] mb-4">
-            Tap. Taste. <span className="text-coral">Repeat.</span>
+          <h2 className="font-fraunces font-black text-navy text-[clamp(28px,4vw,48px)] leading-[1.05] mb-3">
+            Tap. Taste. <span className="text-[#F36B5B]">Repeat.</span>
           </h2>
-          <p className="text-ink/55 text-[16px] max-w-[420px] mx-auto font-medium">
+          <p className="text-ink/60 text-[13px] md:text-[14px] max-w-[400px] mx-auto font-medium">
             Four flavors. Four moods. Pick one and explore what&apos;s inside.
           </p>
+        </motion.div>
+
+        {/* Top Cards - Square Aspect */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          className="flex justify-center gap-4 md:gap-8 mb-6 md:mb-8"
+        >
+          {flavors.map((flavor, i) => {
+            const isActive = i === activeIdx;
+            return (
+              <button
+                key={flavor.id}
+                onClick={() => setActiveIdx(i)}
+                className={`relative w-[70px] h-[70px] md:w-[90px] md:h-[90px] transition-all duration-300 cursor-pointer ${
+                  isActive ? "scale-110 opacity-100 drop-shadow-md" : "scale-100 opacity-50 hover:opacity-100 hover:scale-105"
+                }`}
+              >
+                <Image
+                  src={flavor.cardSrc}
+                  alt={flavor.flavorLabel}
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </button>
+            );
+          })}
+        </motion.div>
+
+        {/* Main Display Area */}
+        <div className="relative bg-[#F3EFE9] rounded-[32px] p-6 md:p-8 lg:p-10 shadow-sm border border-black/5 overflow-hidden">
+          
+          {/* Subtle background circles for depth */}
+          <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#F36B5B]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-300/10 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none" />
+
+          {/* Arrows */}
+          <button onClick={handlePrev} className="hidden md:flex absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:scale-110 transition-transform text-navy">
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <button onClick={handleNext} className="hidden md:flex absolute right-4 lg:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:scale-110 transition-transform text-navy">
+            <ArrowRight className="w-4 h-4" />
+          </button>
+
+          <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-12 px-2 md:px-10">
+            
+            {/* Left: Can visual */}
+            <div className="flex-1 w-full max-w-[400px] relative flex items-center justify-center min-h-[300px] md:min-h-[380px]">
+              <AnimatePresence mode="popLayout">
+                <motion.div
+                  key={active.id}
+                  initial={{ opacity: 0, scale: 0.8, x: -30 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, x: 30 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                  className="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] flex items-center justify-center"
+                >
+                  <Image
+                    src={active.cardSrc}
+                    alt={active.flavorLabel}
+                    fill
+                    className="object-contain relative z-10 drop-shadow-[0_10px_30px_rgba(0,0,0,0.15)]"
+                    unoptimized
+                    priority
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Right: Details - Compact Margins */}
+            <div className="flex-1 w-full max-w-[480px] py-2 relative z-10">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={active.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div className="inline-block px-3 py-0.5 bg-[#F36B5B]/10 text-[#F36B5B] font-bold text-[10px] rounded-full mb-3 tracking-wider">
+                    0{active.id} / 04
+                  </div>
+
+                  <h3 className="font-fraunces font-black text-[#1A2A3A] text-3xl md:text-4xl lg:text-5xl leading-[1.05] mb-2">
+                    {active.nameA} <br /> {active.nameB}
+                  </h3>
+                  
+                  <p className="text-ink/50 font-semibold italic text-xs md:text-sm mb-3">
+                    &ldquo;{active.tagline}&rdquo;
+                  </p>
+
+                  <p className="text-[#1A2A3A]/80 text-[13px] md:text-[14px] leading-relaxed mb-5">
+                    {active.desc}
+                  </p>
+
+                  <p className="text-[9px] font-bold tracking-[.15em] uppercase text-[#1A2A3A]/40 mb-2">
+                    TASTING NOTES
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {active.notes.map((note) => (
+                      <span
+                        key={note}
+                        className="px-3 py-1 rounded-full text-[10px] md:text-xs font-bold border border-[#F36B5B]/30 text-[#F36B5B] bg-white/50"
+                      >
+                        {note}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Feature Icons */}
+                  <div className="grid grid-cols-4 gap-2 mb-6 border-t border-b border-black/5 py-4">
+                    {active.features.map((feat, i) => (
+                      <div key={i} className="flex flex-col items-center text-center">
+                        <div className="w-8 h-8 md:w-9 md:h-9 rounded-full border border-black/10 flex items-center justify-center mb-1.5 bg-white text-[#1A2A3A]">
+                          <feat.icon className="w-3.5 h-3.5 md:w-4 md:h-4 opacity-80" strokeWidth={1.8} />
+                        </div>
+                        <span className="text-[8px] md:text-[9.5px] font-bold text-[#1A2A3A] whitespace-pre-line leading-tight">
+                          {feat.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* CTA */}
+                  <Link
+                    href="/shop"
+                    className="inline-flex items-center gap-2 bg-[#F36B5B] hover:bg-[#E25A4B] text-white font-bold text-[13px] px-6 py-2.5 rounded-full transition-all hover:scale-105 hover:shadow-[0_8px_20px_rgba(243,107,91,0.3)]"
+                  >
+                    Add to Cart
+                    <ShoppingCart className="w-3.5 h-3.5" />
+                  </Link>
+
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
 
-        {/* Flavor selector pills */}
-        <div className="flex justify-center gap-2 md:gap-3 mb-12 md:mb-16 flex-wrap flavor-reveal">
+        {/* Bottom Pagination Dots */}
+        <div className="flex justify-center gap-2 mt-6">
           {flavors.map((f, i) => (
             <button
               key={f.id}
-              onClick={() => switchFlavor(i)}
-              className={`
-                relative flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] md:text-[14px] font-bold 
-                transition-all duration-300 cursor-pointer border-2
-                ${
-                  i === activeIdx
-                    ? "bg-navy text-cream border-navy scale-105 shadow-[0_4px_20px_rgba(18,59,115,0.25)]"
-                    : "bg-white text-navy border-navy/15 hover:border-navy/40 hover:shadow-md"
-                }
-              `}
-            >
-              <span
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${f.dotColor} ${
-                  i === activeIdx ? "scale-125" : "opacity-60"
-                }`}
-              />
-              {f.name}
-            </button>
+              onClick={() => setActiveIdx(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === activeIdx ? "bg-[#F36B5B] w-6" : "bg-black/15 hover:bg-black/30 w-1.5"
+              }`}
+            />
           ))}
         </div>
 
-        {/* Main content: can + details */}
-        <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16 flavor-reveal">
-
-          {/* Can display */}
-          <div className="flex-1 flex justify-center">
-            <div ref={canContainerRef} className="relative">
-              {/* Background glow circle */}
-              <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] md:w-[360px] md:h-[360px] rounded-full transition-all duration-700 blur-[25px] md:blur-[50px] opacity-20 pointer-events-none"
-                style={{ backgroundColor: active.accentColor }}
-              />
-              <Image
-                src={active.canSrc}
-                alt={active.name}
-                width={220}
-                height={560}
-                className="relative z-10 drop-shadow-[0_24px_48px_rgba(0,0,0,0.18)] mx-auto"
-                unoptimized
-                priority
-              />
-            </div>
-          </div>
-
-          {/* Details panel */}
-          <div ref={detailsRef} className="flex-1 max-w-[480px]">
-            {/* Flavor name + tagline */}
-            <div>
-              <h3 className="font-fraunces font-black text-navy text-[clamp(28px,3.5vw,44px)] leading-[1.1] mb-2">
-                {active.name}
-              </h3>
-              <p className="text-ink/50 text-[17px] font-semibold italic mb-6">
-                &ldquo;{active.tagline}&rdquo;
-              </p>
-            </div>
-
-            {/* Flavor notes */}
-            <div>
-              <p className="text-[11px] font-bold tracking-[.18em] uppercase text-navy/40 mb-3">
-                Tasting Notes
-              </p>
-              <div className="flex gap-2 mb-8">
-                {active.notes.map((note) => (
-                  <span
-                    key={note}
-                    className="px-4 py-1.5 rounded-full text-[13px] font-semibold border-2 transition-colors duration-500"
-                    style={{ borderColor: active.accentColor + "40", color: active.accentColor }}
-                  >
-                    {note}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* CTA */}
-            <div>
-              <Link
-                href="/shop"
-                className="inline-flex items-center gap-3 text-cream font-bold text-[15px] px-8 py-3.5 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                style={{ backgroundColor: active.accentColor }}
-              >
-                Add to Cart
-                <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
