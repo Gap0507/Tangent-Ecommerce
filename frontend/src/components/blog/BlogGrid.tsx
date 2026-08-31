@@ -11,7 +11,7 @@ const blogPosts = [
     date: "May 20, 2024",
     title: "Why Watermelon & Mint Make the Perfect Pair",
     excerpt: "Cool, refreshing, and naturally hydrating – discover how this dynamic duo keeps you fresh all day.",
-    link: "#",
+    link: "/blog/watermelon-mint",
     bgColor: "",
   },
   {
@@ -21,7 +21,7 @@ const blogPosts = [
     date: "May 10, 2024",
     title: "Hydration, But Make It Delicious",
     excerpt: "Drinks that hydrate and delight. Here's how Tangent keeps it balanced.",
-    link: "#",
+    link: "/blog/hydration-delicious",
     bgColor: "",
   },
   {
@@ -31,17 +31,17 @@ const blogPosts = [
     date: "May 15, 2024",
     title: "The Zesty Power of Yuzu",
     excerpt: "A citrusy twist with Japanese roots. Here's why yuzu is more than just a flavor.",
-    link: "#",
+    link: "/blog/zesty-power-yuzu",
     bgColor: "",
   },
   {
     id: 4,
     imageSrc: "/can3blogcard.png",
     category: "Lifestyle",
-    date: "May 05, 2024",
+    date: "May 05, 2026",
     title: "Spice Meets Sweet: A Bold Combo",
     excerpt: "Guava and chilli bring the heat and the sweet. Here's why bold flavors are the new cool.",
-    link: "#",
+    link: "/blog/spice-meets-sweet",
     bgColor: "",
   },
 ];
