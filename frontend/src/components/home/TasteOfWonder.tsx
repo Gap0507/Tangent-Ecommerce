@@ -78,15 +78,44 @@ export function TasteOfWonder() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative bg-cream overflow-hidden py-16 md:py-24 px-6 md:px-12">
-      
+    <section ref={sectionRef} className="relative bg-cream overflow-hidden py-44 md:py-24 px-6 md:px-12">
+
+      {/* LEFT CAN - top-left corner of section, partially clipped */}
+      <div
+        ref={leftCanRef}
+        className="absolute top-[-20px] left-[-50px] md:hidden w-[260px] h-[320px] z-10 pointer-events-none"
+      >
+        <Image
+          src="/leftcansection.png"
+          alt="Tangent Ginger Ale Refreshment"
+          fill
+          className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
+          priority
+          unoptimized
+        />
+      </div>
+
+      {/* RIGHT CAN - bottom-right corner of section, partially clipped */}
+      <div
+        ref={rightCanRef}
+        className="absolute bottom-[-20px] right-[-50px] md:hidden w-[260px] h-[320px] z-10 pointer-events-none"
+      >
+        <Image
+          src="/rightcansection.png"
+          alt="Tangent Tonic Water Refreshment"
+          fill
+          className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
+          priority
+          unoptimized
+        />
+      </div>
+
       {/* ── TOP SECTION: LEFT CAN + CENTER TEXT + RIGHT CAN ── */}
-      <div className="max-w-[1380px] mx-auto relative min-h-[460px] md:min-h-[500px] flex items-center justify-center mb-16 md:mb-20">
-        
-        {/* LEFT CAN SHOWCASE */}
+      <div className="max-w-[1380px] mx-auto relative min-h-[500px] flex items-center justify-center mb-16 md:mb-20">
+
+        {/* LEFT CAN - desktop only */}
         <div
-          ref={leftCanRef}
-          className="absolute left-[-80px] lg:left-[-40px] xl:left-[-10px] top-1/2 -translate-y-1/2 w-[300px] md:w-[380px] lg:w-[440px] h-[360px] md:h-[460px] z-10 pointer-events-none hidden md:block"
+          className="absolute left-[-80px] lg:left-[-40px] xl:left-[-10px] top-1/2 -translate-y-1/2 w-[380px] lg:w-[440px] h-[460px] z-10 pointer-events-none hidden md:block"
         >
           <Image
             src="/leftcansection.png"
@@ -99,7 +128,7 @@ export function TasteOfWonder() {
         </div>
 
         {/* CENTER CONTENT */}
-        <div ref={centerTextRef} className="relative z-20 text-center max-w-[540px] mx-auto px-4 py-4">
+        <div ref={centerTextRef} className="relative z-20 text-center max-w-[540px] mx-auto px-4 py-8 md:py-4">
           <p className="text-[12px] font-bold tracking-[.22em] uppercase text-[#4A6038] mb-3">
             THE TANGENT DIFFERENCE
           </p>
@@ -129,10 +158,9 @@ export function TasteOfWonder() {
           </div>
         </div>
 
-        {/* RIGHT CAN SHOWCASE */}
+        {/* RIGHT CAN - desktop only */}
         <div
-          ref={rightCanRef}
-          className="absolute right-[-80px] lg:right-[-40px] xl:right-[-10px] top-1/2 -translate-y-1/2 w-[300px] md:w-[380px] lg:w-[440px] h-[360px] md:h-[460px] z-10 pointer-events-none hidden md:block"
+          className="absolute right-[-80px] lg:right-[-40px] xl:right-[-10px] top-1/2 -translate-y-1/2 w-[380px] lg:w-[440px] h-[460px] z-10 pointer-events-none hidden md:block"
         >
           <Image
             src="/rightcansection.png"

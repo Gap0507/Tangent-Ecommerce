@@ -124,7 +124,7 @@ function MobileProductCarousel() {
               />
 
               {/* Text content — top aligned */}
-              <div className="absolute inset-x-0 top-0 z-20 px-6 pt-[13vh]">
+              <div className="absolute inset-x-0 top-0 z-20 px-6 pt-[8vh]">
                 {/* Name */}
                 <div className="mb-2">
                   <h2

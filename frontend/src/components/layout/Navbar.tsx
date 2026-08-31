@@ -16,7 +16,7 @@ export function Navbar() {
             <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-coral transition-all duration-250 ease-out group-hover:w-full"></span>
           </Link>
           <Link href="/about" className="text-[15px] font-semibold text-navy relative group">
-            Our Story
+            Contact us
             <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-coral transition-all duration-250 ease-out group-hover:w-full"></span>
           </Link>
           <Link href="/blog" className="text-[15px] font-semibold text-navy relative group">
