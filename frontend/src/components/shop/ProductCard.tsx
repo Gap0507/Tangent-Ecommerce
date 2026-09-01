@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Star, ShoppingBag, Rotate3d, Check, X, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -74,7 +75,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Product Image Container */}
-        <div className="relative w-full aspect-[4/4] overflow-hidden bg-cream/30 p-4 flex items-center justify-center">
+        <Link href={`/shop/${product.id}`} className="relative w-full aspect-[4/4] overflow-hidden bg-cream/30 p-4 flex items-center justify-center cursor-pointer">
           <Image
             src={product.imageSrc}
             alt={product.name}
@@ -82,7 +83,7 @@ export function ProductCard({ product }: ProductCardProps) {
             className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
             unoptimized
           />
-        </div>
+        </Link>
 
         {/* Content Details */}
         <div className="p-6 flex flex-col flex-1">
@@ -96,9 +97,11 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
 
           {/* Name & Subtitle */}
-          <h3 className="font-fraunces font-black text-navy text-[22px] leading-tight mb-1">
-            {product.name}
-          </h3>
+          <Link href={`/shop/${product.id}`} className="hover:text-[#6A9A4A] transition-colors cursor-pointer">
+            <h3 className="font-fraunces font-black text-navy text-[22px] leading-tight mb-1 hover:text-[#6A9A4A] transition-colors">
+              {product.name}
+            </h3>
+          </Link>
           <p className="text-ink/60 text-[13px] mb-4">{product.subtitle}</p>
 
           {/* Flavor Notes pills */}

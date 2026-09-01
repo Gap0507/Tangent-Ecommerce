@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { ShoppingBag, ChevronRight } from "lucide-react";
 import Can3DViewer from "@/components/home/Can3DViewer";
@@ -125,14 +126,20 @@ export function ShopHero() {
 
             {/* CTA Buttons */}
             <div className="flex items-center gap-4">
-              <button className="bg-navy text-cream px-8 py-4 rounded-full font-bold text-[15px] hover:bg-navy/90 transition-all cursor-pointer shadow-xl flex items-center gap-2.5 group hover:scale-[1.03]">
+              <Link
+                href={`/shop/${activeFlavor.id}`}
+                className="bg-navy text-cream px-8 py-4 rounded-full font-bold text-[15px] hover:bg-navy/90 transition-all cursor-pointer shadow-xl flex items-center gap-2.5 group hover:scale-[1.03]"
+              >
                 <ShoppingBag className="w-5 h-5" />
                 <span>Shop {activeFlavor.name}</span>
-              </button>
-              <button className="text-navy font-bold text-[14px] flex items-center gap-1 hover:gap-2.5 transition-all cursor-pointer group">
+              </Link>
+              <Link
+                href="/shop"
+                className="text-navy font-bold text-[14px] flex items-center gap-1 hover:gap-2.5 transition-all cursor-pointer group"
+              >
                 View All
                 <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </button>
+              </Link>
             </div>
           </motion.div>
         </div>
