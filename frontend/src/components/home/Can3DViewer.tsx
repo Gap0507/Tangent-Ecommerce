@@ -9,9 +9,10 @@ interface Can3DProps {
   modelPath: string;
   isMobile: boolean;
   rotation?: number[];
+  positionOffset?: [number, number, number];
 }
 
-function CanModel({ modelPath, isMobile, rotation }: Can3DProps) {
+function CanModel({ modelPath, isMobile, rotation, positionOffset = [0, 0, 0] }: Can3DProps) {
   const { scene } = useGLTF(modelPath);
   const modelRef = useRef<THREE.Group>(null);
   const timeRef = useRef(0);
@@ -69,7 +70,7 @@ function CanModel({ modelPath, isMobile, rotation }: Can3DProps) {
   }, [scene]);
 
   const scale = isMobile ? 1.05 : 1.4;
-  const position = [0, -0.05, 0];
+  const position = [0 + positionOffset[0], -0.05 + positionOffset[1], 0 + positionOffset[2]];
 
   return (
     <group
@@ -88,7 +89,7 @@ function CanModel({ modelPath, isMobile, rotation }: Can3DProps) {
   );
 }
 
-export default function Can3DViewer({ modelPath, isMobile, rotation }: Can3DProps) {
+export default function Can3DViewer({ modelPath, isMobile, rotation, positionOffset }: Can3DProps) {
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
       <Canvas
@@ -120,7 +121,7 @@ export default function Can3DViewer({ modelPath, isMobile, rotation }: Can3DProp
             polar={[0, Math.PI / 10]}
             azimuth={[-Math.PI, Math.PI]}
           >
-            <CanModel modelPath={modelPath} isMobile={isMobile} rotation={rotation} />
+            <CanModel modelPath={modelPath} isMobile={isMobile} rotation={rotation} positionOffset={positionOffset} />
           </PresentationControls>
           <Environment
             preset="forest"

@@ -149,7 +149,7 @@ export const InteractiveImageBentoGallery: React.FC<
       >
         <motion.div
           ref={gridRef}
-          className="grid grid-cols-1 md:grid-cols-4 auto-rows-[200px] md:auto-rows-[220px] gap-4"
+          className="grid grid-cols-1 md:grid-cols-4 auto-rows-[250px] md:auto-rows-[300px] gap-4"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -160,7 +160,7 @@ export const InteractiveImageBentoGallery: React.FC<
               key={item.id}
               variants={itemVariants}
               className={cn(
-                "group relative flex min-h-[200px] md:min-h-[220px] w-full cursor-pointer items-end overflow-hidden rounded-2xl border border-navy/10 bg-white p-5 shadow-sm transition-shadow duration-300 ease-in-out hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                "group relative flex min-h-[250px] md:min-h-[300px] w-full cursor-pointer items-end overflow-hidden rounded-2xl border border-navy/10 bg-white p-5 shadow-sm transition-shadow duration-300 ease-in-out hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 item.span
               )}
               whileHover={{ scale: 1.02 }}
