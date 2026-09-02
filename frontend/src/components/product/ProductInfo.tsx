@@ -3,8 +3,10 @@
 import React, { useState } from "react";
 import { Star, ShoppingCart, Check, Zap, Shield, Plus, Minus } from "lucide-react";
 import { ProductDetails } from "@/data/products";
+import { useCart } from "@/context/CartContext";
 
 export function ProductInfo({ product }: { product: ProductDetails }) {
+  const { addToCart } = useCart();
   const [selectedPackIdx, setSelectedPackIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -14,9 +16,18 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
   const originalTotal = selectedPack.originalPrice ? selectedPack.originalPrice * quantity : undefined;
 
   const handleAddToCart = () => {
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      size: selectedPack.size,
+      price: selectedPack.price,
+      quantity,
+      image: product.images.main,
+    });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
+
 
   const decrement = () => setQuantity(Math.max(1, quantity - 1));
   const increment = () => setQuantity(quantity + 1);

@@ -6,6 +6,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Star, ShoppingBag, Rotate3d, Check, X, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useCart } from "@/context/CartContext";
 
 const Can3DViewer = dynamic(() => import("@/components/home/Can3DViewer"), {
   ssr: false,
@@ -41,6 +42,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { addToCart } = useCart();
   const [selectedPackIndex, setSelectedPackIndex] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
   const [is3DModalOpen, setIs3DModalOpen] = useState(false);
@@ -48,11 +50,20 @@ export function ProductCard({ product }: ProductCardProps) {
   const selectedPack = product.packPrices[selectedPackIndex];
 
   const handleAddToCart = () => {
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      size: selectedPack.size,
+      price: selectedPack.price,
+      quantity: 1,
+      image: product.imageSrc,
+    });
     setIsAdded(true);
     setTimeout(() => {
       setIsAdded(false);
     }, 1800);
   };
+
 
   return (
     <>

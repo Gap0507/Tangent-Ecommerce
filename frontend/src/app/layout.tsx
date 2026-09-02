@@ -3,6 +3,7 @@ import { Inter, Fraunces } from "next/font/google";
 import localFont from "next/font/local";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { CartProvider } from "@/context/CartContext";
 import "./globals.css";
 
 const inter = Inter({
@@ -59,10 +60,13 @@ export default function RootLayout({
       className={`${inter.variable} ${fraunces.variable} ${thunder.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans bg-cream text-ink scroll-smooth">
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
+        <CartProvider>
+          <Navbar />
+          <main className="flex-grow">{children}</main>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );
 }
+

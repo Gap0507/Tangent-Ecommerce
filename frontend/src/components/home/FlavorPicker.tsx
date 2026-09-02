@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ArrowLeft, ArrowRight, ShoppingCart, Ban, Droplet, HeartPulse, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
 
 const flavors = [
   {
@@ -82,7 +83,9 @@ const flavors = [
 ];
 
 export function FlavorPicker() {
+  const { addToCart } = useCart();
   const [activeIdx, setActiveIdx] = useState(0);
+
   const active = flavors[activeIdx];
 
   const handleNext = useCallback(() => setActiveIdx((prev) => (prev + 1) % flavors.length), []);
@@ -246,13 +249,23 @@ export function FlavorPicker() {
                   </div>
 
                   {/* CTA */}
-                  <Link
-                    href="/shop"
-                    className="inline-flex items-center gap-2 bg-[#F36B5B] hover:bg-[#E25A4B] text-white font-bold text-[13px] px-6 py-2.5 rounded-full transition-all hover:scale-105 hover:shadow-[0_8px_20px_rgba(243,107,91,0.3)]"
+                  <button
+                    onClick={() =>
+                      addToCart({
+                        productId: active.flavorLabel.toLowerCase().replace(/\s+/g, "-"),
+                        name: active.flavorLabel,
+                        size: "Pack of 4",
+                        price: 16.0,
+                        quantity: 1,
+                        image: active.canSrc,
+                      })
+                    }
+                    className="inline-flex items-center gap-2 bg-[#F36B5B] hover:bg-[#E25A4B] text-white font-bold text-[13px] px-6 py-2.5 rounded-full transition-all hover:scale-105 hover:shadow-[0_8px_20px_rgba(243,107,91,0.3)] cursor-pointer"
                   >
                     Add to Cart
                     <ShoppingCart className="w-3.5 h-3.5" />
-                  </Link>
+                  </button>
+
 
                 </motion.div>
               </AnimatePresence>
