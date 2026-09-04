@@ -92,7 +92,6 @@ export function ProductCard({ product }: ProductCardProps) {
             alt={product.name}
             fill
             className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
-            unoptimized
           />
         </Link>
 
@@ -127,7 +126,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {/* Pack Size Selector */}
           <div className="mt-auto pt-4 border-t border-navy/10">
             <p className="text-[11px] font-bold text-navy/60 uppercase tracking-wider mb-2">Select Size:</p>
-            <div className="grid grid-cols-3 gap-1.5 mb-5">
+            <div className="grid grid-cols-4 gap-1 mb-5">
               {product.packPrices.map((pack, idx) => {
                 const isSelected = selectedPackIndex === idx;
                 return (
@@ -142,7 +141,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   >
                     <div className="text-[11px] leading-tight font-semibold whitespace-nowrap overflow-hidden text-ellipsis">{pack.size.replace('Pack of', 'Pack')}</div>
                     <div className={`text-[10px] mt-0.5 ${isSelected ? "text-sand" : "text-ink/50"}`}>
-                      ${pack.price}
+                      ₹{pack.price}
                     </div>
                   </button>
                 );
@@ -154,7 +153,7 @@ export function ProductCard({ product }: ProductCardProps) {
               <div>
                 <span className="text-[11px] text-ink/50 block">Price:</span>
                 <span className="font-fraunces font-black text-navy text-[24px]">
-                  ${selectedPack.price.toFixed(2)}
+                  ₹{selectedPack.price}
                 </span>
               </div>
 
@@ -228,7 +227,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   }}
                   className="bg-navy text-cream px-6 py-2.5 rounded-xl font-bold text-[13px] hover:bg-navy/90 transition-all cursor-pointer"
                 >
-                  Add ${selectedPack.price.toFixed(2)} to Cart
+                  Add ₹{selectedPack.price} to Cart
                 </button>
               </div>
             </motion.div>

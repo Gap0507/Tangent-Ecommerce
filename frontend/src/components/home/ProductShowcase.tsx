@@ -113,7 +113,6 @@ function MobileProductCarousel() {
                 fill
                 className="object-cover object-top"
                 sizes="100vw"
-                unoptimized
               />
 
               {/* Gradient overlay — top cream fade for text */}
@@ -233,7 +232,6 @@ function ProductCard({ i, product, progress, range, targetScale }: ProductCardPr
           className="object-cover object-top"
           priority={i === 0}
           sizes="100vw"
-          unoptimized
         />
 
         {/* Gradient */}

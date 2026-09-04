@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Star, ShoppingCart, Check, Zap, Shield, Plus, Minus } from "lucide-react";
-import { ProductDetails } from "@/data/products";
+import { ProductDetails, calculatePackPrices } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 
 export function ProductInfo({ product }: { product: ProductDetails }) {
@@ -10,8 +10,28 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
   const [selectedPackIdx, setSelectedPackIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+  const [packPrices, setPackPrices] = useState(product.packPrices);
 
-  const selectedPack = product.packPrices[selectedPackIdx];
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success && Array.isArray(resData.data)) {
+          const dbProd = resData.data.find(
+            (p: any) =>
+              p.name.toLowerCase().includes(product.id.replace("-", " ")) ||
+              product.id.toLowerCase().includes(p.name.toLowerCase().replace(/\s+/g, "-")) ||
+              p.sku.toLowerCase().includes(product.id.substring(0, 4))
+          );
+          if (dbProd && dbProd.price) {
+            setPackPrices(calculatePackPrices(dbProd.price));
+          }
+        }
+      })
+      .catch((err) => console.error("Failed to load inventory price for product info", err));
+  }, [product.id]);
+
+  const selectedPack = packPrices[selectedPackIdx] || packPrices[0];
   const totalPrice = selectedPack.price * quantity;
   const originalTotal = selectedPack.originalPrice ? selectedPack.originalPrice * quantity : undefined;
 
@@ -27,7 +47,6 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
-
 
   const decrement = () => setQuantity(Math.max(1, quantity - 1));
   const increment = () => setQuantity(quantity + 1);
@@ -78,7 +97,7 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
       <div className="mb-5">
         <p className="text-[12px] font-bold text-navy mb-2.5">Pack Size</p>
         <div className="flex flex-wrap gap-2 md:gap-3">
-          {product.packPrices.map((pack, idx) => {
+          {packPrices.map((pack, idx) => {
             const isSelected = selectedPackIdx === idx;
             return (
               <button
@@ -125,11 +144,11 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
            <div className="flex items-end gap-2">
              {originalTotal && (
                <span className="text-[14px] text-ink/40 line-through font-medium pb-1">
-                 ${originalTotal.toFixed(2)}
+                 ₹{originalTotal}
                </span>
              )}
              <span className="font-fraunces font-black text-[28px] leading-none text-navy">
-               ${totalPrice.toFixed(2)}
+               ₹{totalPrice}
              </span>
            </div>
            <p className="text-[10px] text-ink/40 mt-1">(Inclusive of all taxes)</p>
@@ -169,10 +188,11 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
         </div>
         <div>
           <p className="font-bold text-[13px] text-navy">Estimated delivery: 2-4 business days</p>
-          <p className="text-[12px] text-ink/60 mt-0.5">Free shipping on orders above $50</p>
+          <p className="text-[12px] text-ink/60 mt-0.5">Free shipping on orders above ₹1999</p>
         </div>
       </div>
 
     </div>
   );
 }
+

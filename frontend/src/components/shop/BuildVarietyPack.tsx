@@ -36,8 +36,22 @@ export function BuildVarietyPack() {
   const [packSize, setPackSize] = useState<12 | 24>(12);
   const [selectedCans, setSelectedCans] = useState<string[]>([]);
   const [isAdded, setIsAdded] = useState(false);
+  const [baseUnitPrice, setBaseUnitPrice] = useState(149);
 
-  const price = packSize === 12 ? 40 : 72;
+  React.useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success && Array.isArray(resData.data) && resData.data[0]?.price) {
+          setBaseUnitPrice(resData.data[0].price);
+        }
+      })
+      .catch((err) => console.error("Failed to load inventory price for custom builder", err));
+  }, []);
+
+  const price12 = baseUnitPrice * 12;
+  const price24 = baseUnitPrice * 24;
+  const price = packSize === 12 ? price12 : price24;
 
   const addCan = (flavorId: string) => {
     if (selectedCans.length < packSize) {
@@ -100,7 +114,7 @@ export function BuildVarietyPack() {
                     packSize === 12 ? "bg-sand text-navy shadow-sm" : "text-cream/70 hover:text-cream"
                   }`}
                 >
-                  12 Cans ($40)
+                  12 Cans (₹{price12})
                 </button>
                 <button
                   onClick={() => setPackSize(24)}
@@ -108,7 +122,7 @@ export function BuildVarietyPack() {
                     packSize === 24 ? "bg-sand text-navy shadow-sm" : "text-cream/70 hover:text-cream"
                   }`}
                 >
-                  24 Cans ($72 - Save 25%)
+                  24 Cans (₹{price24})
                 </button>
               </div>
             </div>
@@ -192,7 +206,7 @@ export function BuildVarietyPack() {
             <div className="pt-4 border-t border-cream/10">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-cream/70 text-[13px]">Total Box Price:</span>
-                <span className="font-fraunces font-black text-sand text-[28px]">${price}.00</span>
+                <span className="font-fraunces font-black text-sand text-[28px]">₹{price}</span>
               </div>
 
               <button

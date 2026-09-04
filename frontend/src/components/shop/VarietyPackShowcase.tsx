@@ -7,6 +7,21 @@ import { ShoppingBag, Check, Package, Sparkles, Leaf, Droplets, Zap } from "luci
 
 export function VarietyPackShowcase() {
   const [isAdded, setIsAdded] = useState(false);
+  const [packPrice, setPackPrice] = useState(536);
+
+  React.useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success && Array.isArray(resData.data) && resData.data.length > 0) {
+          const sumPrices = resData.data.reduce((acc: number, item: any) => acc + (item.price || 0), 0);
+          if (sumPrices > 0) {
+            setPackPrice(sumPrices);
+          }
+        }
+      })
+      .catch((err) => console.error("Failed to load inventory price for variety pack", err));
+  }, []);
 
   const handleBuyNow = () => {
     setIsAdded(true);
@@ -78,7 +93,6 @@ export function VarietyPackShowcase() {
             {/* RIGHT — Pack Info + Buy Now */}
             <div className="lg:w-[400px] bg-gradient-to-br from-navy to-[#0A1F35] p-8 md:p-10 flex flex-col justify-center text-white relative overflow-hidden">
 
-
               <div className="relative z-10">
                 <span className="inline-block bg-sand/20 text-sand text-[11px] font-black tracking-widest uppercase px-3 py-1 rounded-full mb-5">
                   Best Value
@@ -126,7 +140,7 @@ export function VarietyPackShowcase() {
 
                 {/* Price */}
                 <div className="flex items-end gap-3 mb-3">
-                  <span className="font-fraunces font-black text-[46px] text-sand leading-none">$16</span>
+                  <span className="font-fraunces font-black text-[46px] text-sand leading-none">₹{packPrice}</span>
                   <span className="text-cream/50 text-[14px] font-medium pb-2">/pack of 4</span>
                 </div>
 
@@ -153,7 +167,7 @@ export function VarietyPackShowcase() {
                   ) : (
                     <>
                       <ShoppingBag className="w-5 h-5" />
-                      <span>Buy Now — $16.00</span>
+                      <span>Buy Now — ₹{packPrice}</span>
                     </>
                   )}
                 </button>

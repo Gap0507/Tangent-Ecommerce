@@ -43,6 +43,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const token = localStorage.getItem("admin_token");
     if (token === "dummy-jwt-token-for-admin") {
       setIsLoggedIn(true);
+      document.cookie = "admin_session=valid_admin_session_token; path=/; max-age=86400";
     }
     setIsCheckingAuth(false);
   }, []);
@@ -56,14 +57,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       setIsLoggedIn(true);
       setError("");
       localStorage.setItem("admin_token", "dummy-jwt-token-for-admin");
+      document.cookie = "admin_session=valid_admin_session_token; path=/; max-age=86400";
     } else {
-      setError("Invalid credentials. Hint: admin@tangentdrinks.com / admin123");
+      setError("Invalid admin email or password.");
     }
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     localStorage.removeItem("admin_token");
+    document.cookie = "admin_session=; path=/; max-age=0";
   };
 
   if (isCheckingAuth) {
@@ -109,7 +112,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@tangentdrinks.com"
+                  placeholder="Enter admin email"
                   className="w-full bg-[#FAF7F2] border border-navy/15 rounded-2xl py-3.5 pl-11 pr-4 text-[14px] text-navy placeholder:text-ink/30 focus:outline-none focus:border-navy transition-all"
                   required
                 />
@@ -140,19 +143,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Sign In to Dashboard
             </button>
           </form>
-
-          <div className="mt-6 pt-6 border-t border-navy/10 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setEmail("admin@tangentdrinks.com");
-                setPassword("admin123");
-              }}
-              className="text-[12px] font-bold text-navy/70 hover:text-navy underline cursor-pointer"
-            >
-              Autofill Demo Credentials
-            </button>
-          </div>
         </div>
       </div>
     );
@@ -230,7 +220,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       isPendingOrders ? "text-white font-bold" : "text-white/60 hover:text-white"
                     }`}
                   >
-                    <span>Pending Orders</span>
+                    <span>Orders to Fulfill</span>
                     {isPendingOrders && <span className="w-2 h-2 rounded-full bg-[#FCD34D]" />}
                   </Link>
                 </div>
@@ -242,7 +232,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href="/admin-panel/inventory"
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-[14px] transition-all cursor-pointer ${
                 isInventory
-                  ? "bg-[#FCD34D] text-[#091E33] shadow-md"
+                  ? "bg-[#FCD34D]" + " text-[#091E33] shadow-md"
                   : "text-white/70 hover:bg-white/5 hover:text-white"
               }`}
             >
@@ -255,7 +245,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href="/admin-panel/customers"
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-[14px] transition-all cursor-pointer ${
                 isCustomers
-                  ? "bg-[#FCD34D] text-[#091E33] shadow-md"
+                  ? "bg-[#FCD34D]" + " text-[#091E33] shadow-md"
                   : "text-white/70 hover:bg-white/5 hover:text-white"
               }`}
             >
@@ -268,7 +258,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href="/admin-panel/coupons"
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-[14px] transition-all cursor-pointer ${
                 isCoupons
-                  ? "bg-[#FCD34D] text-[#091E33] shadow-md"
+                  ? "bg-[#FCD34D]" + " text-[#091E33] shadow-md"
                   : "text-white/70 hover:bg-white/5 hover:text-white"
               }`}
             >
@@ -281,7 +271,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href="/admin-panel/settings"
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-[14px] transition-all cursor-pointer ${
                 isSettings
-                  ? "bg-[#FCD34D] text-[#091E33] shadow-md"
+                  ? "bg-[#FCD34D]" + " text-[#091E33] shadow-md"
                   : "text-white/70 hover:bg-white/5 hover:text-white"
               }`}
             >
@@ -323,7 +313,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <h2 className="font-fraunces font-black text-[28px] md:text-[32px] text-navy leading-tight">
               {isDashboard && "Welcome back, Admin 👋"}
               {isAllOrders && "All Orders"}
-              {isPendingOrders && "Pending Orders"}
+              {isPendingOrders && "Orders to Fulfill"}
               {isInventory && "Inventory"}
               {isCustomers && "Customers"}
               {isCoupons && "Coupons & Discounts"}
@@ -332,7 +322,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {(isAllOrders || isPendingOrders || isInventory || isCustomers || isCoupons || isSettings) && (
               <p className="text-[13px] text-ink/60 font-medium mt-1">
                 {isAllOrders && "View and manage all customer orders"}
-                {isPendingOrders && "These orders are waiting to be packed and shipped"}
+                {isPendingOrders && "Paid orders waiting to be packed and shipped"}
                 {isInventory && "Manage your products and stock levels"}
                 {isCustomers && "Manage and view all your customers"}
                 {isCoupons && "Create and manage coupons to boost sales and reward your customers."}
@@ -354,7 +344,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             {/* Save Changes Button only on Settings Page */}
             {isSettings && (
-              <button className="flex items-center gap-2 bg-[#091E33] hover:bg-navy text-white text-[14px] font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm">
+              <button form="settings-form" type="submit" className="flex items-center gap-2 bg-[#091E33] hover:bg-navy text-white text-[14px] font-bold px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm">
                 <Save className="w-4 h-4" />
                 <span>Save Changes</span>
               </button>

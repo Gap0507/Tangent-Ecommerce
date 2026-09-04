@@ -42,6 +42,15 @@ export interface ProductDetails {
   }[];
 }
 
+export function calculatePackPrices(basePrice: number) {
+  return [
+    { size: "Pack of 4", cans: 4, price: basePrice * 4 },
+    { size: "Pack of 8", cans: 8, price: basePrice * 8 },
+    { size: "Pack of 12", cans: 12, price: basePrice * 12 },
+    { size: "Pack of 24", cans: 24, price: basePrice * 24 },
+  ];
+}
+
 export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
   "watermelon-mint": {
     id: "watermelon-mint",
@@ -57,12 +66,7 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
       "Low in calories",
       "No added preservatives"
     ],
-    packPrices: [
-      { size: "250 ml (Pack of 1)", cans: 1, price: 4.50 },
-      { size: "Pack of 4", cans: 4, price: 16.0, originalPrice: 18.0, savings: "Save 10%" },
-      { size: "Pack of 8", cans: 8, price: 28.0, originalPrice: 33.0, savings: "Save 15%" },
-      { size: "Pack of 24", cans: 24, price: 76.0, originalPrice: 96.0, savings: "Save 20%" },
-    ],
+    packPrices: calculatePackPrices(149),
     images: {
       main: "/can2.png",
       gallery: [
@@ -149,12 +153,7 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
       "Low in calories",
       "No added preservatives"
     ],
-    packPrices: [
-      { size: "250 ml (Pack of 1)", cans: 1, price: 4.50 },
-      { size: "Pack of 4", cans: 4, price: 16.0, originalPrice: 18.0, savings: "Save 10%" },
-      { size: "Pack of 8", cans: 8, price: 28.0, originalPrice: 33.0, savings: "Save 15%" },
-      { size: "Pack of 24", cans: 24, price: 76.0, originalPrice: 96.0, savings: "Save 20%" },
-    ],
+    packPrices: calculatePackPrices(149),
     images: {
       main: "/can1.png",
       gallery: [
@@ -208,12 +207,7 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
       "Low in calories",
       "No added preservatives"
     ],
-    packPrices: [
-      { size: "250 ml (Pack of 1)", cans: 1, price: 4.50 },
-      { size: "Pack of 4", cans: 4, price: 16.0, originalPrice: 18.0, savings: "Save 10%" },
-      { size: "Pack of 8", cans: 8, price: 28.0, originalPrice: 33.0, savings: "Save 15%" },
-      { size: "Pack of 24", cans: 24, price: 76.0, originalPrice: 96.0, savings: "Save 20%" },
-    ],
+    packPrices: calculatePackPrices(149),
     images: {
       main: "/can4.png",
       gallery: [
@@ -267,12 +261,7 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
       "Low in calories",
       "No added preservatives"
     ],
-    packPrices: [
-      { size: "250 ml (Pack of 1)", cans: 1, price: 4.50 },
-      { size: "Pack of 4", cans: 4, price: 16.0, originalPrice: 18.0, savings: "Save 10%" },
-      { size: "Pack of 8", cans: 8, price: 28.0, originalPrice: 33.0, savings: "Save 15%" },
-      { size: "Pack of 24", cans: 24, price: 76.0, originalPrice: 96.0, savings: "Save 20%" },
-    ],
+    packPrices: calculatePackPrices(149),
     images: {
       main: "/can3.png",
       gallery: [

@@ -34,7 +34,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 activeIndex === idx ? "border-navy opacity-100" : "border-transparent opacity-60 hover:opacity-100 hover:border-navy/20"
               }`}
             >
-              <Image src={img} alt={`${productName} view ${idx + 1}`} fill className="object-cover" unoptimized />
+              <Image src={img} alt={`${productName} view ${idx + 1}`} fill className="object-cover" />
             </button>
           ))}
         </div>
@@ -69,7 +69,6 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               alt={productName} 
               fill 
               className={`object-cover transition-transform duration-500 ${isHovered ? 'scale-105' : 'scale-100'}`} 
-              unoptimized 
             />
           </motion.div>
         </AnimatePresence>

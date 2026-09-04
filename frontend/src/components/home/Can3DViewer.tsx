@@ -136,3 +136,10 @@ export default function Can3DViewer({ modelPath, isMobile, rotation, positionOff
     </div>
   );
 }
+
+// Preload 3D GLB assets for Vercel CDN speed
+useGLTF.preload("/assets/3d/can/Tangent_Watermelon_Cranberry_v2_FINAL_4K.glb");
+useGLTF.preload("/assets/3d/can/Tangent_Watermelon_Mint.glb");
+useGLTF.preload("/assets/3d/can/Tangent_Guava_Chilli_FINAL_4K.glb");
+useGLTF.preload("/assets/3d/can/Tangent_Yuzu_Mint_FINAL_4K.glb");
+

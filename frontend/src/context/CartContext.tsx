@@ -27,42 +27,43 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const FREE_SHIPPING_THRESHOLD = 40.0;
-
-// Initial mock cart items to match the user's reference UI nicely
-const INITIAL_MOCK_ITEMS: CartItem[] = [
-  {
-    id: "watermelon-mint-1",
-    productId: "watermelon-mint",
-    name: "Watermelon Mint",
-    size: "Pack of 4",
-    price: 16.0,
-    quantity: 1,
-    image: "/can2.png",
-  },
-  {
-    id: "yuzu-mint-1",
-    productId: "yuzu-mint",
-    name: "Yuzu Mint",
-    size: "Pack of 4",
-    price: 16.0,
-    quantity: 1,
-    image: "/can4.png",
-  },
-  {
-    id: "guava-chilli-1",
-    productId: "guava-chilli",
-    name: "Guava Chilli",
-    size: "Pack of 4",
-    price: 16.0,
-    quantity: 1,
-    image: "/can3.png",
-  },
-];
+const FREE_SHIPPING_THRESHOLD = 1999.0;
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(INITIAL_MOCK_ITEMS);
+  const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load cart from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("tangent_cart");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Filter out legacy mock items / legacy USD items (< 10 INR) if present
+        const cleanItems = Array.isArray(parsed) 
+          ? parsed.filter((item: CartItem) => !item.id.endsWith("-1") && item.id !== "watermelon-mint-1" && item.price >= 10)
+          : [];
+        setItems(cleanItems);
+      } else {
+        setItems([]);
+      }
+    } catch {
+      setItems([]);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Save cart to localStorage on changes
+  useEffect(() => {
+    if (isLoaded) {
+      try {
+        localStorage.setItem("tangent_cart", JSON.stringify(items));
+      } catch (e) {
+        console.error("Failed to save cart to localStorage", e);
+      }
+    }
+  }, [items, isLoaded]);
 
   const openCartTemporarily = () => {
     setIsCartOpen(true);

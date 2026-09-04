@@ -1,190 +1,163 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import {
-  ShoppingBag,
-  Search,
-  Filter,
-  Eye,
-  Send,
-  MoreVertical,
-  Clock,
-  Truck,
-  Wallet,
-} from "lucide-react";
+import { Search, Filter, Eye, Send, Clock, Truck, Wallet, Loader2 } from "lucide-react";
 
 interface OrderItem {
+  productId: string;
+  sku: string;
   name: string;
-  size: string;
-  qty: number;
-  image: string;
+  quantity: number;
+  price: number;
+  image?: string;
 }
 
 interface Order {
-  id: string;
+  _id: string;
+  orderNumber: string;
   customerName: string;
+  customerEmail: string;
   customerPhone: string;
-  date: string;
-  time: string;
-  item: OrderItem;
-  amount: number;
-  paymentStatus: "Paid" | "Unpaid";
-  paymentGateway: string;
-  shippingAddress: string;
-  pushedToShiprocket?: boolean;
+  createdAt: string;
+  items: OrderItem[];
+  pricing: {
+    total: number;
+  };
+  paymentStatus: string;
+  orderStatus: string;
+  shipmentStatus: string;
+  shippingAddress: {
+    street: string;
+    city: string;
+    state: string;
+    pincode: string;
+  };
 }
 
-const PENDING_ORDERS_DATA: Order[] = [
-  {
-    id: "#TNG1234",
-    customerName: "Rohit Verma",
-    customerPhone: "+91 98765 43210",
-    date: "May 20, 2024",
-    time: "10:30 AM",
-    item: { name: "Watermelon Mint", size: "250ml (Pack of 1)", qty: 2, image: "/can2.png" },
-    amount: 598,
-    paymentStatus: "Paid",
-    paymentGateway: "Razorpay",
-    shippingAddress: "B-12, Sector 27 Noida, Uttar Pradesh 201301",
-  },
-  {
-    id: "#TNG1233",
-    customerName: "Ananya Sharma",
-    customerPhone: "+91 91234 56789",
-    date: "May 20, 2024",
-    time: "09:15 AM",
-    item: { name: "Yuzu Mint", size: "250ml (Pack of 1)", qty: 1, image: "/can4.png" },
-    amount: 149,
-    paymentStatus: "Paid",
-    paymentGateway: "Razorpay",
-    shippingAddress: "18, Park Street Bengaluru, Karnataka 560001",
-  },
-  {
-    id: "#TNG1232",
-    customerName: "Priya Mehta",
-    customerPhone: "+91 99887 66554",
-    date: "May 19, 2024",
-    time: "08:45 PM",
-    item: { name: "Guava Chilli", size: "250ml (Pack of 1)", qty: 2, image: "/can3.png" },
-    amount: 298,
-    paymentStatus: "Paid",
-    paymentGateway: "Razorpay",
-    shippingAddress: "102, Green View Apt. Mumbai, Maharashtra 400064",
-  },
-  {
-    id: "#TNG1231",
-    customerName: "Karan Singh",
-    customerPhone: "+91 88776 55433",
-    date: "May 19, 2024",
-    time: "05:20 PM",
-    item: { name: "Watermelon Cranberry", size: "250ml (Pack of 1)", qty: 1, image: "/can1.png" },
-    amount: 149,
-    paymentStatus: "Paid",
-    paymentGateway: "Razorpay",
-    shippingAddress: "55, Lace Garden Pune, Maharashtra 411001",
-  },
-  {
-    id: "#TNG1230",
-    customerName: "Sneha Patel",
-    customerPhone: "+91 77665 44321",
-    date: "May 18, 2024",
-    time: "11:10 AM",
-    item: { name: "Watermelon Mint", size: "250ml (Pack of 1)", qty: 1, image: "/can2.png" },
-    amount: 149,
-    paymentStatus: "Paid",
-    paymentGateway: "Razorpay",
-    shippingAddress: "9, Shanti Nagar Ahmedabad, Gujarat 380015",
-  },
-];
-
 export default function PendingOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>(PENDING_ORDERS_DATA);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
   const [selectedOrderModal, setSelectedOrderModal] = useState<Order | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const filteredOrders = orders.filter(
-    (ord) =>
-      ord.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ord.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ord.customerPhone.includes(searchQuery)
-  );
+  useEffect(() => {
+    fetchPendingOrders();
+  }, []);
 
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedOrderIds(filteredOrders.map((o) => o.id));
-    } else {
-      setSelectedOrderIds([]);
+  const fetchPendingOrders = async () => {
+    try {
+      // Fetch all orders and filter strictly for PAID orders waiting to be packed and shipped
+      const res = await fetch('/api/orders');
+      const data = await res.json();
+      if (data.success) {
+        const unfulfilled = data.data.filter((o: Order) => 
+          o.paymentStatus === 'PAID' && 
+          o.shipmentStatus !== 'CREATED' && 
+          o.orderStatus !== 'SHIPPED' && 
+          o.orderStatus !== 'DELIVERED' && 
+          o.orderStatus !== 'CANCELLED'
+        );
+        setOrders(unfulfilled);
+      }
+    } catch (e) {
+      console.error("Failed to fetch orders to fulfill", e);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleToggleSelectOrder = (id: string) => {
-    setSelectedOrderIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+  const handlePushToShiprocket = async (order: Order) => {
+    if (order.paymentStatus !== 'PAID') {
+      alert("Cannot push unpaid orders to Shiprocket.");
+      return;
+    }
+    setProcessingId(order._id);
+    try {
+      const res = await fetch('/api/shipments/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order._id })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        // Remove from pending list once shipped
+        setOrders((prev) => prev.filter((o) => o._id !== order._id));
+        alert(`Shipment created! AWB: ${data.data.awbCode}`);
+      } else {
+        alert(data.error || "Failed to push to Shiprocket");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error pushing to Shiprocket");
+    } finally {
+      setProcessingId(null);
+    }
   };
 
-  const handlePushShiprocket = (orderId: string) => {
-    setOrders((prev) =>
-      prev.map((ord) => (ord.id === orderId ? { ...ord, pushedToShiprocket: true } : ord))
+  const filteredOrders = orders.filter((ord) => {
+    return (
+      ord.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ord.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ord.customerPhone.includes(searchQuery)
     );
+  });
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return {
+      date: date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      time: date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+    };
   };
+
+  const totalPending = orders.length;
+  const totalValue = orders.reduce((acc, curr) => acc + curr.pricing.total, 0);
+
+  if (loading) {
+    return <div className="p-8 text-center text-navy font-bold animate-pulse">Loading orders to fulfill...</div>;
+  }
 
   return (
     <div className="space-y-6">
-      {/* Top 4 Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Card 1: Total Pending */}
-        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[12.5px] font-bold text-ink/60 mb-1">Total Pending</p>
-            <h3 className="font-fraunces font-black text-[28px] text-navy leading-none mb-1">18</h3>
-            <p className="text-[11.5px] text-ink/50 font-medium">Orders</p>
-          </div>
-          <div className="w-13 h-13 rounded-2xl bg-[#FEF3C7] flex items-center justify-center text-[#D97706] shrink-0">
-            <ShoppingBag className="w-6 h-6" />
-          </div>
-        </div>
-
-        {/* Card 2: Total Amount */}
-        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[12.5px] font-bold text-ink/60 mb-1">Total Amount</p>
-            <h3 className="font-fraunces font-black text-[28px] text-navy leading-none mb-1">₹7,452</h3>
-            <p className="text-[11.5px] text-ink/50 font-medium">To be Collected</p>
-          </div>
-          <div className="w-13 h-13 rounded-2xl bg-[#E8F2FD] flex items-center justify-center text-[#1E73BE] shrink-0">
-            <Wallet className="w-6 h-6" />
+      
+      {/* Top Header & KPI Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-[#091E33] rounded-3xl p-6 text-white shadow-md relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10" />
+          <p className="text-[12px] font-bold text-white/70 mb-1">ORDERS TO FULFILL</p>
+          <h3 className="text-4xl font-black mb-2">{totalPending}</h3>
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#34D399]">
+            <Clock className="w-3.5 h-3.5" />
+            <span>Requires action</span>
           </div>
         </div>
 
-        {/* Card 3: Ready to Ship */}
-        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[12.5px] font-bold text-ink/60 mb-1">Ready to Ship</p>
-            <h3 className="font-fraunces font-black text-[28px] text-navy leading-none mb-1">14</h3>
-            <p className="text-[11.5px] text-ink/50 font-medium">Orders</p>
-          </div>
-          <div className="w-13 h-13 rounded-2xl bg-[#EDF5E6] flex items-center justify-center text-[#4B7322] shrink-0">
-            <Truck className="w-6 h-6" />
+        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex flex-col justify-center">
+          <p className="text-[12px] font-bold text-ink/50 mb-1">TOTAL VALUE TO FULFILL</p>
+          <h3 className="text-3xl font-black text-navy mb-2">₹{totalValue}</h3>
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-navy/60">
+            <Wallet className="w-3.5 h-3.5" />
+            <span>Value of paid unfulfilled orders</span>
           </div>
         </div>
 
-        {/* Card 4: Avg Time */}
-        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[12.5px] font-bold text-ink/60 mb-1">Avg. Time</p>
-            <h3 className="font-fraunces font-black text-[28px] text-navy leading-none mb-1">12 hrs</h3>
-            <p className="text-[11.5px] text-ink/50 font-medium">To Ship</p>
+        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex flex-col justify-center">
+          <p className="text-[12px] font-bold text-ink/50 mb-1">LOGISTICS PARTNER</p>
+          <div className="flex items-center gap-3 mb-2">
+            <h3 className="text-2xl font-black text-navy">Shiprocket</h3>
+            <span className="bg-[#ECFDF5] text-[#047857] text-[10px] font-bold px-2 py-0.5 rounded-full">Connected</span>
           </div>
-          <div className="w-13 h-13 rounded-2xl bg-[#F3E8FF] flex items-center justify-center text-[#7E22CE] shrink-0">
-            <Clock className="w-6 h-6" />
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-navy/60">
+            <Truck className="w-3.5 h-3.5" />
+            <span>1-click dispatch enabled</span>
           </div>
         </div>
       </div>
 
-      {/* Search & Push to Shiprocket Action Bar */}
+      {/* Search & Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-navy/10 shadow-sm">
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-ink/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -192,130 +165,119 @@ export default function PendingOrdersPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by order ID, customer, phone..."
-            className="w-full bg-[#FAF7F2] border border-navy/15 rounded-full py-2.5 pl-9 pr-4 text-[13px] text-navy placeholder:text-ink/40 focus:outline-none focus:border-navy"
+            placeholder="Search pending orders..."
+            className="w-full bg-[#FAF7F2] border border-navy/15 rounded-full py-2 pl-9 pr-4 text-[13px] text-navy placeholder:text-ink/40 focus:outline-none focus:border-navy"
           />
         </div>
-
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-1.5 bg-white border border-navy/20 hover:border-navy text-navy font-bold text-[13px] px-4 py-2.5 rounded-full transition-all cursor-pointer shadow-sm">
-            <Filter className="w-4 h-4 text-navy/70" />
-            <span>Filters</span>
-          </button>
-
-          <button
-            disabled={selectedOrderIds.length === 0}
-            className="flex items-center gap-2 bg-[#091E33] hover:bg-[#071728] text-white font-bold text-[13px] px-6 py-2.5 rounded-full transition-all shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Send className="w-4 h-4" />
-            <span>Push to Shiprocket ({selectedOrderIds.length})</span>
-          </button>
-        </div>
+        <button className="flex items-center gap-1.5 bg-white border border-navy/20 hover:border-navy text-navy font-bold text-[13px] px-4 py-2 rounded-full transition-all cursor-pointer shadow-sm">
+          <Filter className="w-3.5 h-3.5 text-navy/70" />
+          <span>Sort & Filter</span>
+        </button>
       </div>
 
-      {/* Table */}
+      {/* Pending Orders Table */}
       <div className="bg-white rounded-3xl border border-navy/10 shadow-sm overflow-hidden p-6">
+        <h3 className="text-[16px] font-bold text-navy mb-4">Action Required</h3>
+        
         <div className="overflow-x-auto">
           <table className="w-full text-left text-[13px]">
             <thead>
               <tr className="text-[11px] font-bold uppercase tracking-wider text-ink/40 border-b border-navy/10 pb-4">
-                <th className="pb-3 px-2 w-8">
-                  <input
-                    type="checkbox"
-                    onChange={handleSelectAll}
-                    checked={selectedOrderIds.length > 0 && selectedOrderIds.length === filteredOrders.length}
-                    className="w-4 h-4 rounded border-navy/20 text-[#091E33] focus:ring-[#091E33] cursor-pointer"
-                  />
-                </th>
-                <th className="pb-3 px-2">ORDER ID</th>
-                <th className="pb-3 px-2">CUSTOMER</th>
-                <th className="pb-3 px-2">DATE</th>
-                <th className="pb-3 px-2">ITEMS</th>
-                <th className="pb-3 px-2">AMOUNT</th>
-                <th className="pb-3 px-2">PAYMENT</th>
-                <th className="pb-3 px-2">SHIPPING ADDRESS</th>
-                <th className="pb-3 px-2 text-right">ACTION</th>
+                <th className="pb-3 px-2">ORDER & TIME</th>
+                <th className="pb-3 px-2">CUSTOMER INFO</th>
+                <th className="pb-3 px-2">ITEMS TO PACK</th>
+                <th className="pb-3 px-2 text-center">PAYMENT</th>
+                <th className="pb-3 px-2 text-right">ONE-CLICK FULFILLMENT</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-navy/5">
-              {filteredOrders.map((ord) => {
-                const isSelected = selectedOrderIds.includes(ord.id);
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-8 text-ink/50">No pending orders.</td>
+                </tr>
+              ) : filteredOrders.map((ord) => {
+                const { date, time } = formatDate(ord.createdAt);
+                const firstItem = ord.items[0];
+                const extraItemsCount = ord.items.length - 1;
+                const isProcessing = processingId === ord._id;
+
                 return (
-                  <tr key={ord.id} className={`hover:bg-cream/20 transition-colors ${isSelected ? "bg-cream/40" : ""}`}>
-                    <td className="py-4 px-2">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => handleToggleSelectOrder(ord.id)}
-                        className="w-4 h-4 rounded border-navy/20 text-[#091E33] focus:ring-[#091E33] cursor-pointer"
-                      />
-                    </td>
-
-                    <td className="py-4 px-2 font-bold text-navy whitespace-nowrap">{ord.id}</td>
-
-                    <td className="py-4 px-2">
-                      <h4 className="font-bold text-navy text-[13.5px] leading-tight">{ord.customerName}</h4>
-                      <p className="text-[11px] text-ink/50">{ord.customerPhone}</p>
-                    </td>
-
+                  <tr key={ord._id} className="hover:bg-cream/20 transition-colors">
+                    {/* Order ID & Time */}
                     <td className="py-4 px-2 whitespace-nowrap">
-                      <p className="font-bold text-navy text-[13px]">{ord.date}</p>
-                      <p className="text-[11px] text-ink/50">{ord.time}</p>
-                    </td>
-
-                    <td className="py-4 px-2">
-                      <div className="flex items-center gap-3 min-w-[200px]">
-                        <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] border border-black/5 p-1 flex items-center justify-center shrink-0">
-                          <Image src={ord.item.image} alt={ord.item.name} width={32} height={32} className="object-contain max-h-8" unoptimized />
-                        </div>
-                        <div>
-                          <h5 className="font-bold text-navy text-[13px] leading-tight">{ord.item.name}</h5>
-                          <p className="text-[11px] text-ink/50">{ord.item.size}</p>
-                        </div>
-                        <span className="text-[12px] font-bold text-ink/60 ml-auto">x {ord.item.qty}</span>
+                      <p className="font-black text-navy text-[14px]">{ord.orderNumber}</p>
+                      <p className="text-[11px] text-ink/50 mt-0.5">{date}</p>
+                      <div className="flex items-center gap-1 text-[11px] font-bold text-[#B45309] mt-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{time}</span>
                       </div>
                     </td>
 
-                    <td className="py-4 px-2 font-black text-[#091E33] text-[14px]">₹{ord.amount}</td>
+                    {/* Customer */}
+                    <td className="py-4 px-2">
+                      <h4 className="font-bold text-navy text-[13.5px] leading-tight">{ord.customerName}</h4>
+                      <p className="text-[11px] text-ink/60 mt-0.5">{ord.customerPhone}</p>
+                      <p className="text-[11px] text-ink/60">{ord.shippingAddress?.city}, {ord.shippingAddress?.state}</p>
+                    </td>
 
-                    <td className="py-4 px-2 whitespace-nowrap">
-                      <span className="inline-block bg-[#EBF5E8] text-[#365615] text-[11px] font-bold px-2.5 py-0.5 rounded-full mb-0.5">
+                    {/* Items */}
+                    <td className="py-4 px-2">
+                      {firstItem && (
+                        <div className="flex items-center gap-3 min-w-[200px]">
+                          <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] border border-black/5 p-1 flex items-center justify-center shrink-0">
+                            <Image src={firstItem.image || "/can2.png"} alt={firstItem.name} width={32} height={32} className="object-contain max-h-8" unoptimized />
+                          </div>
+                          <div>
+                            <h5 className="font-bold text-navy text-[13px] leading-tight">{firstItem.name}</h5>
+                            <p className="text-[11px] text-ink/50">x{firstItem.quantity}</p>
+                          </div>
+                          {extraItemsCount > 0 && (
+                            <span className="text-[11px] font-bold text-ink/40 ml-2 bg-black/5 px-2 py-0.5 rounded-full">
+                              +{extraItemsCount}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Payment Status */}
+                    <td className="py-4 px-2 text-center whitespace-nowrap">
+                      <span className={`inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full mb-0.5 ${
+                          ord.paymentStatus === 'PAID' ? 'bg-[#EBF5E8] text-[#365615]' : 'bg-[#FEF3C7] text-[#B45309]'
+                      }`}>
                         {ord.paymentStatus}
                       </span>
-                      <p className="text-[11px] text-ink/50">{ord.paymentGateway}</p>
+                      <p className="font-black text-navy text-[13px]">₹{ord.pricing.total}</p>
                     </td>
 
-                    <td className="py-4 px-2 max-w-[220px]">
-                      <p className="text-[12px] text-navy/80 font-medium leading-snug line-clamp-2">
-                        {ord.shippingAddress}
-                      </p>
-                    </td>
-
+                    {/* Actions */}
                     <td className="py-4 px-2 text-right whitespace-nowrap">
-                      <div className="inline-flex items-center gap-2">
+                      <div className="flex flex-col items-end gap-2">
+                        <button
+                          onClick={() => handlePushToShiprocket(ord)}
+                          disabled={isProcessing || ord.paymentStatus !== 'PAID'}
+                          className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-bold transition-all shadow-sm w-44
+                            ${isProcessing || ord.paymentStatus !== 'PAID'
+                              ? "bg-gray-200 text-gray-500 cursor-not-allowed" 
+                              : "bg-[#091E33] hover:bg-[#071728] text-white cursor-pointer"
+                            }`}
+                        >
+                          {isProcessing ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <span>Push to Shiprocket</span>
+                              <Send className="w-3.5 h-3.5" />
+                            </>
+                          )}
+                        </button>
+                        
                         <button
                           onClick={() => setSelectedOrderModal(ord)}
-                          className="border border-navy/20 hover:border-navy text-navy font-bold text-[12px] px-3 py-1.5 rounded-xl transition-all cursor-pointer hover:bg-cream flex items-center gap-1"
+                          className="inline-flex items-center gap-1.5 text-navy/70 hover:text-navy text-[11px] font-bold px-2 cursor-pointer transition-colors"
                         >
-                          <span>View</span>
-                          <Eye className="w-3.5 h-3.5 text-navy/70" />
-                        </button>
-
-                        <button
-                          onClick={() => handlePushShiprocket(ord.id)}
-                          disabled={ord.pushedToShiprocket}
-                          className={`font-bold text-[12px] px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 shadow-sm ${
-                            ord.pushedToShiprocket
-                              ? "bg-[#6A9A4A] text-white"
-                              : "bg-[#091E33] hover:bg-[#071728] text-white"
-                          }`}
-                        >
-                          <span>{ord.pushedToShiprocket ? "Pushed ✓" : "Push"}</span>
-                          {!ord.pushedToShiprocket && <Send className="w-3 h-3" />}
-                        </button>
-
-                        <button className="p-1.5 text-ink/40 hover:text-navy transition-colors cursor-pointer">
-                          <MoreVertical className="w-4 h-4" />
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>View Details</span>
                         </button>
                       </div>
                     </td>
@@ -325,64 +287,19 @@ export default function PendingOrdersPage() {
             </tbody>
           </table>
         </div>
-
-        {/* Table Footer */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 mt-4 border-t border-navy/10 text-[13px]">
-          <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 font-medium text-navy cursor-pointer">
-              <input
-                type="checkbox"
-                onChange={handleSelectAll}
-                checked={selectedOrderIds.length > 0 && selectedOrderIds.length === filteredOrders.length}
-                className="w-4 h-4 rounded border-navy/20 text-[#091E33]"
-              />
-              <span>Select All ({filteredOrders.length} orders)</span>
-            </label>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-ink/60 text-[12px]">
-              <span>Rows per page</span>
-              <select className="bg-[#FAF7F2] border border-navy/15 rounded-lg px-2 py-1 text-navy font-bold focus:outline-none">
-                <option>10</option>
-                <option>20</option>
-                <option>50</option>
-              </select>
-            </div>
-
-            <p className="text-ink/60 font-medium">
-              Showing <span className="font-bold text-navy">1 to {filteredOrders.length}</span> of 18
-            </p>
-
-            <div className="flex items-center gap-1">
-              <button className="w-8 h-8 rounded-full border border-navy/15 flex items-center justify-center text-navy/60 hover:bg-cream cursor-pointer">
-                &lt;
-              </button>
-              <button className="w-8 h-8 rounded-full bg-[#091E33] text-white font-bold flex items-center justify-center">
-                1
-              </button>
-              <button className="w-8 h-8 rounded-full hover:bg-cream text-navy font-medium flex items-center justify-center cursor-pointer">
-                2
-              </button>
-              <button className="w-8 h-8 rounded-full border border-navy/15 flex items-center justify-center text-navy/60 hover:bg-cream cursor-pointer">
-                &gt;
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Modal */}
+      {/* Order Details Modal (Same as All Orders for consistency) */}
       {selectedOrderModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border border-navy/10 relative">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto pt-20">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-8 shadow-2xl border border-navy/10 relative my-auto">
             <div className="flex items-center justify-between pb-4 border-b border-navy/10 mb-4">
               <div>
                 <h3 className="font-fraunces font-bold text-[22px] text-navy">
-                  Order {selectedOrderModal.id}
+                  Order {selectedOrderModal.orderNumber}
                 </h3>
                 <p className="text-[12px] text-ink/50">
-                  Placed on {selectedOrderModal.date} at {selectedOrderModal.time}
+                  Placed on {formatDate(selectedOrderModal.createdAt).date} at {formatDate(selectedOrderModal.createdAt).time}
                 </p>
               </div>
               <button
@@ -393,31 +310,43 @@ export default function PendingOrdersPage() {
               </button>
             </div>
 
-            <div className="space-y-4 text-[13px] mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[13px] mb-6">
               <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-black/5">
                 <h4 className="font-bold text-navy mb-1 uppercase tracking-wider text-[11px]">Customer Details</h4>
                 <p className="font-bold text-[14px] text-navy">{selectedOrderModal.customerName}</p>
+                <p className="text-ink/60">{selectedOrderModal.customerEmail}</p>
                 <p className="text-ink/60">{selectedOrderModal.customerPhone}</p>
               </div>
 
               <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-black/5">
                 <h4 className="font-bold text-navy mb-1 uppercase tracking-wider text-[11px]">Shipping Address</h4>
-                <p className="text-navy font-medium">{selectedOrderModal.shippingAddress}</p>
+                <p className="text-navy font-medium">{selectedOrderModal.shippingAddress?.street}</p>
+                <p className="text-navy font-medium">{selectedOrderModal.shippingAddress?.city}, {selectedOrderModal.shippingAddress?.state} {selectedOrderModal.shippingAddress?.pincode}</p>
               </div>
+            </div>
 
-              <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-black/5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Image src={selectedOrderModal.item.image} alt={selectedOrderModal.item.name} width={40} height={40} className="object-contain max-h-10" unoptimized />
-                  <div>
-                    <h4 className="font-bold text-navy">{selectedOrderModal.item.name}</h4>
-                    <p className="text-[11px] text-ink/50">{selectedOrderModal.item.size}</p>
+            <h4 className="font-bold text-navy mb-3 uppercase tracking-wider text-[11px]">Order Items</h4>
+            <div className="space-y-3 mb-6">
+              {selectedOrderModal.items.map((item, idx) => (
+                <div key={idx} className="bg-[#FAF7F2] p-4 rounded-2xl border border-black/5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Image src={item.image || "/can2.png"} alt={item.name} width={40} height={40} className="object-contain max-h-10" unoptimized />
+                    <div>
+                      <h4 className="font-bold text-navy">{item.name}</h4>
+                      <p className="text-[11px] text-ink/50">SKU: {item.sku}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-navy text-[12px] block mb-0.5">Qty: {item.quantity}</span>
+                    <p className="font-fraunces font-black text-navy text-[16px]">₹{item.price * item.quantity}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className="font-bold text-navy">Qty: {selectedOrderModal.item.qty}</span>
-                  <p className="font-fraunces font-black text-navy text-[16px]">₹{selectedOrderModal.amount}</p>
-                </div>
-              </div>
+              ))}
+            </div>
+
+            <div className="border-t border-navy/10 pt-4 flex justify-between items-center mb-6">
+              <span className="font-bold text-navy">Total Amount</span>
+              <span className="font-fraunces font-black text-navy text-[20px]">₹{selectedOrderModal.pricing?.total}</span>
             </div>
 
             <button

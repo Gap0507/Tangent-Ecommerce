@@ -7,13 +7,11 @@ import { X, Plus, Minus, Truck, ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { motion, AnimatePresence } from "motion/react";
 
-const FREE_SHIPPING_THRESHOLD = 40.0;
 
 export function CartDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { items, removeFromCart, updateQuantity, totalItems, subtotal } = useCart();
 
-  const amountNeededForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const shippingProgressPercentage = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
+
 
   return (
     <AnimatePresence>
@@ -75,7 +73,6 @@ export function CartDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                         width={48}
                         height={48}
                         className="object-contain max-h-14"
-                        unoptimized
                       />
                     </div>
 
@@ -118,7 +115,7 @@ export function CartDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                     {/* Price */}
                     <div className="text-right shrink-0">
                       <span className="font-bold text-[15px] text-navy">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ₹{(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -130,7 +127,7 @@ export function CartDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-bold text-[14px] text-navy">Subtotal</span>
                   <span className="font-black font-fraunces text-[20px] text-navy">
-                    ${subtotal.toFixed(2)}
+                    ₹{subtotal.toFixed(2)}
                   </span>
                 </div>
                 <p className="text-[10px] text-ink/40">(Inclusive of all taxes)</p>
@@ -138,33 +135,12 @@ export function CartDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: ()
 
               {/* Checkout CTA */}
               <Link
-                href="/cart"
+                href="/checkout"
                 onClick={onClose}
-                className="block text-center w-full bg-[#0A2540] hover:bg-[#071a2d] text-white font-bold text-[14px] py-3.5 rounded-2xl transition-all shadow-md hover:shadow-lg cursor-pointer mb-3"
+                className="block text-center w-full bg-[#0A2540] hover:bg-[#071a2d] text-white font-bold text-[14px] py-3.5 rounded-2xl transition-all shadow-md hover:shadow-lg cursor-pointer"
               >
                 Proceed to Checkout
               </Link>
-
-
-              {/* Free Shipping Progress */}
-              <div className="bg-[#EDF5E6] border border-[#D6EA85]/60 rounded-2xl p-3">
-                <div className="flex items-center gap-2 text-[11px] font-bold text-[#4B7322] mb-1.5">
-                  <Truck className="w-4 h-4 shrink-0" />
-                  {amountNeededForFreeShipping > 0 ? (
-                    <span>
-                      You are <span className="font-extrabold text-[#365615]">${amountNeededForFreeShipping.toFixed(2)}</span> away from free shipping!
-                    </span>
-                  ) : (
-                    <span className="font-extrabold text-[#365615]">🎉 You unlocked Free Shipping!</span>
-                  )}
-                </div>
-                <div className="w-full h-1.5 bg-white/70 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#6A9A4A] rounded-full transition-all duration-300"
-                    style={{ width: `${shippingProgressPercentage}%` }}
-                  />
-                </div>
-              </div>
             </>
           )}
         </motion.div>

@@ -6,14 +6,14 @@ import Link from "next/link";
 import { ChevronRight, ArrowLeft, Trash2, Plus, Minus, Lock, RotateCcw, Leaf, Tag, ShoppingBag, Truck, Check } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
-const FREE_SHIPPING_THRESHOLD = 40.0;
+const FREE_SHIPPING_THRESHOLD = 1999.0;
 
 const RECOMMENDATIONS = [
   {
     id: "watermelon-cranberry",
     name: "Watermelon Cranberry",
     size: "Pack of 4",
-    price: 16.0,
+    price: 320.0,
     image: "/can1.png",
     canImg: "/can1.png",
   },
@@ -21,7 +21,7 @@ const RECOMMENDATIONS = [
     id: "yuzu-mint",
     name: "Yuzu Mint",
     size: "Pack of 4",
-    price: 16.0,
+    price: 480.0,
     image: "/can4.png",
     canImg: "/can4.png",
   },
@@ -29,7 +29,7 @@ const RECOMMENDATIONS = [
     id: "guava-chilli",
     name: "Guava Chilli",
     size: "Pack of 4",
-    price: 16.0,
+    price: 400.0,
     image: "/can3.png",
     canImg: "/can3.png",
   },
@@ -37,7 +37,7 @@ const RECOMMENDATIONS = [
     id: "watermelon-mint",
     name: "Watermelon Mint",
     size: "Pack of 4",
-    price: 16.0,
+    price: 520.0,
     image: "/can2.png",
     canImg: "/can2.png",
   },
@@ -51,12 +51,7 @@ export default function CartPage() {
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [addedRecId, setAddedRecId] = useState<string | null>(null);
 
-  const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD || items.length === 0;
-  const shippingFee = isFreeShipping ? 0 : 3.49;
-  const amountNeededForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const shippingProgressPercentage = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
-
-  const grandTotal = Math.max(0, subtotal - discount + (items.length > 0 ? shippingFee : 0));
+  const grandTotal = Math.max(0, subtotal - discount);
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +59,7 @@ export default function CartPage() {
       setDiscount(subtotal * 0.1);
       setCouponApplied(true);
     } else if (couponCode.trim().length > 0) {
-      setDiscount(5.0);
+      setDiscount(100.0);
       setCouponApplied(true);
     }
   };
@@ -182,7 +177,7 @@ export default function CartPage() {
                       <div className="md:col-span-2 text-left md:text-center w-full md:w-auto flex md:block justify-between items-center">
                         <span className="text-[12px] text-ink/50 md:hidden">Price:</span>
                         <span className="font-bold text-[15px] text-navy">
-                          ${item.price.toFixed(2)}
+                          ₹{item.price.toFixed(2)}
                         </span>
                       </div>
 
@@ -218,7 +213,7 @@ export default function CartPage() {
                       <div className="md:col-span-2 text-right w-full md:w-auto flex md:block justify-between items-center border-t md:border-0 pt-2 md:pt-0">
                         <span className="text-[12px] text-ink/50 md:hidden">Total:</span>
                         <span className="font-fraunces font-black text-[20px] text-navy">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          ₹{(item.price * item.quantity).toFixed(2)}
                         </span>
                       </div>
                     </div>
@@ -227,29 +222,6 @@ export default function CartPage() {
 
               </div>
             )}
-
-            {/* Free Shipping Banner */}
-            <div className="bg-[#EDF5E6] border border-[#D6EA85]/60 rounded-3xl p-5 shadow-sm">
-              <div className="flex items-center gap-3 text-[13px] font-bold text-[#365615] mb-2">
-                <div className="w-8 h-8 rounded-full bg-[#6A9A4A]/20 flex items-center justify-center shrink-0 text-[#4B7322]">
-                  <Truck className="w-4 h-4" />
-                </div>
-                {amountNeededForFreeShipping > 0 ? (
-                  <span>
-                    You are <span className="font-black text-[#26420B]">${amountNeededForFreeShipping.toFixed(2)}</span> away from free shipping!
-                  </span>
-                ) : (
-                  <span className="font-extrabold text-[#26420B]">🎉 Congratulations! You unlocked Free Shipping!</span>
-                )}
-              </div>
-              <div className="w-full h-2 bg-white/80 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-[#6A9A4A] rounded-full transition-all duration-300"
-                  style={{ width: `${shippingProgressPercentage}%` }}
-                />
-              </div>
-            </div>
-
           </div>
 
           {/* Right Column: Order Summary */}
@@ -264,20 +236,20 @@ export default function CartPage() {
               <div className="space-y-3.5 text-[14px] mb-6">
                 <div className="flex justify-between items-center">
                   <span className="text-ink/70">Subtotal ({totalItems} items)</span>
-                  <span className="font-bold text-navy">${subtotal.toFixed(2)}</span>
+                  <span className="font-bold text-navy">₹{subtotal.toFixed(2)}</span>
                 </div>
 
                 <div className="flex justify-between items-center">
                   <span className="text-ink/70">Shipping</span>
-                  <span className={`font-bold ${isFreeShipping ? "text-[#6A9A4A]" : "text-navy"}`}>
-                    {isFreeShipping ? "FREE" : `$${shippingFee.toFixed(2)}`}
+                  <span className="font-medium text-ink/60 text-[13px]">
+                    Calculated at checkout
                   </span>
                 </div>
 
                 {discount > 0 && (
                   <div className="flex justify-between items-center text-[#6A9A4A]">
                     <span>Discount</span>
-                    <span className="font-bold">-${discount.toFixed(2)}</span>
+                    <span className="font-bold">-₹{discount.toFixed(2)}</span>
                   </div>
                 )}
 
@@ -294,19 +266,21 @@ export default function CartPage() {
                 </div>
                 <div className="text-right">
                   <span className="font-fraunces font-black text-navy text-[28px]">
-                    ${grandTotal.toFixed(2)}
+                    ₹{grandTotal.toFixed(2)}
                   </span>
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="space-y-3 mb-6">
-                <button
-                  disabled={items.length === 0}
-                  className="w-full bg-[#0A2540] hover:bg-[#071a2d] text-white font-bold text-[15px] py-4 rounded-2xl transition-all shadow-md hover:shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                <Link
+                  href="/checkout"
+                  className={`block text-center w-full bg-[#0A2540] hover:bg-[#071a2d] text-white font-bold text-[15px] py-4 rounded-2xl transition-all shadow-md hover:shadow-lg cursor-pointer ${
+                    items.length === 0 ? "pointer-events-none opacity-50" : ""
+                  }`}
                 >
                   Proceed to Checkout
-                </button>
+                </Link>
 
                 {showCouponInput ? (
                   <form onSubmit={handleApplyCoupon} className="flex gap-2">
@@ -403,7 +377,7 @@ export default function CartPage() {
                         </h3>
                       </Link>
                       <span className="font-fraunces font-black text-navy text-[18px]">
-                        ${rec.price.toFixed(2)}
+                        ₹{rec.price.toFixed(2)}
                       </span>
                     </div>
 

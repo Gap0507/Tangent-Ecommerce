@@ -1,310 +1,170 @@
 "use client";
 
-import React, { useState } from "react";
-import { Search, Filter, Download, Users, ShoppingBag, IndianRupee, Star, MoreVertical } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Users, Search, Download, TrendingUp, Filter, Loader2 } from "lucide-react";
 
 interface Customer {
-  id: string;
-  initials: string;
-  avatarBg: string;
-  avatarText: string;
+  _id: string;
   name: string;
-  phone: string;
   email: string;
-  orders: number;
+  phone: string;
+  totalOrders: number;
   totalSpend: number;
-  lastOrder: string;
+  createdAt: string;
 }
 
-const CUSTOMERS_DATA: Customer[] = [
-  {
-    id: "cust-1",
-    initials: "RV",
-    avatarBg: "bg-[#FFF4E5]",
-    avatarText: "text-[#E68A00]",
-    name: "Rohit Verma",
-    phone: "+91 98765 43210",
-    email: "rohit.verma@email.com",
-    orders: 8,
-    totalSpend: 4250,
-    lastOrder: "May 20, 2024",
-  },
-  {
-    id: "cust-2",
-    initials: "AS",
-    avatarBg: "bg-[#FCE8F0]",
-    avatarText: "text-[#D81B60]",
-    name: "Ananya Sharma",
-    phone: "+91 91234 56789",
-    email: "ananya.sharma@email.com",
-    orders: 6,
-    totalSpend: 3280,
-    lastOrder: "May 20, 2024",
-  },
-  {
-    id: "cust-3",
-    initials: "PM",
-    avatarBg: "bg-[#EBF5E8]",
-    avatarText: "text-[#4CAF50]",
-    name: "Priya Mehta",
-    phone: "+91 99887 66554",
-    email: "priya.mehta@email.com",
-    orders: 5,
-    totalSpend: 2980,
-    lastOrder: "May 19, 2024",
-  },
-  {
-    id: "cust-4",
-    initials: "KS",
-    avatarBg: "bg-[#F3E8FF]",
-    avatarText: "text-[#7E22CE]",
-    name: "Karan Singh",
-    phone: "+91 88776 55433",
-    email: "karan.singh@email.com",
-    orders: 4,
-    totalSpend: 2450,
-    lastOrder: "May 19, 2024",
-  },
-  {
-    id: "cust-5",
-    initials: "SP",
-    avatarBg: "bg-[#E0F7FA]",
-    avatarText: "text-[#00ACC1]",
-    name: "Sneha Patel",
-    phone: "+91 77665 44321",
-    email: "sneha.patel@email.com",
-    orders: 3,
-    totalSpend: 1890,
-    lastOrder: "May 18, 2024",
-  },
-  {
-    id: "cust-6",
-    initials: "VJ",
-    avatarBg: "bg-[#FFF3E0]",
-    avatarText: "text-[#FB8C00]",
-    name: "Vikram Joshi",
-    phone: "+91 88990 11223",
-    email: "vikram.joshi@email.com",
-    orders: 3,
-    totalSpend: 1790,
-    lastOrder: "May 18, 2024",
-  },
-  {
-    id: "cust-7",
-    initials: "MI",
-    avatarBg: "bg-[#E3F2FD]",
-    avatarText: "text-[#1E88E5]",
-    name: "Meera Iyer",
-    phone: "+91 77889 99112",
-    email: "meera.iyer@email.com",
-    orders: 2,
-    totalSpend: 1298,
-    lastOrder: "May 17, 2024",
-  },
-];
-
 export default function CustomersPage() {
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredCustomers = CUSTOMERS_DATA.filter(
-    (cust) =>
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      const res = await fetch('/api/customers');
+      const data = await res.json();
+      if (data.success) {
+        setCustomers(data.data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch customers", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredCustomers = customers.filter((cust) => {
+    return (
       cust.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       cust.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       cust.phone.includes(searchQuery)
-  );
+    );
+  });
+
+  const totalCustomers = customers.length;
+  const activeCustomers = customers.filter((c) => c.totalOrders > 0).length;
+  const averageSpend = customers.length > 0 
+    ? Math.round(customers.reduce((acc, c) => acc + c.totalSpend, 0) / customers.length)
+    : 0;
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  };
+
+  if (loading) {
+    return <div className="p-8 text-center text-navy font-bold animate-pulse">Loading customers...</div>;
+  }
 
   return (
     <div className="space-y-6">
       
-      {/* Top Action Bar (Search & Export) inside header area according to design, 
-          but our layout handles the main header title. We put search below it. */}
-      <div className="flex flex-col sm:flex-row justify-end items-center gap-3 w-full">
-        <div className="relative w-full sm:w-80">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-[#091E33] rounded-3xl p-6 text-white shadow-md relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10" />
+          <p className="text-[12px] font-bold text-white/70 mb-1">TOTAL CUSTOMERS</p>
+          <h3 className="text-4xl font-black mb-2">{totalCustomers}</h3>
+          <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#34D399]">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>+12% this month</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex flex-col justify-center">
+          <p className="text-[12px] font-bold text-ink/50 mb-1">ACTIVE CUSTOMERS</p>
+          <h3 className="text-3xl font-black text-navy mb-2">{activeCustomers}</h3>
+          <p className="text-[11px] text-ink/50 font-medium">Placed at least 1 order</p>
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex flex-col justify-center">
+          <p className="text-[12px] font-bold text-ink/50 mb-1">AVERAGE SPEND</p>
+          <h3 className="text-3xl font-black text-navy mb-2">₹{averageSpend}</h3>
+          <p className="text-[11px] text-ink/50 font-medium">Per customer lifetime</p>
+        </div>
+      </div>
+
+      {/* Action Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-navy/10 shadow-sm">
+        <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-ink/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name, email or phone..."
-            className="w-full bg-white border border-navy/15 rounded-full py-2.5 pl-9 pr-4 text-[13px] text-navy placeholder:text-ink/40 focus:outline-none focus:border-navy shadow-sm"
+            placeholder="Search by name, email, or phone..."
+            className="w-full bg-[#FAF7F2] border border-navy/15 rounded-full py-2 pl-9 pr-4 text-[13px] text-navy placeholder:text-ink/40 focus:outline-none focus:border-navy"
           />
         </div>
 
-        <button className="flex items-center gap-1.5 bg-white border border-navy/20 hover:border-navy text-navy font-bold text-[13px] px-4 py-2.5 rounded-full transition-all cursor-pointer shadow-sm whitespace-nowrap">
-          <Filter className="w-4 h-4 text-navy/70" />
-          <span>Filters</span>
-        </button>
-
-        <button className="flex items-center gap-1.5 bg-white border border-navy/20 hover:border-navy text-navy font-bold text-[13px] px-4 py-2.5 rounded-full transition-all cursor-pointer shadow-sm whitespace-nowrap">
-          <span>Export</span>
-          <Download className="w-4 h-4 text-navy/70" />
-        </button>
+        <div className="flex items-center gap-3 shrink-0">
+          <button className="flex items-center gap-1.5 bg-white border border-navy/20 hover:border-navy text-navy font-bold text-[12.5px] px-4 py-2 rounded-full transition-all cursor-pointer shadow-sm">
+            <Filter className="w-3.5 h-3.5 text-navy/70" />
+            <span>Filters</span>
+          </button>
+          <button className="flex items-center gap-1.5 bg-[#091E33] hover:bg-[#071728] text-white font-bold text-[12.5px] px-4 py-2 rounded-full transition-all cursor-pointer shadow-sm">
+            <span>Export CSV</span>
+            <Download className="w-3.5 h-3.5 text-white/80" />
+          </button>
+        </div>
       </div>
 
-      {/* Top 4 KPI Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        
-        {/* Card 1: Total Customers */}
-        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex items-center justify-between">
-          <div className="w-13 h-13 rounded-2xl bg-[#F3E8FF] flex items-center justify-center text-[#7E22CE] shrink-0">
-            <Users className="w-6 h-6" />
-          </div>
-          <div className="text-right">
-            <p className="text-[12.5px] font-bold text-ink/60 mb-1">Total Customers</p>
-            <h3 className="font-fraunces font-black text-[28px] text-navy leading-none mb-1">328</h3>
-            <p className="text-[11.5px] text-ink/50 font-medium">All time</p>
-          </div>
-        </div>
-
-        {/* Card 2: New This Month */}
-        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex items-center justify-between">
-          <div className="w-13 h-13 rounded-2xl bg-[#EDF5E6] flex items-center justify-center text-[#4B7322] shrink-0">
-            <ShoppingBag className="w-6 h-6" />
-          </div>
-          <div className="text-right">
-            <p className="text-[12.5px] font-bold text-ink/60 mb-1">New This Month</p>
-            <h3 className="font-fraunces font-black text-[28px] text-navy leading-none mb-1">28</h3>
-            <p className="text-[11.5px] text-ink/50 font-medium">May 1 - May 20</p>
-          </div>
-        </div>
-
-        {/* Card 3: Total Revenue */}
-        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex items-center justify-between">
-          <div className="w-13 h-13 rounded-2xl bg-[#FEF3C7] flex items-center justify-center text-[#D97706] shrink-0">
-            <IndianRupee className="w-6 h-6" />
-          </div>
-          <div className="text-right">
-            <p className="text-[12.5px] font-bold text-ink/60 mb-1">Total Revenue from Customers</p>
-            <h3 className="font-fraunces font-black text-[28px] text-navy leading-none mb-1">₹2,45,680</h3>
-            <p className="text-[11.5px] text-ink/50 font-medium">All time</p>
-          </div>
-        </div>
-
-        {/* Card 4: Repeat Customers */}
-        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex items-center justify-between">
-          <div className="w-13 h-13 rounded-2xl bg-[#E8F2FD] flex items-center justify-center text-[#1E73BE] shrink-0">
-            <Star className="w-6 h-6" />
-          </div>
-          <div className="text-right">
-            <p className="text-[12.5px] font-bold text-ink/60 mb-1">Repeat Customers</p>
-            <h3 className="font-fraunces font-black text-[28px] text-navy leading-none mb-1">84</h3>
-            <p className="text-[11.5px] text-ink/50 font-medium">25.6% of total</p>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Customers Table Container */}
+      {/* Customers Table */}
       <div className="bg-white rounded-3xl border border-navy/10 shadow-sm overflow-hidden p-6">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-[13px]">
             <thead>
               <tr className="text-[11px] font-bold uppercase tracking-wider text-ink/40 border-b border-navy/10 pb-4">
                 <th className="pb-3 px-2">CUSTOMER</th>
-                <th className="pb-3 px-2">EMAIL / PHONE</th>
-                <th className="pb-3 px-2 text-center">ORDERS</th>
+                <th className="pb-3 px-2">CONTACT INFO</th>
+                <th className="pb-3 px-2 text-center">TOTAL ORDERS</th>
                 <th className="pb-3 px-2 text-right">TOTAL SPEND</th>
-                <th className="pb-3 px-2">LAST ORDER</th>
-                <th className="pb-3 px-2 text-right">ACTION</th>
+                <th className="pb-3 px-2 text-right">JOINED DATE</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-navy/5">
-              {filteredCustomers.map((cust) => (
-                <tr key={cust.id} className="hover:bg-cream/20 transition-colors">
-                  
-                  {/* Customer Info (Avatar, Name, Phone) */}
+              {filteredCustomers.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-8 text-ink/50">No customers found.</td>
+                </tr>
+              ) : filteredCustomers.map((cust) => (
+                <tr key={cust._id} className="hover:bg-cream/20 transition-colors">
                   <td className="py-4 px-2">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-[14px] shrink-0 ${cust.avatarBg} ${cust.avatarText}`}>
-                        {cust.initials}
+                      <div className="w-10 h-10 rounded-full bg-navy/5 flex items-center justify-center text-navy font-black text-[14px]">
+                        {cust.name.charAt(0)}
                       </div>
-                      <div>
-                        <h4 className="font-bold text-navy text-[13.5px] leading-tight">{cust.name}</h4>
-                        <p className="text-[11.5px] text-ink/50 leading-tight mt-0.5">{cust.phone}</p>
-                      </div>
+                      <h4 className="font-bold text-navy text-[14px]">{cust.name}</h4>
                     </div>
                   </td>
-
-                  {/* Email */}
-                  <td className="py-4 px-2 font-medium text-navy/70 text-[13px]">
-                    {cust.email}
+                  
+                  <td className="py-4 px-2">
+                    <p className="text-navy font-medium text-[13px]">{cust.email}</p>
+                    <p className="text-ink/50 text-[11px] mt-0.5">{cust.phone}</p>
                   </td>
 
-                  {/* Orders */}
-                  <td className="py-4 px-2 font-bold text-navy text-[14px] text-center">
-                    {cust.orders}
+                  <td className="py-4 px-2 text-center">
+                    <span className="inline-block bg-[#FAF7F2] border border-black/5 rounded-lg px-3 py-1 font-bold text-navy text-[14px]">
+                      {cust.totalOrders}
+                    </span>
                   </td>
 
-                  {/* Total Spend */}
-                  <td className="py-4 px-2 font-bold text-navy text-[14px] text-right whitespace-nowrap">
-                    ₹{cust.totalSpend.toLocaleString("en-IN")}
+                  <td className="py-4 px-2 text-right font-black text-[#091E33] text-[15px]">
+                    ₹{cust.totalSpend}
                   </td>
 
-                  {/* Last Order Date */}
-                  <td className="py-4 px-2 font-medium text-navy/80 text-[13px] whitespace-nowrap">
-                    {cust.lastOrder}
+                  <td className="py-4 px-2 text-right text-ink/60 font-medium">
+                    {formatDate(cust.createdAt)}
                   </td>
-
-                  {/* Action Buttons */}
-                  <td className="py-4 px-2 text-right whitespace-nowrap">
-                    <div className="inline-flex items-center justify-end gap-2 w-full">
-                      <button className="border border-navy/20 hover:border-navy text-navy font-bold text-[12px] px-3.5 py-1.5 rounded-full transition-all cursor-pointer hover:bg-cream whitespace-nowrap">
-                        View Details
-                      </button>
-                      <button className="p-1.5 text-ink/40 hover:text-navy transition-colors cursor-pointer shrink-0">
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-
-        {/* Table Footer / Pagination */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 mt-4 border-t border-navy/10 text-[13px]">
-          <p className="text-ink/60 font-medium">
-            Showing <span className="font-bold text-navy">1 to {filteredCustomers.length}</span> of 328 customers
-          </p>
-
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-ink/60 text-[12px]">
-              <span>Rows per page</span>
-              <select className="bg-[#FAF7F2] border border-navy/15 rounded-lg px-2 py-1 text-navy font-bold focus:outline-none cursor-pointer">
-                <option>10</option>
-                <option>20</option>
-                <option>50</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <button className="w-8 h-8 rounded-full border border-navy/15 flex items-center justify-center text-navy/60 hover:bg-cream cursor-pointer">
-                &lt;
-              </button>
-              <button className="w-8 h-8 rounded-full bg-[#091E33] text-white font-bold flex items-center justify-center">
-                1
-              </button>
-              <button className="w-8 h-8 rounded-full hover:bg-cream text-navy font-medium flex items-center justify-center cursor-pointer">
-                2
-              </button>
-              <button className="w-8 h-8 rounded-full hover:bg-cream text-navy font-medium flex items-center justify-center cursor-pointer">
-                3
-              </button>
-              <span className="px-1 text-ink/40">...</span>
-              <button className="w-8 h-8 rounded-full hover:bg-cream text-navy font-medium flex items-center justify-center cursor-pointer">
-                33
-              </button>
-              <button className="w-8 h-8 rounded-full border border-navy/15 flex items-center justify-center text-navy/60 hover:bg-cream cursor-pointer">
-                &gt;
-              </button>
-            </div>
-          </div>
-        </div>
-
       </div>
-
     </div>
   );
 }

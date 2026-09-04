@@ -25,7 +25,7 @@ export function Navbar() {
   return (
     <>
       <div className="bg-navy text-cream text-center text-[13px] tracking-[.02em] py-[9px] px-4 font-medium">
-        $3.49 flat rate shipping <span className="opacity-55 mx-2">•</span> Orders $40+ ship FREE
+        ₹49 flat rate shipping <span className="opacity-55 mx-2">•</span> Orders ₹1999+ ship FREE
       </div>
 
       <nav className="bg-cream grid grid-cols-3 items-center py-[18px] px-6 md:px-10 sticky top-0 z-50 border-b border-navy/10">

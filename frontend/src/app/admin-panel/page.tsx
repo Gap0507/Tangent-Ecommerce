@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -9,40 +9,100 @@ import {
   ArrowRight,
   IndianRupee,
   ExternalLink,
+  Loader2,
 } from "lucide-react";
 
-const INITIAL_INVENTORY = [
+interface Order {
+  _id: string;
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  createdAt: string;
+  pricing: {
+    total: number;
+  };
+  paymentStatus: string;
+  orderStatus: string;
+  shipmentStatus: string;
+}
+
+interface Customer {
+  _id: string;
+  name: string;
+  email: string;
+  totalOrders: number;
+  totalSpend: number;
+}
+
+interface InventoryItem {
+  id: string;
+  name: string;
+  size: string;
+  stock: number;
+  active: boolean;
+  image: string;
+}
+
+const DEFAULT_INVENTORY: InventoryItem[] = [
   { id: "watermelon-mint", name: "Watermelon Mint", size: "250ml", stock: 150, active: true, image: "/can2.png" },
   { id: "yuzu-mint", name: "Yuzu Mint", size: "250ml", stock: 120, active: true, image: "/can4.png" },
   { id: "guava-chilli", name: "Guava Chilli", size: "250ml", stock: 80, active: true, image: "/can3.png" },
-  { id: "watermelon-cranberry", name: "Watermelon Cranberry", size: "250ml", stock: 60, active: false, image: "/can1.png" },
-];
-
-const RECENT_ORDERS = [
-  { id: "#TNG1234", customer: "Rohit Verma", date: "May 20, 2024", amount: 598, status: "Pending" },
-  { id: "#TNG1233", customer: "Ananya Sharma", date: "May 20, 2024", amount: 447, status: "Pending" },
-  { id: "#TNG1232", customer: "Priya Mehta", date: "May 19, 2024", amount: 298, status: "Shipped" },
-  { id: "#TNG1231", customer: "Karan Singh", date: "May 19, 2024", amount: 447, status: "Delivered" },
-  { id: "#TNG1230", customer: "Sneha Patel", date: "May 18, 2024", amount: 149, status: "Delivered" },
-];
-
-const PENDING_ORDERS = [
-  { id: "#TNG1234", customer: "Rohit Verma", date: "May 20, 2024", amount: 598 },
-  { id: "#TNG1233", customer: "Ananya Sharma", date: "May 20, 2024", amount: 447 },
-  { id: "#TNG1231", customer: "Karan Singh", date: "May 19, 2024", amount: 447 },
-];
-
-const TOP_CUSTOMERS = [
-  { name: "Rohit Verma", orders: 8, spend: 4250 },
-  { name: "Ananya Sharma", orders: 6, spend: 3280 },
-  { name: "Priya Mehta", orders: 5, spend: 2980 },
-  { name: "Karan Singh", orders: 4, spend: 2450 },
-  { name: "Sneha Patel", orders: 3, spend: 1890 },
+  { id: "watermelon-cranberry", name: "Watermelon Cranberry", size: "250ml", stock: 60, active: true, image: "/can1.png" },
 ];
 
 export default function AdminDashboardPage() {
-  const [inventory, setInventory] = useState(INITIAL_INVENTORY);
-  const [packedOrders, setPackedOrders] = useState<string[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>(DEFAULT_INVENTORY);
+  const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      try {
+        const [ordersRes, customersRes, productsRes] = await Promise.all([
+          fetch("/api/orders").then((r) => r.json()).catch(() => ({ success: false })),
+          fetch("/api/customers").then((r) => r.json()).catch(() => ({ success: false })),
+          fetch("/api/products").then((r) => r.json()).catch(() => ({ success: false })),
+        ]);
+
+        if (ordersRes.success && Array.isArray(ordersRes.data)) {
+          setOrders(ordersRes.data);
+        }
+
+        if (customersRes.success && Array.isArray(customersRes.data)) {
+          setCustomers(customersRes.data);
+        }
+
+        if (productsRes.success && Array.isArray(productsRes.data) && productsRes.data.length > 0) {
+          const dbProducts = productsRes.data;
+          setInventory((prev) =>
+            prev.map((item) => {
+              const matched = dbProducts.find(
+                (p: any) =>
+                  p.name.toLowerCase().includes(item.name.toLowerCase()) ||
+                  item.id.includes(p.sku.toLowerCase())
+              );
+              if (matched) {
+                return {
+                  ...item,
+                  stock: matched.stock !== undefined ? matched.stock : item.stock,
+                  active: matched.isActive !== undefined ? matched.isActive : item.active,
+                };
+              }
+              return item;
+            })
+          );
+        }
+      } catch (err) {
+        console.error("Error loading admin dashboard metrics:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboardData();
+  }, []);
 
   const handleToggleInventory = (id: string) => {
     setInventory((prev) =>
@@ -56,9 +116,66 @@ export default function AdminDashboardPage() {
     );
   };
 
-  const handlePackOrder = (id: string) => {
-    setPackedOrders((prev) => [...prev, id]);
+  const handlePackOrder = async (orderId: string) => {
+    setProcessingId(orderId);
+    try {
+      const res = await fetch("/api/shipments/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOrders((prev) =>
+          prev.map((o) => (o._id === orderId ? { ...o, shipmentStatus: "CREATED", orderStatus: "SHIPPED" } : o))
+        );
+        alert(`Shipment created successfully! AWB: ${data.data.awbCode}`);
+      } else {
+        alert(data.error || "Failed to create shipment");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error creating shipment");
+    } finally {
+      setProcessingId(null);
+    }
   };
+
+  // Metrics Calculations
+  const todayStr = new Date().toISOString().split("T")[0];
+  const todayOrders = orders.filter(
+    (o) => o.createdAt && new Date(o.createdAt).toISOString().split("T")[0] === todayStr
+  );
+  const todaySales = todayOrders.reduce((sum, o) => sum + (o.pricing?.total || 0), 0);
+
+  const ordersToFulfill = orders.filter(
+    (o) => o.paymentStatus === "PAID" && o.shipmentStatus !== "CREATED" && o.orderStatus !== "SHIPPED"
+  );
+
+  const totalRevenue = orders
+    .filter((o) => o.paymentStatus === "PAID")
+    .reduce((sum, o) => sum + (o.pricing?.total || 0), 0);
+
+  const recentOrders = [...orders].slice(0, 5);
+
+  const topCustomers = [...customers]
+    .sort((a, b) => b.totalSpend - a.totalSpend)
+    .slice(0, 5);
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-navy font-bold">
+        <Loader2 className="w-8 h-8 animate-spin mb-3 text-navy/60" />
+        <p className="text-[14px]">Loading live dashboard metrics...</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -67,9 +184,11 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-[13px] font-bold text-ink/60 mb-1">Today&apos;s Sales</p>
-            <h3 className="font-fraunces font-black text-[30px] text-navy leading-none mb-2">₹24,350</h3>
+            <h3 className="font-fraunces font-black text-[30px] text-navy leading-none mb-2">
+              ₹{todaySales.toLocaleString("en-IN")}
+            </h3>
             <p className="text-[12px] font-bold text-[#6A9A4A] flex items-center gap-1">
-              <span>↑ 12.5%</span> <span className="text-ink/40 font-normal">vs Yesterday</span>
+              <span>{todayOrders.length} order(s) today</span>
             </p>
           </div>
           <div className="w-14 h-14 rounded-2xl bg-[#E8F2FD] flex items-center justify-center text-[#1E73BE] shrink-0">
@@ -79,9 +198,13 @@ export default function AdminDashboardPage() {
 
         <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[13px] font-bold text-ink/60 mb-1">Pending Orders</p>
-            <h3 className="font-fraunces font-black text-[30px] text-navy leading-none mb-2">18</h3>
-            <p className="text-[12px] font-bold text-[#D97706]">3 new orders</p>
+            <p className="text-[13px] font-bold text-ink/60 mb-1">Orders to Fulfill</p>
+            <h3 className="font-fraunces font-black text-[30px] text-navy leading-none mb-2">
+              {ordersToFulfill.length}
+            </h3>
+            <p className="text-[12px] font-bold text-[#D97706]">
+              {ordersToFulfill.length > 0 ? "Requires packing & shipping" : "All orders fulfilled"}
+            </p>
           </div>
           <div className="w-14 h-14 rounded-2xl bg-[#FEF3C7] flex items-center justify-center text-[#D97706] shrink-0">
             <Package className="w-7 h-7" />
@@ -90,10 +213,12 @@ export default function AdminDashboardPage() {
 
         <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[13px] font-bold text-ink/60 mb-1">Total Revenue</p>
-            <h3 className="font-fraunces font-black text-[30px] text-navy leading-none mb-2">₹2,45,680</h3>
+            <p className="text-[13px] font-bold text-ink/60 mb-1">Total Paid Revenue</p>
+            <h3 className="font-fraunces font-black text-[30px] text-navy leading-none mb-2">
+              ₹{totalRevenue.toLocaleString("en-IN")}
+            </h3>
             <p className="text-[12px] font-bold text-[#6A9A4A] flex items-center gap-1">
-              <span>↑ 18.6%</span> <span className="text-ink/40 font-normal">vs Last Month</span>
+              <span>From {orders.filter(o => o.paymentStatus === 'PAID').length} paid order(s)</span>
             </p>
           </div>
           <div className="w-14 h-14 rounded-2xl bg-[#EDF5E6] flex items-center justify-center text-[#4B7322] shrink-0">
@@ -128,27 +253,35 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-navy/5">
-                  {RECENT_ORDERS.map((order) => (
-                    <tr key={order.id} className="hover:bg-cream/30 transition-colors">
-                      <td className="py-4 font-bold text-navy">{order.id}</td>
-                      <td className="py-4 font-medium text-navy/80">{order.customer}</td>
-                      <td className="py-4 text-ink/60">{order.date}</td>
-                      <td className="py-4 font-bold text-navy">₹{order.amount}</td>
-                      <td className="py-4 text-right">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-[11px] font-bold ${
-                            order.status === "Pending"
-                              ? "bg-[#FEF3C7] text-[#B45309]"
-                              : order.status === "Shipped"
-                              ? "bg-[#ECFDF5] text-[#047857]"
-                              : "bg-[#EFF6FF] text-[#1D4ED8]"
-                          }`}
-                        >
-                          {order.status}
-                        </span>
+                  {recentOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-6 text-center text-ink/50">
+                        No orders recorded yet.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    recentOrders.map((order) => (
+                      <tr key={order._id} className="hover:bg-cream/30 transition-colors">
+                        <td className="py-4 font-bold text-navy">{order.orderNumber}</td>
+                        <td className="py-4 font-medium text-navy/80">{order.customerName}</td>
+                        <td className="py-4 text-ink/60">{formatDate(order.createdAt)}</td>
+                        <td className="py-4 font-bold text-navy">₹{order.pricing?.total || 0}</td>
+                        <td className="py-4 text-right">
+                          <span
+                            className={`inline-block px-3 py-1 rounded-full text-[11px] font-bold ${
+                              order.paymentStatus === "PAID"
+                                ? "bg-[#ECFDF5] text-[#047857]"
+                                : order.paymentStatus === "REFUNDED"
+                                ? "bg-[#FEE2E2] text-[#B91C1C]"
+                                : "bg-[#FEF3C7] text-[#B45309]"
+                            }`}
+                          >
+                            {order.paymentStatus}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -160,9 +293,9 @@ export default function AdminDashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-fraunces font-bold text-[20px] text-navy">Inventory Overview</h3>
-              <span className="text-[13px] font-bold text-navy hover:text-[#6A9A4A] flex items-center gap-1 cursor-pointer">
+              <Link href="/admin-panel/inventory" className="text-[13px] font-bold text-navy hover:text-[#6A9A4A] flex items-center gap-1 cursor-pointer">
                 <span>View All Products</span> <ArrowRight className="w-4 h-4" />
-              </span>
+              </Link>
             </div>
             <div className="space-y-4 mb-6">
               <div className="grid grid-cols-12 text-[11px] font-bold uppercase tracking-wider text-ink/40 pb-2 border-b border-navy/10 px-1">
@@ -201,20 +334,20 @@ export default function AdminDashboardPage() {
               ))}
             </div>
           </div>
-          <p className="text-[12px] text-ink/40 font-medium pt-3 border-t border-navy/5">Showing 4 of 4 products</p>
+          <p className="text-[12px] text-ink/40 font-medium pt-3 border-t border-navy/5">Showing {inventory.length} active catalog products</p>
         </div>
       </div>
 
-      {/* ---------------- BOTTOM SECTION: PENDING ORDERS, TOP CUSTOMERS, BRAND BANNER ---------------- */}
+      {/* ---------------- BOTTOM SECTION: ORDERS TO FULFILL, TOP CUSTOMERS, BRAND BANNER ---------------- */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Pending Orders List */}
-        <div className="lg:col-span-4 bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex flex-col justify-between">
+        {/* Orders to Fulfill List */}
+        <div className="lg:col-span-4 bg-[#FFFFFF] rounded-3xl p-6 border border-navy/10 shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                <h3 className="font-fraunces font-bold text-[20px] text-navy">Pending Orders</h3>
+                <h3 className="font-fraunces font-bold text-[20px] text-navy">Orders to Fulfill</h3>
                 <span className="bg-[#FEF3C7] text-[#B45309] text-[12px] font-bold px-2 py-0.5 rounded-full">
-                  18
+                  {ordersToFulfill.length}
                 </span>
               </div>
               <Link
@@ -226,37 +359,39 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="space-y-3 mb-6">
-              {PENDING_ORDERS.map((ord) => {
-                const isPacked = packedOrders.includes(ord.id);
-                return (
-                  <div
-                    key={ord.id}
-                    className="bg-[#FAF7F2] rounded-2xl p-3.5 flex items-center justify-between border border-black/5"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="font-bold text-[13px] text-navy">{ord.id}</span>
-                        <span className="text-[12px] text-navy/70">{ord.customer}</span>
-                      </div>
-                      <p className="text-[11px] text-ink/50">
-                        {ord.date} • <span className="font-bold text-navy">₹{ord.amount}</span>
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => handlePackOrder(ord.id)}
-                      disabled={isPacked}
-                      className={`text-[12px] font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
-                        isPacked
-                          ? "bg-[#6A9A4A] text-white"
-                          : "bg-white border border-navy/20 hover:bg-navy hover:text-white text-navy"
-                      }`}
+              {ordersToFulfill.length === 0 ? (
+                <div className="bg-[#FAF7F2] rounded-2xl p-4 text-center text-ink/50 text-[13px]">
+                  No unfulfilled orders pending.
+                </div>
+              ) : (
+                ordersToFulfill.slice(0, 3).map((ord) => {
+                  const isProcessing = processingId === ord._id;
+                  return (
+                    <div
+                      key={ord._id}
+                      className="bg-[#FAF7F2] rounded-2xl p-3.5 flex items-center justify-between border border-black/5"
                     >
-                      {isPacked ? "Packed ✓" : "Pack & Ship"}
-                    </button>
-                  </div>
-                );
-              })}
+                      <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="font-bold text-[13px] text-navy">{ord.orderNumber}</span>
+                          <span className="text-[12px] text-navy/70 truncate max-w-[90px]">{ord.customerName}</span>
+                        </div>
+                        <p className="text-[11px] text-ink/50">
+                          {formatDate(ord.createdAt)} • <span className="font-bold text-navy">₹{ord.pricing?.total}</span>
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => handlePackOrder(ord._id)}
+                        disabled={isProcessing}
+                        className="text-[12px] font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer bg-[#091E33] hover:bg-[#071728] text-white disabled:opacity-50"
+                      >
+                        {isProcessing ? "Processing..." : "Push to Shiprocket"}
+                      </button>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -264,7 +399,7 @@ export default function AdminDashboardPage() {
             href="/admin-panel/pending-orders"
             className="text-[13px] font-bold text-navy hover:underline flex items-center gap-1 transition-all pt-2"
           >
-            <span>View all pending orders</span> <ArrowRight className="w-3.5 h-3.5" />
+            <span>View all orders to fulfill</span> <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
@@ -273,9 +408,9 @@ export default function AdminDashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-fraunces font-bold text-[20px] text-navy">Top Customers</h3>
-              <span className="text-[13px] font-bold text-navy hover:text-[#6A9A4A] flex items-center gap-1 cursor-pointer">
+              <Link href="/admin-panel/customers" className="text-[13px] font-bold text-navy hover:text-[#6A9A4A] flex items-center gap-1 cursor-pointer">
                 <span>View All</span> <ArrowRight className="w-4 h-4" />
-              </span>
+              </Link>
             </div>
 
             <table className="w-full text-left text-[13px]">
@@ -287,13 +422,21 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-navy/5">
-                {TOP_CUSTOMERS.map((cust, idx) => (
-                  <tr key={idx} className="hover:bg-cream/20 transition-colors">
-                    <td className="py-3 font-bold text-navy">{cust.name}</td>
-                    <td className="py-3 text-center text-ink/70 font-medium">{cust.orders}</td>
-                    <td className="py-3 text-right font-bold text-navy">₹{cust.spend.toLocaleString("en-IN")}</td>
+                {topCustomers.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="py-6 text-center text-ink/50">
+                      No customer profiles found.
+                    </td>
                   </tr>
-                ))}
+                ) : (
+                  topCustomers.map((cust) => (
+                    <tr key={cust._id} className="hover:bg-cream/20 transition-colors">
+                      <td className="py-3 font-bold text-navy">{cust.name}</td>
+                      <td className="py-3 text-center text-ink/70 font-medium">{cust.totalOrders}</td>
+                      <td className="py-3 text-right font-bold text-navy">₹{cust.totalSpend?.toLocaleString("en-IN") || 0}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

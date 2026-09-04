@@ -13,6 +13,7 @@ const flavors = [
     nameA: "Watermelon",
     nameB: "Cranberry",
     flavorLabel: "Watermelon Cranberry",
+    unitPrice: 80,
     tagline: "No added sugar. Zero crash.",
     desc: "The perfect blend of juicy watermelon and tart cranberry. Refreshing, hydrating, and packed with goodness.",
     canSrc: "/can1.png",
@@ -31,6 +32,7 @@ const flavors = [
     nameA: "Watermelon",
     nameB: "Mint",
     flavorLabel: "Watermelon Mint",
+    unitPrice: 130,
     tagline: "Enriched with Vitamins B12, B6, B1.",
     desc: "A cool twist of fresh mint and sweet watermelon. Rejuvenating and perfect for hot afternoons.",
     canSrc: "/can2.png",
@@ -49,6 +51,7 @@ const flavors = [
     nameA: "Guava",
     nameB: "Chilli",
     flavorLabel: "Guava Chilli",
+    unitPrice: 100,
     tagline: "A sweet & spicy twist.",
     desc: "Tropical guava meets a surprising kick of chilli. A bold, unapologetic flavor for those who dare.",
     canSrc: "/can3.png",
@@ -67,6 +70,7 @@ const flavors = [
     nameA: "Yuzu",
     nameB: "Mint",
     flavorLabel: "Yuzu Mint",
+    unitPrice: 120,
     tagline: "Crisp and refreshing.",
     desc: "Bright citrus yuzu perfectly balanced with cool mint. Zesty, uplifting, and totally unique.",
     canSrc: "/can4.png",
@@ -147,7 +151,6 @@ export function FlavorPicker() {
                   alt={flavor.flavorLabel}
                   fill
                   className="object-contain"
-                  unoptimized
                 />
               </button>
             );
@@ -187,7 +190,6 @@ export function FlavorPicker() {
                     alt={active.flavorLabel}
                     fill
                     className="object-contain relative z-10 drop-shadow-[0_10px_30px_rgba(0,0,0,0.15)]"
-                    unoptimized
                     priority
                   />
                 </motion.div>
@@ -255,7 +257,7 @@ export function FlavorPicker() {
                         productId: active.flavorLabel.toLowerCase().replace(/\s+/g, "-"),
                         name: active.flavorLabel,
                         size: "Pack of 4",
-                        price: 16.0,
+                        price: active.unitPrice * 4,
                         quantity: 1,
                         image: active.canSrc,
                       })

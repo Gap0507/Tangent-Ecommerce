@@ -23,8 +23,8 @@ const FLAVORS = [
     tagline: "Ultra Hydrating & Crisp",
     color: "#F28C8C",
     modelPath: "/assets/3d/can/Tangent_Watermelon_Mint.glb",
-    price: "$16.00",
-    packLabel: "Pack of 4",
+    price: "₹520",
+    packLabel: "1000 ml (Pack of 4)",
     offset: [0, -0.04, 0] as [number, number, number],
   },
   {
@@ -33,8 +33,8 @@ const FLAVORS = [
     tagline: "Sweet Meets Tart",
     color: "#85C7D3",
     modelPath: "/assets/3d/can/Tangent_Watermelon_Cranberry_v2_FINAL_4K.glb",
-    price: "$16.00",
-    packLabel: "Pack of 4",
+    price: "₹320",
+    packLabel: "1000 ml (Pack of 4)",
     offset: [0, -0.04, 0] as [number, number, number],
   },
   {
@@ -43,8 +43,8 @@ const FLAVORS = [
     tagline: "Zesty Japanese Citrus",
     color: "#F9D949",
     modelPath: "/assets/3d/can/Tangent_Yuzu_Mint_FINAL_4K.glb",
-    price: "$16.00",
-    packLabel: "Pack of 4",
+    price: "₹480",
+    packLabel: "1000 ml (Pack of 4)",
     offset: [0, -0.04, 0] as [number, number, number],
   },
   {
@@ -53,16 +53,46 @@ const FLAVORS = [
     tagline: "Sweet Tropical Heat",
     color: "#E8706B",
     modelPath: "/assets/3d/can/Tangent_Guava_Chilli_FINAL_4K.glb",
-    price: "$16.00",
-    packLabel: "Pack of 4",
+    price: "₹400",
+    packLabel: "1000 ml (Pack of 4)",
     offset: [0, -0.04, 0] as [number, number, number],
   },
 ];
 
 export function ShopHero() {
+  const [flavorList, setFlavorList] = useState(FLAVORS);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const activeFlavor = FLAVORS[activeIndex];
+  const activeFlavor = flavorList[activeIndex] || flavorList[0];
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success && Array.isArray(resData.data) && resData.data.length > 0) {
+          const inventoryProducts = resData.data;
+          setFlavorList((prev) =>
+            prev.map((f) => {
+              const dbProd = inventoryProducts.find(
+                (p: any) =>
+                  p.name.toLowerCase().includes(f.id.replace("-", " ")) ||
+                  f.id.toLowerCase().includes(p.name.toLowerCase().replace(/\s+/g, "-")) ||
+                  p.sku.toLowerCase().includes(f.id.substring(0, 4))
+              );
+              if (dbProd && dbProd.price) {
+                return {
+                  ...f,
+                  price: `₹${dbProd.price * 4}`,
+                  packLabel: "1000 ml (Pack of 4)",
+                };
+              }
+              return f;
+            })
+          );
+        }
+      })
+      .catch((err) => console.error("Failed to load inventory price for hero", err));
+  }, []);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
