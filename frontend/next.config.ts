@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   reactCompiler: true,
   allowedDevOrigins: ["192.168.31.244"],
   images: {
@@ -12,6 +16,15 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/:path*.(png|jpg|jpeg|webp|avif|svg|gif)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
       {
         source: "/assets/3d/:path*",
         headers: [
@@ -44,4 +57,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
 

@@ -177,7 +177,6 @@ export function WhyTangent() {
                 width={220}
                 height={560}
                 className="relative z-10 drop-shadow-[0_20px_40px_rgba(18,59,115,0.25)]"
-                unoptimized
               />
             </div>
           </div>
@@ -226,7 +225,6 @@ export function WhyTangent() {
               width={160}
               height={420}
               className="relative z-10 drop-shadow-[0_16px_32px_rgba(18,59,115,0.2)]"
-              unoptimized
             />
           </div>
 

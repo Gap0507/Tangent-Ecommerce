@@ -23,32 +23,32 @@ export function ContactHero() {
       {/* ── Decorative Fruit & Leaf Elements ── */}
       {/* Top-left watermelon */}
       <div className="absolute top-[-30px] left-[-30px] w-[140px] md:w-[200px] h-[140px] md:h-[200px] z-0 pointer-events-none rotate-[-15deg]">
-        <Image src="/watermelonfruit.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/watermelonfruit.png" alt="" fill className="object-contain" />
       </div>
 
       {/* Top-right lemon */}
       <div className="absolute top-[-20px] right-[-20px] w-[120px] md:w-[180px] h-[120px] md:h-[180px] z-0 pointer-events-none">
-        <Image src="/lemonfresh.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/lemonfresh.png" alt="" fill className="object-contain" />
       </div>
 
       {/* Bottom-left watermelon */}
       <div className="absolute bottom-[-40px] left-[-20px] md:bottom-[-60px] md:left-[-40px] w-[120px] md:w-[200px] h-[120px] md:h-[200px] z-0 pointer-events-none rotate-[20deg]">
-        <Image src="/watermelonfruit.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/watermelonfruit.png" alt="" fill className="object-contain" />
       </div>
 
       {/* Top-right leaf */}
       <div className="absolute top-[40px] right-[60px] md:right-[120px] w-[60px] md:w-[90px] h-[60px] md:h-[90px] z-0 pointer-events-none rotate-[30deg]">
-        <Image src="/assets/images/leaf/2.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/assets/images/leaf/2.png" alt="" fill className="object-contain" />
       </div>
 
       {/* Bottom-right leaf */}
       <div className="absolute bottom-[20px] right-[-20px] md:bottom-[40px] md:right-[-40px] w-[70px] md:w-[120px] h-[70px] md:h-[120px] z-0 pointer-events-none rotate-[-20deg]">
-        <Image src="/assets/images/leaf/1.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/assets/images/leaf/1.png" alt="" fill className="object-contain" />
       </div>
 
       {/* Left leaf */}
       <div className="absolute top-[50%] left-[-15px] w-[60px] md:w-[80px] h-[60px] md:h-[80px] z-0 pointer-events-none rotate-[45deg]">
-        <Image src="/assets/images/leaf/1.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/assets/images/leaf/1.png" alt="" fill className="object-contain" />
       </div>
 
       {/* ── Main Content ── */}
@@ -119,7 +119,6 @@ export function ContactHero() {
               alt="Tangent Watermelon Mint Can"
               fill
               className="object-contain"
-              unoptimized
             />
           </motion.div>
 

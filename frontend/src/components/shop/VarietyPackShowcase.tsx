@@ -71,7 +71,6 @@ export function VarietyPackShowcase() {
                   alt="Tangent Variety Pack - All 4 Flavors"
                   fill
                   className="object-contain object-center p-6 md:p-10"
-                  unoptimized
                 />
                 {/* Subtle gradient overlay at bottom for depth */}
                 <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/50 to-transparent pointer-events-none" />

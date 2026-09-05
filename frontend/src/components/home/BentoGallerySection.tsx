@@ -73,7 +73,6 @@ const ImageModal = ({
             alt={item.title}
             fill
             className="h-auto max-h-[85vh] w-full rounded-lg object-contain"
-            unoptimized
           />
         </div>
         <div className="p-4 bg-navy text-white rounded-b-lg">
@@ -175,7 +174,6 @@ export const InteractiveImageBentoGallery: React.FC<
                 alt={item.title}
                 fill
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                unoptimized
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
               <div className="relative z-10 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">

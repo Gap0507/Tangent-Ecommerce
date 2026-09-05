@@ -36,7 +36,6 @@ export function WhyLoveIt({ data }: { data: ProductDetails["whyLoveIt"] }) {
             alt="Lifestyle product shot" 
             fill 
             className="object-cover" 
-            unoptimized 
           />
         </div>
       </div>

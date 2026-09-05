@@ -15,7 +15,6 @@ export function RealRefreshment() {
           fill
           className="object-cover object-top"
           priority
-          unoptimized
         />
       </div>
 
@@ -27,7 +26,6 @@ export function RealRefreshment() {
           fill
           className="object-cover object-right md:object-center"
           priority
-          unoptimized
         />
       </div>
 

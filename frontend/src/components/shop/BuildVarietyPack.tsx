@@ -137,7 +137,7 @@ export function BuildVarietyPack() {
                   className="bg-navy/80 hover:bg-navy p-4 rounded-2xl border border-cream/15 flex flex-col items-center text-center transition-all hover:scale-105 hover:border-sand/50 cursor-pointer disabled:opacity-50 disabled:hover:scale-100 group"
                 >
                   <div className="relative w-24 h-24 mb-3">
-                    <Image src={flavor.image} alt={flavor.name} fill className="object-contain" unoptimized />
+                    <Image src={flavor.image} alt={flavor.name} fill className="object-contain" />
                   </div>
                   <span className="font-bold text-[13px] text-cream group-hover:text-sand mb-1">{flavor.name}</span>
                   <div className="mt-auto inline-flex items-center gap-1 text-[11px] font-bold text-sand bg-cream/10 px-2.5 py-1 rounded-full">
@@ -185,7 +185,7 @@ export function BuildVarietyPack() {
                     >
                       {flavorObj ? (
                         <div className="relative w-full h-full p-1 group/slot">
-                          <Image src={flavorObj.image} alt={flavorObj.name} fill className="object-contain p-1" unoptimized />
+                          <Image src={flavorObj.image} alt={flavorObj.name} fill className="object-contain p-1" />
                           <button
                             onClick={() => removeCanAt(idx)}
                             className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover/slot:opacity-100 transition-opacity cursor-pointer shadow-md"

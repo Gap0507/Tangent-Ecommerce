@@ -91,7 +91,6 @@ export function TasteOfWonder() {
           fill
           className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
           priority
-          unoptimized
         />
       </div>
 
@@ -106,7 +105,6 @@ export function TasteOfWonder() {
           fill
           className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
           priority
-          unoptimized
         />
       </div>
 
@@ -123,7 +121,6 @@ export function TasteOfWonder() {
             fill
             className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
             priority
-            unoptimized
           />
         </div>
 
@@ -168,7 +165,6 @@ export function TasteOfWonder() {
             fill
             className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
             priority
-            unoptimized
           />
         </div>
 

@@ -160,7 +160,6 @@ export function MomentsSection() {
                 fill
                 className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 768px) 220px, 260px"
-                unoptimized
               />
 
               {/* Bottom gradient + text */}
