@@ -90,7 +90,25 @@ export function CartDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                           <X className="w-4 h-4" />
                         </button>
                       </div>
-                      <p className="text-[11px] text-ink/50 mb-2 font-medium">{item.size}</p>
+                      {(() => {
+                        const parts = item.size.split(":");
+                        const mainSize = parts[0].trim();
+                        const breakdown = parts[1] ? parts[1].split(",").map(s => s.trim()) : [];
+                        return (
+                          <>
+                            <p className="text-[11px] text-ink/50 mb-1 font-medium">{mainSize}</p>
+                            {breakdown.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-2">
+                                {breakdown.map((b, idx) => (
+                                  <span key={idx} className="inline-block bg-[#F5F2EB] text-navy/80 text-[9px] font-semibold px-1.5 py-0.5 rounded border border-navy/10">
+                                    {b.replace(/(\d+)x\s*/g, '$1 x ')}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
 
                       {/* Quantity Controls */}
                       <div className="flex items-center gap-1 bg-[#F5F2EB] border border-navy/10 rounded-lg w-fit px-1 py-0.5">

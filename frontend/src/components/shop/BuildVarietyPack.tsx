@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Plus, Trash2, ShoppingBag, Sparkles, Check } from "lucide-react";
 import { motion } from "motion/react";
+import { useCart } from "@/context/CartContext";
 
 const FLAVOR_OPTIONS = [
   {
@@ -33,25 +34,33 @@ const FLAVOR_OPTIONS = [
 ];
 
 export function BuildVarietyPack() {
-  const [packSize, setPackSize] = useState<12 | 24>(12);
+  const { addToCart } = useCart();
+  const [packSize, setPackSize] = useState<8 | 12 | 24>(8);
   const [selectedCans, setSelectedCans] = useState<string[]>([]);
   const [isAdded, setIsAdded] = useState(false);
-  const [baseUnitPrice, setBaseUnitPrice] = useState(149);
+  const [productPrices, setProductPrices] = useState<Record<string, number>>({});
 
   React.useEffect(() => {
     fetch("/api/products")
       .then((res) => res.json())
       .then((resData) => {
-        if (resData.success && Array.isArray(resData.data) && resData.data[0]?.price) {
-          setBaseUnitPrice(resData.data[0].price);
+        if (resData.success && Array.isArray(resData.data)) {
+          const pricesMap: Record<string, number> = {};
+          resData.data.forEach((p: any) => {
+            const flavor = FLAVOR_OPTIONS.find((f) => f.name.toLowerCase() === p.name.toLowerCase());
+            if (flavor) {
+              pricesMap[flavor.id] = p.price;
+            }
+          });
+          setProductPrices(pricesMap);
         }
       })
       .catch((err) => console.error("Failed to load inventory price for custom builder", err));
   }, []);
 
-  const price12 = baseUnitPrice * 12;
-  const price24 = baseUnitPrice * 24;
-  const price = packSize === 12 ? price12 : price24;
+  const price = selectedCans.reduce((total, canId) => {
+    return total + (productPrices[canId] || 149);
+  }, 0);
 
   const addCan = (flavorId: string) => {
     if (selectedCans.length < packSize) {
@@ -71,8 +80,30 @@ export function BuildVarietyPack() {
 
   const handleAddCustomPack = () => {
     if (selectedCans.length === packSize) {
+      const counts: Record<string, number> = {};
+      selectedCans.forEach((id) => {
+        counts[id] = (counts[id] || 0) + 1;
+      });
+      const breakdownStr = Object.entries(counts)
+        .map(([id, qty]) => {
+          const flavorName = FLAVOR_OPTIONS.find((f) => f.id === id)?.name || id;
+          return `${qty} x ${flavorName}`;
+        })
+        .join(", ");
+
+      addToCart({
+        productId: `custom-variety-${packSize}`,
+        name: "Custom Variety Pack",
+        size: `${packSize} Cans: ${breakdownStr}`,
+        price: price,
+        quantity: 1,
+        image: "/all4can.png",
+      });
       setIsAdded(true);
-      setTimeout(() => setIsAdded(false), 2000);
+      setTimeout(() => {
+        setIsAdded(false);
+        clearAll();
+      }, 2000);
     }
   };
 
@@ -107,6 +138,17 @@ export function BuildVarietyPack() {
               <div className="flex items-center gap-2 bg-navy p-1 rounded-2xl border border-cream/10">
                 <button
                   onClick={() => {
+                    setPackSize(8);
+                    if (selectedCans.length > 8) setSelectedCans(selectedCans.slice(0, 8));
+                  }}
+                  className={`px-4 py-1.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
+                    packSize === 8 ? "bg-sand text-navy shadow-sm" : "text-cream/70 hover:text-cream"
+                  }`}
+                >
+                  8 Cans
+                </button>
+                <button
+                  onClick={() => {
                     setPackSize(12);
                     if (selectedCans.length > 12) setSelectedCans(selectedCans.slice(0, 12));
                   }}
@@ -114,7 +156,7 @@ export function BuildVarietyPack() {
                     packSize === 12 ? "bg-sand text-navy shadow-sm" : "text-cream/70 hover:text-cream"
                   }`}
                 >
-                  12 Cans (₹{price12})
+                  12 Cans
                 </button>
                 <button
                   onClick={() => setPackSize(24)}
@@ -122,7 +164,7 @@ export function BuildVarietyPack() {
                     packSize === 24 ? "bg-sand text-navy shadow-sm" : "text-cream/70 hover:text-cream"
                   }`}
                 >
-                  24 Cans (₹{price24})
+                  24 Cans
                 </button>
               </div>
             </div>

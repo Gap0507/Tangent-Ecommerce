@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Star, ShoppingCart, Check, Zap, Shield, Plus, Minus } from "lucide-react";
 import { ProductDetails, calculatePackPrices } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 
 export function ProductInfo({ product }: { product: ProductDetails }) {
+  const router = useRouter();
   const { addToCart } = useCart();
   const [selectedPackIdx, setSelectedPackIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -46,6 +48,18 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
     });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      size: selectedPack.size,
+      price: selectedPack.price,
+      quantity,
+      image: product.images.main,
+    });
+    router.push("/checkout");
   };
 
   const decrement = () => setQuantity(Math.max(1, quantity - 1));
@@ -176,7 +190,10 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
             </>
           )}
         </button>
-        <button className="flex-1 h-[54px] rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all cursor-pointer bg-white text-navy border border-navy/15 hover:border-navy hover:bg-navy/5 shadow-sm">
+        <button
+          onClick={handleBuyNow}
+          className="flex-1 h-[54px] rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all cursor-pointer bg-white text-navy border border-navy/15 hover:border-navy hover:bg-navy/5 shadow-sm"
+        >
           Buy Now <Zap className="w-4 h-4" />
         </button>
       </div>

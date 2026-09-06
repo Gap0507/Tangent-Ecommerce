@@ -11,6 +11,7 @@ interface OrderItem {
   quantity: number;
   price: number;
   image?: string;
+  size?: string;
 }
 
 interface Order {
@@ -193,13 +194,18 @@ export default function AllOrdersPage() {
 
                       <td className="py-4 px-2">
                         {firstItem && (
-                          <div className="flex items-center gap-3 min-w-[200px]">
-                            <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] border border-black/5 p-1 flex items-center justify-center shrink-0">
+                          <div className="flex items-start gap-3 min-w-[240px]">
+                            <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] border border-black/5 p-1 flex items-center justify-center shrink-0 mt-0.5">
                               <Image src={firstItem.image || "/can2.png"} alt={firstItem.name} width={32} height={32} className="object-contain max-h-8" unoptimized />
                             </div>
                             <div>
                               <h5 className="font-bold text-navy text-[13px] leading-tight">{firstItem.name}</h5>
-                              <p className="text-[11px] text-ink/50">x{firstItem.quantity}</p>
+                              {firstItem.size && (
+                                <p className="text-[11px] font-bold text-[#0F5394] bg-[#F0F6FF] px-2 py-0.5 rounded-md mt-1 inline-block border border-[#0F5394]/10 max-w-[280px] whitespace-normal leading-snug">
+                                  {firstItem.size}
+                                </p>
+                              )}
+                              <p className="text-[11px] text-ink/50 mt-1 font-medium">Qty: {firstItem.quantity}</p>
                             </div>
                             {extraItemsCount > 0 && (
                               <span className="text-[11px] font-bold text-ink/40 ml-2 bg-black/5 px-2 py-0.5 rounded-full">
@@ -286,11 +292,16 @@ export default function AllOrdersPage() {
             <h4 className="font-bold text-navy mb-3 uppercase tracking-wider text-[11px]">Order Items</h4>
             <div className="space-y-3 mb-6">
               {selectedOrderModal.items.map((item, idx) => (
-                <div key={idx} className="bg-[#FAF7F2] p-4 rounded-2xl border border-black/5 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Image src={item.image || "/can2.png"} alt={item.name} width={40} height={40} className="object-contain max-h-10" unoptimized />
+                <div key={idx} className="bg-[#FAF7F2] p-4 rounded-2xl border border-black/5 flex items-start justify-between">
+                  <div className="flex items-start gap-3">
+                    <Image src={item.image || "/can2.png"} alt={item.name} width={40} height={40} className="object-contain max-h-10 mt-0.5" unoptimized />
                     <div>
-                      <h4 className="font-bold text-navy">{item.name}</h4>
+                      <h4 className="font-bold text-navy text-[14px]">{item.name}</h4>
+                      {item.size && (
+                        <div className="text-[11px] font-bold text-[#0F5394] bg-[#F0F6FF] px-2.5 py-1 rounded-lg border border-[#0F5394]/10 my-1 inline-block">
+                          {item.size}
+                        </div>
+                      )}
                       <p className="text-[11px] text-ink/50">SKU: {item.sku}</p>
                     </div>
                   </div>

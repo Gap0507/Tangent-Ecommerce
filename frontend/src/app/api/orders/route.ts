@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDB from "@/lib/db";
 import { Order, OrderStatus, PaymentStatus } from "@/models/Order";
+import { Product } from "@/models/Product";
 import { Settings } from "@/models/Settings";
 import { getSession } from "@/lib/auth";
 
@@ -41,16 +42,32 @@ export async function POST(request: Request) {
     const settings = await Settings.findOne();
     const orderNumber = `TAN-${Math.floor(100000 + Math.random() * 900000)}`;
 
-    // Ensure items have a valid ObjectId for MongoDB ref
+    const dbProducts = await Product.find({});
+
+    // Ensure items have a valid ObjectId for MongoDB ref & preserve pack size info
     const parsedItems = data.items.map((item: any) => {
       let validProductId = item.productId;
+      
+      // Look up matching product in MongoDB by SKU or Name if invalid ID
       if (!validProductId || (typeof validProductId === "string" && !validProductId.match(/^[0-9a-fA-F]{24}$/))) {
-        validProductId = "650000000000000000000001";
+        const cleanItemName = item.name ? item.name.replace(/\s*\([^)]*\)/g, "").trim() : "";
+        const matched = dbProducts.find((p: any) =>
+          (item.sku && p.sku.toLowerCase() === item.sku.toLowerCase()) ||
+          (cleanItemName && p.name.toLowerCase().includes(cleanItemName.toLowerCase())) ||
+          (item.productId && p.sku.toLowerCase().includes(String(item.productId).toLowerCase()))
+        );
+        if (matched) {
+          validProductId = matched._id;
+        } else {
+          validProductId = "650000000000000000000001";
+        }
       }
+
       return {
         productId: validProductId,
         sku: item.sku || item.productId || "TAN-SKU",
         name: item.name,
+        size: item.size || "Pack of 4",
         quantity: item.quantity,
         price: item.price,
         image: item.image,

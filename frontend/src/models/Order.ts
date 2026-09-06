@@ -28,6 +28,7 @@ export interface IOrderItem {
   productId: mongoose.Types.ObjectId;
   sku: string;
   name: string;
+  size?: string;
   quantity: number;
   price: number;
   image?: string;
@@ -69,6 +70,7 @@ const orderItemSchema = new Schema<IOrderItem>({
   productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
   sku: { type: String, required: true },
   name: { type: String, required: true },
+  size: { type: String },
   quantity: { type: Number, required: true, min: 1 },
   price: { type: Number, required: true, min: 0 },
   image: { type: String },
@@ -127,4 +129,10 @@ orderSchema.index({
   customerPhone: 'text',
 });
 
+// In development, clear cached model so schema updates (like item.size) take effect
+if (process.env.NODE_ENV !== 'production' && mongoose.models.Order) {
+  delete (mongoose.models as any).Order;
+}
+
 export const Order: Model<IOrder> = mongoose.models.Order || mongoose.model<IOrder>('Order', orderSchema);
+

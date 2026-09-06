@@ -166,10 +166,30 @@ export default function CartPage() {
                           <h3 className="font-fraunces font-bold text-navy text-[18px] md:text-[20px] leading-tight mb-1 truncate">
                             {item.name}
                           </h3>
-                          <p className="text-[12px] text-ink/50 mb-2">{item.size}</p>
-                          <span className="inline-block bg-[#F5F2EB] text-navy/80 text-[11px] font-semibold px-2.5 py-0.5 rounded-md border border-navy/10">
-                            {item.size}
-                          </span>
+                          {(() => {
+                            const parts = item.size.split(":");
+                            const mainSize = parts[0].trim();
+                            const breakdown = parts[1] ? parts[1].split(",").map(s => s.trim()) : [];
+                            
+                            return (
+                              <>
+                                <p className="text-[12px] text-ink/50 mb-1">{mainSize}</p>
+                                {breakdown.length > 0 ? (
+                                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                    {breakdown.map((b, idx) => (
+                                      <span key={idx} className="inline-block bg-[#F5F2EB] text-navy/80 text-[10px] font-semibold px-2 py-0.5 rounded-md border border-navy/10">
+                                        {b.replace(/(\d+)x\s*/g, '$1 x ')}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="inline-block bg-[#F5F2EB] text-navy/80 text-[11px] font-semibold px-2.5 py-0.5 rounded-md border border-navy/10 mt-1">
+                                    {mainSize}
+                                  </span>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
 

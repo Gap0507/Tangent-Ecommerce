@@ -315,12 +315,9 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
                   <div className="col-span-3 flex justify-center">
-                    <input
-                      type="number"
-                      value={item.stock}
-                      onChange={(e) => handleStockChange(item.id, parseInt(e.target.value) || 0)}
-                      className="w-16 bg-[#FAF7F2] border border-navy/15 rounded-xl text-center py-1.5 text-[13px] font-bold text-navy focus:outline-none focus:border-navy"
-                    />
+                    <span className="bg-[#FAF7F2] border border-navy/15 rounded-xl px-4 py-1.5 text-[13px] font-bold text-navy">
+                      {item.stock}
+                    </span>
                   </div>
                   <div className="col-span-3 flex justify-end">
                     <button
@@ -364,33 +361,30 @@ export default function AdminDashboardPage() {
                   No unfulfilled orders pending.
                 </div>
               ) : (
-                ordersToFulfill.slice(0, 3).map((ord) => {
-                  const isProcessing = processingId === ord._id;
-                  return (
-                    <div
-                      key={ord._id}
-                      className="bg-[#FAF7F2] rounded-2xl p-3.5 flex items-center justify-between border border-black/5"
-                    >
-                      <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="font-bold text-[13px] text-navy">{ord.orderNumber}</span>
-                          <span className="text-[12px] text-navy/70 truncate max-w-[90px]">{ord.customerName}</span>
-                        </div>
-                        <p className="text-[11px] text-ink/50">
-                          {formatDate(ord.createdAt)} • <span className="font-bold text-navy">₹{ord.pricing?.total}</span>
-                        </p>
+                ordersToFulfill.slice(0, 4).map((ord) => (
+                  <Link
+                    key={ord._id}
+                    href="/admin-panel/pending-orders"
+                    className="bg-[#FAF7F2] hover:bg-[#F3EFE6] transition-all rounded-2xl p-3.5 flex items-center justify-between border border-navy/10 group cursor-pointer"
+                  >
+                    <div className="min-w-0 flex-1 pr-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-black text-navy text-[13.5px]">{ord.orderNumber}</span>
+                        <span className="bg-[#FEF3C7] text-[#B45309] text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+                          Pending Fulfillment
+                        </span>
                       </div>
-
-                      <button
-                        onClick={() => handlePackOrder(ord._id)}
-                        disabled={isProcessing}
-                        className="text-[12px] font-bold px-3 py-1.5 rounded-xl transition-all cursor-pointer bg-[#091E33] hover:bg-[#071728] text-white disabled:opacity-50"
-                      >
-                        {isProcessing ? "Processing..." : "Push to Shiprocket"}
-                      </button>
+                      <p className="font-medium text-navy/80 text-[12.5px] truncate">{ord.customerName}</p>
+                      <p className="text-[11px] text-ink/50 mt-0.5 font-medium">
+                        {formatDate(ord.createdAt)} • <strong className="text-navy font-bold">₹{ord.pricing?.total}</strong>
+                      </p>
                     </div>
-                  );
-                })
+
+                    <div className="w-8 h-8 rounded-full bg-white border border-navy/10 flex items-center justify-center text-navy group-hover:bg-[#091E33] group-hover:text-white transition-colors shrink-0">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </Link>
+                ))
               )}
             </div>
           </div>

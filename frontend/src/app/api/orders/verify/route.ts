@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import connectToDB from "@/lib/db";
 import { Order, OrderStatus, PaymentStatus } from "@/models/Order";
-import { Product } from "@/models/Product";
 import { Customer } from "@/models/Customer";
 import { Settings } from "@/models/Settings";
+import { deductInventoryForOrder } from "@/lib/inventory";
 
 export async function POST(request: Request) {
   try {
@@ -43,24 +43,8 @@ export async function POST(request: Request) {
       order.razorpayOrderId = razorpayOrderId || order.razorpayOrderId;
       order.razorpayPaymentId = razorpayPaymentId || `pay_mock_${Date.now()}`;
 
-      // 1. Decrement Product Stock Inventory
-      for (const item of order.items) {
-        try {
-          const prodIdStr = String(item.productId || "");
-          if (prodIdStr && prodIdStr.match(/^[0-9a-fA-F]{24}$/)) {
-            await Product.findByIdAndUpdate(prodIdStr, {
-              $inc: { stock: -item.quantity },
-            });
-          } else if (item.sku || item.name) {
-            await Product.findOneAndUpdate(
-              { $or: [{ sku: item.sku }, { name: item.name }] },
-              { $inc: { stock: -item.quantity } }
-            );
-          }
-        } catch (e) {
-          console.error(`Failed to update stock for item ${item.name}:`, e);
-        }
-      }
+      // 1. Decrement Product Stock Inventory accurately based on pack size / custom pack breakdown
+      await deductInventoryForOrder(order.items);
 
       // 2. Update or Create Customer Profile in CRM
       try {

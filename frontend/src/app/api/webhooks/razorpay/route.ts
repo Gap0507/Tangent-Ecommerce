@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import connectToDB from "@/lib/db";
 import { Order, PaymentStatus } from "@/models/Order";
-import { Product } from "@/models/Product";
+import { deductInventoryForOrder } from "@/lib/inventory";
 
 const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || "fallback_secret";
 
@@ -51,12 +51,7 @@ export async function POST(request: Request) {
       order.razorpayPaymentId = razorpayPaymentId;
 
       // 3. Securely Reduce Inventory Stock
-      for (const item of order.items) {
-        await Product.findByIdAndUpdate(
-          item.productId,
-          { $inc: { stock: -item.quantity } }
-        );
-      }
+      await deductInventoryForOrder(order.items);
 
       await order.save();
     }
