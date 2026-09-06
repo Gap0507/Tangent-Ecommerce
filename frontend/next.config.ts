@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.resolve(__dirname),
   reactCompiler: true,
   allowedDevOrigins: ["192.168.31.244"],
+  serverExternalPackages: ["mongoose"],
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 31536000,
