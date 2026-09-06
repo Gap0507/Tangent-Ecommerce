@@ -14,6 +14,59 @@ interface OrderItem {
   size?: string;
 }
 
+function ItemSizeDisplay({ size }: { size?: string }) {
+  if (!size) return null;
+
+  const hasBreakdown = size.includes("Cans:") || (size.includes("x ") && !size.startsWith("Pack of "));
+
+  if (hasBreakdown) {
+    let packBadgeText = "Variety Pack";
+    let breakdownText = size;
+
+    if (size.includes("Cans:")) {
+      const parts = size.split("Cans:");
+      const match = parts[0].match(/(Pack of \d+|\d+\s*Cans)/i);
+      packBadgeText = match ? match[0] : "Variety Pack";
+      breakdownText = parts[1].replace(/[()]/g, "").trim();
+    } else {
+      const match = size.match(/^(\d+\s*Cans|Pack of \d+):?\s*(.*)/i);
+      if (match) {
+        packBadgeText = match[1];
+        breakdownText = match[2];
+      }
+    }
+
+    const items = breakdownText
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    return (
+      <div className="mt-1 space-y-1 max-w-[280px]">
+        <span className="inline-block bg-[#091E33] text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow-xs">
+          {packBadgeText}
+        </span>
+        <div className="flex flex-wrap gap-1">
+          {items.map((flavorItem, idx) => (
+            <span
+              key={idx}
+              className="inline-block bg-[#F0F6FF] text-[#0F5394] text-[10.5px] font-bold px-2 py-0.5 rounded-md border border-[#0F5394]/15"
+            >
+              {flavorItem}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <span className="inline-block bg-[#F0F6FF] text-[#0F5394] text-[11px] font-bold px-2.5 py-0.5 rounded-md mt-1 border border-[#0F5394]/15">
+      {size}
+    </span>
+  );
+}
+
 interface Order {
   _id: string;
   orderNumber: string;
@@ -194,17 +247,13 @@ export default function AllOrdersPage() {
 
                       <td className="py-4 px-2">
                         {firstItem && (
-                          <div className="flex items-start gap-3 min-w-[240px]">
+                          <div className="flex items-start gap-3 min-w-[260px]">
                             <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] border border-black/5 p-1 flex items-center justify-center shrink-0 mt-0.5">
                               <Image src={firstItem.image || "/can2.png"} alt={firstItem.name} width={32} height={32} className="object-contain max-h-8" unoptimized />
                             </div>
                             <div>
-                              <h5 className="font-bold text-navy text-[13px] leading-tight">{firstItem.name}</h5>
-                              {firstItem.size && (
-                                <p className="text-[11px] font-bold text-[#0F5394] bg-[#F0F6FF] px-2 py-0.5 rounded-md mt-1 inline-block border border-[#0F5394]/10 max-w-[280px] whitespace-normal leading-snug">
-                                  {firstItem.size}
-                                </p>
-                              )}
+                              <h5 className="font-bold text-navy text-[13.5px] leading-tight">{firstItem.name}</h5>
+                              <ItemSizeDisplay size={firstItem.size} />
                               <p className="text-[11px] text-ink/50 mt-1 font-medium">Qty: {firstItem.quantity}</p>
                             </div>
                             {extraItemsCount > 0 && (
@@ -297,12 +346,8 @@ export default function AllOrdersPage() {
                     <Image src={item.image || "/can2.png"} alt={item.name} width={40} height={40} className="object-contain max-h-10 mt-0.5" unoptimized />
                     <div>
                       <h4 className="font-bold text-navy text-[14px]">{item.name}</h4>
-                      {item.size && (
-                        <div className="text-[11px] font-bold text-[#0F5394] bg-[#F0F6FF] px-2.5 py-1 rounded-lg border border-[#0F5394]/10 my-1 inline-block">
-                          {item.size}
-                        </div>
-                      )}
-                      <p className="text-[11px] text-ink/50">SKU: {item.sku}</p>
+                      <ItemSizeDisplay size={item.size} />
+                      <p className="text-[11px] text-ink/50 mt-1">SKU: {item.sku}</p>
                     </div>
                   </div>
                   <div className="text-right">

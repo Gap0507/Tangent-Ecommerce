@@ -4,10 +4,12 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import { ShoppingBag, Check, Package, Sparkles, Leaf, Droplets, Zap } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 
 export function VarietyPackShowcase() {
+  const { addToCart } = useCart();
   const [isAdded, setIsAdded] = useState(false);
-  const [packPrice, setPackPrice] = useState(536);
+  const [packPrice, setPackPrice] = useState(430);
 
   React.useEffect(() => {
     fetch("/api/products")
@@ -24,6 +26,14 @@ export function VarietyPackShowcase() {
   }, []);
 
   const handleBuyNow = () => {
+    addToCart({
+      productId: "variety-pack-4",
+      name: "Tangent Variety Pack",
+      size: "Pack of 4 (4 Cans: 1 x Watermelon Mint, 1 x Yuzu Mint, 1 x Watermelon Cranberry, 1 x Guava Chilli)",
+      price: packPrice,
+      quantity: 1,
+      image: "/all4can.png",
+    });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2200);
   };
