@@ -90,6 +90,7 @@ export function TasteOfWonder() {
           alt="Tangent Ginger Ale Refreshment"
           fill
           className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
+          sizes="260px"
           priority
         />
       </div>
@@ -104,6 +105,7 @@ export function TasteOfWonder() {
           alt="Tangent Tonic Water Refreshment"
           fill
           className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
+          sizes="260px"
           priority
         />
       </div>
@@ -120,6 +122,7 @@ export function TasteOfWonder() {
             alt="Tangent Ginger Ale Refreshment"
             fill
             className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
+            sizes="(max-width: 1024px) 380px, 440px"
             priority
           />
         </div>
@@ -164,6 +167,7 @@ export function TasteOfWonder() {
             alt="Tangent Tonic Water Refreshment"
             fill
             className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
+            sizes="(max-width: 1024px) 380px, 440px"
             priority
           />
         </div>

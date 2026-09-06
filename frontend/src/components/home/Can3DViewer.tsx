@@ -93,14 +93,14 @@ export default function Can3DViewer({ modelPath, isMobile, rotation, positionOff
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
       <Canvas
-        shadows
-        dpr={[1, 1.5]}
+        shadows={false}
+        dpr={[1, 1.2]}
         gl={{
           toneMapping: THREE.ACESFilmicToneMapping,
           outputColorSpace: THREE.SRGBColorSpace,
           antialias: true,
           alpha: true,
-          powerPreference: isMobile ? "default" : "high-performance",
+          powerPreference: "low-power",
         }}
         camera={{
           position: [0, 0, 1],

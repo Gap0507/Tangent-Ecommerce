@@ -170,6 +170,7 @@ export function TangentStandard() {
                 alt="Tangent All 4 Cans Showcase"
                 fill
                 className="object-contain drop-shadow-[0_25px_60px_rgba(0,0,0,0.5)]"
+                sizes="(max-width: 768px) 100vw, 660px"
                 priority
               />
             </div>

@@ -14,6 +14,7 @@ export function RealRefreshment() {
           alt="Real Refreshment Background Mobile"
           fill
           className="object-cover object-top"
+          sizes="(max-width: 768px) 100vw, 1px"
           priority
         />
       </div>
@@ -25,6 +26,7 @@ export function RealRefreshment() {
           alt="Real Refreshment Background"
           fill
           className="object-cover object-right md:object-center"
+          sizes="(max-width: 768px) 1px, 100vw"
           priority
         />
       </div>

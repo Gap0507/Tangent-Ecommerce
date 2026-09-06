@@ -147,12 +147,19 @@ export function Juice3DShowcase() {
               </h1>
             </div>
 
-            {/* 3D GLB Models on Circular Arc Path (Zero CSS rotation to prevent WebGL GPU clipping) */}
+            {/* 3D GLB Models on Circular Arc Path */}
             <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
               {CANS.map((can, i) => {
                 const baseAngle = i * 90;
-                const currentAngleDeg = baseAngle + wheelAngle;
-                const rad = (currentAngleDeg * Math.PI) / 180;
+                const rawAngle = baseAngle + wheelAngle;
+                const rad = (rawAngle * Math.PI) / 180;
+
+                // Normalize angle between -180 and 180 degrees
+                const normDeg = ((rawAngle % 360) + 540) % 360 - 180;
+
+                // Only instantiate WebGL canvas for cans visible on arc (-110 deg to +110 deg)
+                const isVisible = Math.abs(normDeg) <= 110;
+                if (!isVisible) return null;
 
                 // Trigonometric arc coordinates
                 const x = radius * Math.sin(rad);

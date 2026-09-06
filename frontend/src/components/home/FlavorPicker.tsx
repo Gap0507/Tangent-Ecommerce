@@ -151,6 +151,7 @@ export function FlavorPicker() {
                   alt={flavor.flavorLabel}
                   fill
                   className="object-contain"
+                  sizes="90px"
                 />
               </button>
             );
@@ -190,6 +191,7 @@ export function FlavorPicker() {
                     alt={active.flavorLabel}
                     fill
                     className="object-contain relative z-10 drop-shadow-[0_10px_30px_rgba(0,0,0,0.15)]"
+                    sizes="(max-width: 768px) 300px, 400px"
                     priority
                   />
                 </motion.div>

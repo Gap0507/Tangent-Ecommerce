@@ -487,7 +487,6 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-navy text-[14px]">Standard Express Delivery</h4>
-                    <p className="text-[12px] text-ink/60 font-medium">3-5 business days via Shiprocket</p>
                   </div>
                 </div>
                 <div className="sm:text-right pl-[4.5rem] sm:pl-0">
