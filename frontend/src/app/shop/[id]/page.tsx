@@ -60,7 +60,7 @@ export default async function ProductDetailsPage({ params }: { params: Promise<{
 
       {/* Tabs & Detailed Sections */}
       <section className="max-w-[1280px] mx-auto px-6 md:px-12 pb-24">
-        <ProductTabs />
+        <ProductTabs product={product} />
         <div className="pt-16 mt-8">
            <WhyLoveIt data={product.whyLoveIt} />
         </div>
