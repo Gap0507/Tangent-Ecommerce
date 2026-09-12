@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 
 const badges = [
   {
-    title: "Real Ingredients",
+    title: "Vegan",
     desc: "Made with real fruits and botanicals.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-7 h-7">
@@ -15,9 +15,9 @@ const badges = [
     ),
     iconCustom: (
       <svg viewBox="0 0 40 40" fill="none" className="w-8 h-8">
-        <path d="M20 6c-2 0-4 1-5 3-2 3-1 7 2 9l3 2 3-2c3-2 4-6 2-9-1-2-3-3-5-3z" stroke="#73C2A0" strokeWidth="2" fill="#73C2A0" fillOpacity="0.15"/>
-        <path d="M20 20v12" stroke="#73C2A0" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M16 24h8" stroke="#73C2A0" strokeWidth="2" strokeLinecap="round"/>
+        <path d="M20 6c-2 0-4 1-5 3-2 3-1 7 2 9l3 2 3-2c3-2 4-6 2-9-1-2-3-3-5-3z" stroke="#73C2A0" strokeWidth="2" fill="#73C2A0" fillOpacity="0.15" />
+        <path d="M20 20v12" stroke="#73C2A0" strokeWidth="2" strokeLinecap="round" />
+        <path d="M16 24h8" stroke="#73C2A0" strokeWidth="2" strokeLinecap="round" />
       </svg>
     ),
   },
@@ -53,12 +53,12 @@ export function ContactTrustBadges() {
           <div className="flex flex-col items-center text-center">
             <div className="w-14 h-14 rounded-full bg-cream/10 flex items-center justify-center mb-4 text-[#73C2A0]">
               <svg viewBox="0 0 40 40" fill="none" className="w-7 h-7">
-                <path d="M20 6c-2 0-4 1-5 3-2 3-1 7 2 9l3 2 3-2c3-2 4-6 2-9-1-2-3-3-5-3z" stroke="currentColor" strokeWidth="2.5" fill="currentColor" fillOpacity="0.15"/>
-                <path d="M20 20v14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
-                <path d="M16 25h8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                <path d="M20 6c-2 0-4 1-5 3-2 3-1 7 2 9l3 2 3-2c3-2 4-6 2-9-1-2-3-3-5-3z" stroke="currentColor" strokeWidth="2.5" fill="currentColor" fillOpacity="0.15" />
+                <path d="M20 20v14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M16 25h8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
               </svg>
             </div>
-            <h3 className="font-fraunces font-bold text-cream text-[14px] md:text-[15px] mb-1.5">Real Ingredients</h3>
+            <h3 className="font-fraunces font-bold text-cream text-[14px] md:text-[15px] mb-1.5">Vegan</h3>
             <p className="text-cream/50 text-[11px] md:text-[12px] leading-[1.4] max-w-[160px]">Made with real fruits and botanicals.</p>
           </div>
 

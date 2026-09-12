@@ -46,7 +46,6 @@ export function calculatePackPrices(basePrice: number) {
   return [
     { size: "Pack of 4", cans: 4, price: basePrice * 4 },
     { size: "Pack of 8", cans: 8, price: basePrice * 8 },
-    { size: "Pack of 12", cans: 12, price: basePrice * 12 },
     { size: "Pack of 24", cans: 24, price: basePrice * 24 },
   ];
 }
@@ -61,10 +60,10 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
     badge: "Best Seller",
     description: "A juicy blend of watermelon and cool mint that keeps you hydrated and refreshed all day long.",
     valueProps: [
-      "Real fruit extracts",
+      "Prebiotic",
       "No artificial flavors or colors",
       "Low in calories",
-      "No added preservatives"
+      "High In Vitamins"
     ],
     packPrices: calculatePackPrices(149),
     images: {
@@ -78,7 +77,7 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
     features: [
       {
         icon: "leaf",
-        title: "Real Ingredients",
+        title: "Vegan",
         description: "Made with real fruits & botanicals."
       },
       {
@@ -95,10 +94,11 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
     whyLoveIt: {
       text: "Watermelon Mint is your go-to drink for instant refreshment. It's light, hydrating, and made with real ingredients that nourish your body and delight your senses.",
       points: [
-        "Made with watermelon juice & natural mint extract",
-        "Contains essential vitamins like A, C & antioxidants",
+        "Made with natural Flavours",
+        "Contains essential vitamins like B12, b7, b6, b5 b3 b1 C and prebiotic",
         "Helps keep you hydrated and energized",
-        "Perfect for workouts, weekdays, or weekend chill"
+        "Perfect for workouts, weekdays, or weekend chill",
+        "Sweetened with stevia and monk fruit"
       ],
       image: "/blogdetails/can1watermelonmint/img3.png"
     },
@@ -148,10 +148,10 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
     badge: "Fan Favorite",
     description: "A perfect harmony of sweet watermelon and tart cranberry to keep your tastebuds dancing and body hydrated.",
     valueProps: [
-      "Real fruit extracts",
+      "Prebiotic",
       "No artificial flavors or colors",
       "Low in calories",
-      "No added preservatives"
+      "High In Vitamins"
     ],
     packPrices: calculatePackPrices(149),
     images: {
@@ -163,17 +163,18 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
       ]
     },
     features: [
-      { icon: "leaf", title: "Real Ingredients", description: "Made with real fruits & botanicals." },
+      { icon: "leaf", title: "Vegan", description: "Made with real fruits & botanicals." },
       { icon: "box", title: "No Shortcuts", description: "No artificial flavors, colors or sweeteners." },
       { icon: "droplet", title: "Low Calories", description: "Light on calories, big on refreshment." }
     ],
     whyLoveIt: {
       text: "Watermelon Cranberry is the ultimate thirst quencher. The subtle tartness of cranberry perfectly balances the sweet watermelon, creating an irresistible daily refresher.",
       points: [
-        "Made with watermelon & cranberry juice",
-        "Packed with Vitamin C and antioxidants",
+        "Made with natural Flavours",
+        "Contains essential vitamins like B12, b7, b6, b5 b3 b1 C and prebiotic",
         "Helps keep you hydrated and energized",
-        "Perfect for workouts, weekdays, or weekend chill"
+        "Perfect for workouts, weekdays, or weekend chill",
+        "Sweetened with stevia and monk fruit"
       ],
       image: "/blogdetails/can2watermeloncranberry/img3.png"
     },
@@ -202,10 +203,10 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
     badge: "New Arrival",
     description: "Experience the vibrant zest of Asian yuzu citrus blended with cool, soothing mint for an unforgettable crisp finish.",
     valueProps: [
-      "Real fruit extracts",
+      "Prebiotic",
       "No artificial flavors or colors",
       "Low in calories",
-      "No added preservatives"
+      "High In Vitamins"
     ],
     packPrices: calculatePackPrices(149),
     images: {
@@ -217,17 +218,18 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
       ]
     },
     features: [
-      { icon: "leaf", title: "Real Ingredients", description: "Made with real fruits & botanicals." },
+      { icon: "leaf", title: "Vegan", description: "Made with real fruits & botanicals." },
       { icon: "box", title: "No Shortcuts", description: "No artificial flavors, colors or sweeteners." },
       { icon: "droplet", title: "Low Calories", description: "Light on calories, big on refreshment." }
     ],
     whyLoveIt: {
       text: "Yuzu Mint brings a unique citrusy brightness. It's an invigorating lift for your afternoons, crafted carefully for a complex but highly drinkable flavor profile.",
       points: [
-        "Made with real yuzu extract and mint",
-        "High in natural Vitamin C",
-        "Crisp, clean, and never too sweet",
-        "Perfect as a mixer or on its own"
+        "Made with natural Flavours",
+        "Contains essential vitamins like B12, b7, b6, b5 b3 b1 C and prebiotic",
+        "Helps keep you hydrated and energized",
+        "Perfect for workouts, weekdays, or weekend chill",
+        "Sweetened with stevia and monk fruit"
       ],
       image: "/blogdetails/can3yulu/img3.png"
     },
@@ -256,10 +258,10 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
     badge: "Award Winning",
     description: "Tropical sweet guava meets a subtle, tingling chilli kick. A bold, adventurous hydration experience.",
     valueProps: [
-      "Real fruit extracts",
+      "Prebiotic",
       "No artificial flavors or colors",
       "Low in calories",
-      "No added preservatives"
+      "High In Vitamins"
     ],
     packPrices: calculatePackPrices(149),
     images: {
@@ -271,17 +273,18 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
       ]
     },
     features: [
-      { icon: "leaf", title: "Real Ingredients", description: "Made with real fruits & botanicals." },
+      { icon: "leaf", title: "Vegan", description: "Made with real fruits & botanicals." },
       { icon: "box", title: "No Shortcuts", description: "No artificial flavors, colors or sweeteners." },
       { icon: "droplet", title: "Low Calories", description: "Light on calories, big on refreshment." }
     ],
     whyLoveIt: {
       text: "Guava Chilli is not your average drink. The sweet, tropical aroma of guava is perfectly complemented by a warm, lingering spice that makes every sip exciting.",
       points: [
-        "Made with pink guava and real chilli extract",
-        "A perfectly balanced sweet and spicy profile",
-        "Awakens your senses and hydrates your body",
-        "The ultimate companion for food pairings"
+        "Made with natural identical flavour and natural colour",
+        "Contains essential vitamins like B12, b7, b6, b5 b3 b1 C and prebiotic",
+        "Helps keep you hydrated and energized",
+        "Perfect for workouts, weekdays, or weekend chill",
+        "Sweetened with stevia and monk fruit"
       ],
       image: "/blogdetails/can4guavachilli/img3.png"
     },

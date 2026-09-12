@@ -104,7 +104,7 @@ export function ShopHero() {
   return (
     <section className="relative w-full min-h-[600px] md:min-h-[650px] overflow-hidden bg-cream">
       <div className="flex flex-col lg:flex-row w-full min-h-[600px] md:min-h-[650px]">
-        
+
         {/* LEFT — Content on cream bg */}
         <div className="flex-1 flex items-center px-8 md:px-16 lg:px-20 py-14 lg:py-0 relative z-20">
           <motion.div
@@ -129,7 +129,7 @@ export function ShopHero() {
             </h1>
 
             <p className="text-ink/60 text-[16px] md:text-[17px] leading-[1.7] mb-10 max-w-[440px]">
-              Vitamin-infused, botanical prebiotic sparkling beverages. Zero added sugar, low calorie, crafted with 100% real fruit juice.
+              Vitamin-infused, botanical prebiotic sparkling beverages. Zero added sugar, low calorie, crafted with 100 natural flavours.
             </p>
 
             {/* Flavor Selector — Clean Tabs */}
@@ -138,11 +138,10 @@ export function ShopHero() {
                 <button
                   key={flavor.id}
                   onClick={() => setActiveIndex(idx)}
-                  className={`relative px-5 py-2.5 rounded-full text-[13px] font-bold transition-all duration-300 cursor-pointer border-2 ${
-                    activeIndex === idx
-                      ? "text-white border-transparent shadow-lg scale-105"
-                      : "bg-transparent text-navy/70 border-navy/12 hover:border-navy/30 hover:text-navy"
-                  }`}
+                  className={`relative px-5 py-2.5 rounded-full text-[13px] font-bold transition-all duration-300 cursor-pointer border-2 ${activeIndex === idx
+                    ? "text-white border-transparent shadow-lg scale-105"
+                    : "bg-transparent text-navy/70 border-navy/12 hover:border-navy/30 hover:text-navy"
+                    }`}
                   style={
                     activeIndex === idx
                       ? { backgroundColor: flavor.color, borderColor: flavor.color }
@@ -187,7 +186,7 @@ export function ShopHero() {
               <div className="relative w-full h-full flex items-center justify-center">
                 {/* Animated color background */}
                 <AnimatedBackground backgroundColor={activeFlavor.color} />
-                
+
                 {/* Large background text */}
                 <div className="absolute z-[1] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full pointer-events-none text-center">
                   <h1

@@ -35,7 +35,7 @@ const FLAVOR_OPTIONS = [
 
 export function BuildVarietyPack() {
   const { addToCart } = useCart();
-  const [packSize, setPackSize] = useState<8 | 12 | 24>(8);
+  const [packSize, setPackSize] = useState<4 | 8 | 24>(4);
   const [selectedCans, setSelectedCans] = useState<string[]>([]);
   const [isAdded, setIsAdded] = useState(false);
   const [productPrices, setProductPrices] = useState<Record<string, number>>({});
@@ -138,6 +138,17 @@ export function BuildVarietyPack() {
               <div className="flex items-center gap-2 bg-navy p-1 rounded-2xl border border-cream/10">
                 <button
                   onClick={() => {
+                    setPackSize(4);
+                    if (selectedCans.length > 4) setSelectedCans(selectedCans.slice(0, 4));
+                  }}
+                  className={`px-4 py-1.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
+                    packSize === 4 ? "bg-sand text-navy shadow-sm" : "text-cream/70 hover:text-cream"
+                  }`}
+                >
+                  4 Cans
+                </button>
+                <button
+                  onClick={() => {
                     setPackSize(8);
                     if (selectedCans.length > 8) setSelectedCans(selectedCans.slice(0, 8));
                   }}
@@ -146,17 +157,6 @@ export function BuildVarietyPack() {
                   }`}
                 >
                   8 Cans
-                </button>
-                <button
-                  onClick={() => {
-                    setPackSize(12);
-                    if (selectedCans.length > 12) setSelectedCans(selectedCans.slice(0, 12));
-                  }}
-                  className={`px-4 py-1.5 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
-                    packSize === 12 ? "bg-sand text-navy shadow-sm" : "text-cream/70 hover:text-cream"
-                  }`}
-                >
-                  12 Cans
                 </button>
                 <button
                   onClick={() => setPackSize(24)}

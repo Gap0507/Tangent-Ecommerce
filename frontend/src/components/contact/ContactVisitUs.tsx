@@ -29,7 +29,7 @@ export function ContactVisitUs() {
             className="flex-1 min-h-[350px] md:min-h-[450px] rounded-2xl overflow-hidden shadow-lg border border-navy/10"
           >
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3769.4!2d72.83!3d19.13!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDA3JzQ4LjAiTiA3MsKwNDknNDguMCJF!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+              src="https://maps.google.com/maps?q=Dudhat+Food+and+Beverages+Pvt+Ltd,+Vatva,+Ahmedabad&output=embed"
               width="100%"
               height="100%"
               style={{ border: 0, minHeight: "350px" }}
@@ -67,11 +67,11 @@ export function ContactVisitUs() {
               </div>
               <div>
                 <p className="text-navy text-[14px] font-bold mb-1">Tangent Beverages Pvt. Ltd.</p>
-                <p className="text-ink/60 text-[13px] leading-[1.5]">
-                  101, Creative Tower, Off Link Road,<br />
-                  Andheri West, Mumbai – 400053,<br />
-                  Maharashtra, India
-                </p>
+                <a href="https://maps.app.goo.gl/o6dzxNeU23BfYuhA6" target="_blank" rel="noopener noreferrer" className="text-ink/60 text-[13px] leading-[1.5] hover:text-coral transition-colors block">
+                  Dudhat Food and Beverages Pvt Ltd,<br />
+                  Plot no 4802, phase IV, GICC, B/H Indo German Tool Room,<br />
+                  Vatva, Ahmedabad-382445
+                </a>
               </div>
             </div>
 
@@ -81,7 +81,7 @@ export function ContactVisitUs() {
                 <Mail className="w-[18px] h-[18px] text-blue" />
               </div>
               <div>
-                <p className="text-navy text-[14px] font-bold">hello@tangentsdrinks.com</p>
+                <p className="text-navy text-[14px] font-bold">info@tangentfnb.com</p>
               </div>
             </div>
 
@@ -91,7 +91,7 @@ export function ContactVisitUs() {
                 <Phone className="w-[18px] h-[18px] text-[#73A642]" />
               </div>
               <div>
-                <p className="text-navy text-[14px] font-bold">+91 98765 43210</p>
+                <p className="text-navy text-[14px] font-bold">9724565952</p>
               </div>
             </div>
           </motion.div>

@@ -20,7 +20,7 @@ export default function SettingsPage() {
     useRealTimeRates: false,
     flatShippingRate: 49,
     storeEmail: "hello@tangentdrinks.com",
-    storePhone: "+91 98765 43210",
+    storePhone: "+9724565952",
     storeName: "Tangent Drinks",
   });
 
@@ -39,7 +39,7 @@ export default function SettingsPage() {
             useRealTimeRates: d.useRealTimeRates || false,
             flatShippingRate: d.flatShippingRate !== undefined ? d.flatShippingRate : 49,
             storeEmail: d.storeEmail || "hello@tangentdrinks.com",
-            storePhone: d.storePhone || "+91 98765 43210",
+            storePhone: d.storePhone || "+9724565952",
             storeName: d.storeName || "Tangent Drinks",
           });
         }
@@ -71,7 +71,7 @@ export default function SettingsPage() {
           useRealTimeRates: updated.useRealTimeRates || false,
           flatShippingRate: updated.flatShippingRate !== undefined ? updated.flatShippingRate : 49,
           storeEmail: updated.storeEmail || "hello@tangentdrinks.com",
-          storePhone: updated.storePhone || "+91 98765 43210",
+          storePhone: updated.storePhone || "+9724565952",
           storeName: updated.storeName || "Tangent Drinks",
         });
         setStatusMessage({ type: "success", text: "Settings saved successfully" });
@@ -100,8 +100,8 @@ export default function SettingsPage() {
       {statusMessage && (
         <div
           className={`p-4 rounded-2xl border flex items-center gap-3 text-[14px] font-semibold transition-all ${statusMessage.type === "success"
-              ? "bg-green-50 border-green-200 text-green-800"
-              : "bg-red-50 border-red-200 text-red-800"
+            ? "bg-green-50 border-green-200 text-green-800"
+            : "bg-red-50 border-red-200 text-red-800"
             }`}
         >
           {statusMessage.type === "success" ? (

@@ -40,7 +40,7 @@ export async function deductInventoryForOrder(items: any[]) {
         if (processedBreakdown) continue;
       }
 
-      // Case 2: Standard Single-Flavor Pack (Pack of 4, Pack of 8, Pack of 12, Pack of 24)
+      // Case 2: Standard Single-Flavor Pack (Pack of 4, Pack of 8, Pack of 24)
       let cansPerPack = 1;
       const packMatch = itemSize.match(/Pack of (\d+)/i) || itemSize.match(/(\d+)\s*cans?/i);
       if (packMatch && packMatch[1]) {

@@ -367,7 +367,7 @@ export default function CheckoutPage() {
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+91 98765 43210"
+                    placeholder="+9724565952"
                     required
                     className="w-full bg-transparent border border-navy/20 rounded-xl px-4 py-3 text-[14px] text-navy focus:outline-none focus:border-navy transition-colors"
                   />

@@ -18,6 +18,7 @@ import {
   Mail,
   LogOut,
   Save,
+  MessageSquare,
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -155,6 +156,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isCustomers = pathname === "/admin-panel/customers";
   const isCoupons = pathname === "/admin-panel/coupons";
   const isSettings = pathname === "/admin-panel/settings";
+  const isInquiries = pathname === "/admin-panel/inquiries";
 
   return (
     <div className="min-h-screen bg-[#F8F6F0] flex text-navy font-sans">
@@ -253,6 +255,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <span>Customers</span>
             </Link>
 
+            {/* Inquiries */}
+            <Link
+              href="/admin-panel/inquiries"
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-bold text-[14px] transition-all cursor-pointer ${
+                isInquiries
+                  ? "bg-[#FCD34D]" + " text-[#091E33] shadow-md"
+                  : "text-white/70 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              <MessageSquare className="w-5 h-5" />
+              <span>Inquiries</span>
+            </Link>
+
             {/* Coupons */}
             <Link
               href="/admin-panel/coupons"
@@ -316,15 +331,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {isPendingOrders && "Orders to Fulfill"}
               {isInventory && "Inventory"}
               {isCustomers && "Customers"}
+              {isInquiries && "Inquiries"}
               {isCoupons && "Coupons & Discounts"}
               {isSettings && "Settings"}
             </h2>
-            {(isAllOrders || isPendingOrders || isInventory || isCustomers || isCoupons || isSettings) && (
+            {(isAllOrders || isPendingOrders || isInventory || isCustomers || isCoupons || isSettings || isInquiries) && (
               <p className="text-[13px] text-ink/60 font-medium mt-1">
                 {isAllOrders && "View and manage all customer orders"}
                 {isPendingOrders && "Paid orders waiting to be packed and shipped"}
                 {isInventory && "Manage your products and stock levels"}
                 {isCustomers && "Manage and view all your customers"}
+                {isInquiries && "View and manage contact form submissions"}
                 {isCoupons && "Create and manage coupons to boost sales and reward your customers."}
                 {isSettings && "Manage your store configurations and integrations"}
               </p>

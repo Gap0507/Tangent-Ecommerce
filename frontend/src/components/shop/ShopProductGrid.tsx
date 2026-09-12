@@ -6,7 +6,6 @@ import { ProductCard, ProductItem } from "./ProductCard";
 const createDefaultPackPrices = (unitPrice: number) => [
   { size: "Pack of 4", cans: 4, price: unitPrice * 4 },
   { size: "Pack of 8", cans: 8, price: unitPrice * 8 },
-  { size: "Pack of 12", cans: 12, price: unitPrice * 12 },
   { size: "Pack of 24", cans: 24, price: unitPrice * 24 },
 ];
 

@@ -9,12 +9,12 @@ const faqs = [
   {
     question: "What makes Tangent drinks different?",
     answer:
-      "Tangent drinks are crafted with 100% real fruit extracts and natural botanicals. We use zero added sugar, zero artificial flavors, and zero artificial colors. Every can is a refreshing blend of honest ingredients that taste amazing without the guilt.",
+      "Tangent drinks are crafted with 100% natural identical flavours. We use zero added sugar, zero artificial flavors, and zero artificial colors. Every can is a refreshing blend of honest ingredients that taste amazing without the guilt.",
   },
   {
     question: "Do Tangent drinks contain added sugar?",
     answer:
-      "No! All Tangent drinks are completely free of added sugar. We use natural fruit extracts and botanicals to deliver delicious flavors without any added sweeteners, making them a healthier alternative to traditional soft drinks.",
+      "No! Tangent contains no added sugar. We use natural sweeteners like Stevia and Monk Fruit to deliver great taste without added sugar, making it a smarter alternative to sugary soft drinks.",
   },
   {
     question: "Where can I buy Tangent drinks?",
@@ -24,7 +24,7 @@ const faqs = [
   {
     question: "Do you offer bulk or corporate orders?",
     answer:
-      "Yes! We offer bulk and corporate ordering options for offices, events, and wholesale partners. Please reach out to us at hello@tangentsdrinks.com or fill out the contact form above with your requirements.",
+      "Yes! We offer bulk and corporate ordering options for offices, events, and wholesale partners. Please reach out to us at info@tangentfnb.com or fill out the contact form above with your requirements.",
   },
   {
     question: "How should I store Tangent drinks?",

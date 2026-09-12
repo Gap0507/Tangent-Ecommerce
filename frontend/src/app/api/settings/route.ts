@@ -16,7 +16,7 @@ export async function GET() {
         useRealTimeRates: false,
         flatShippingRate: 49,
         storeEmail: "hello@tangentdrinks.com",
-        storePhone: "+91 98765 43210",
+        storePhone: "+9724565952",
         storeName: "Tangent Drinks",
       });
     }
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       useRealTimeRates: Boolean(useRealTimeRates),
       flatShippingRate: Number(flatShippingRate) || 49,
       storeEmail: storeEmail || "hello@tangentdrinks.com",
-      storePhone: storePhone || "+91 98765 43210",
+      storePhone: storePhone || "+9724565952",
       storeName: storeName || "Tangent Drinks",
     };
 

@@ -22,7 +22,7 @@ const settingsSchema = new Schema<ISettings>(
     useRealTimeRates: { type: Boolean, default: false },
     flatShippingRate: { type: Number, default: 49 },
     storeEmail: { type: String, default: 'hello@tangentdrinks.com' },
-    storePhone: { type: String, default: '+91 98765 43210' },
+    storePhone: { type: String, default: '+9724565952' },
     storeName: { type: String, default: 'Tangent Drinks' },
   },
   { timestamps: true }
