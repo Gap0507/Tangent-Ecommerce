@@ -39,6 +39,7 @@ export function BuildVarietyPack() {
   const [selectedCans, setSelectedCans] = useState<string[]>([]);
   const [isAdded, setIsAdded] = useState(false);
   const [productPrices, setProductPrices] = useState<Record<string, number>>({});
+  const [flavorStocks, setFlavorStocks] = useState<Record<string, number>>({});
 
   React.useEffect(() => {
     fetch("/api/products")
@@ -46,13 +47,20 @@ export function BuildVarietyPack() {
       .then((resData) => {
         if (resData.success && Array.isArray(resData.data)) {
           const pricesMap: Record<string, number> = {};
+          const stocksMap: Record<string, number> = {};
           resData.data.forEach((p: any) => {
-            const flavor = FLAVOR_OPTIONS.find((f) => f.name.toLowerCase() === p.name.toLowerCase());
+            const flavor = FLAVOR_OPTIONS.find(
+              (f) =>
+                f.name.toLowerCase() === p.name.toLowerCase() ||
+                p.name.toLowerCase().includes(f.name.toLowerCase())
+            );
             if (flavor) {
-              pricesMap[flavor.id] = p.price;
+              if (p.price) pricesMap[flavor.id] = p.price;
+              if (typeof p.stock === "number") stocksMap[flavor.id] = p.stock;
             }
           });
           setProductPrices(pricesMap);
+          setFlavorStocks(stocksMap);
         }
       })
       .catch((err) => console.error("Failed to load inventory price for custom builder", err));
@@ -63,7 +71,9 @@ export function BuildVarietyPack() {
   }, 0);
 
   const addCan = (flavorId: string) => {
-    if (selectedCans.length < packSize) {
+    const dbStock = flavorStocks[flavorId] ?? 999;
+    const countInBox = selectedCans.filter((id) => id === flavorId).length;
+    if (selectedCans.length < packSize && countInBox < dbStock) {
       setSelectedCans([...selectedCans, flavorId]);
     }
   };
@@ -171,22 +181,51 @@ export function BuildVarietyPack() {
 
             <h3 className="font-bold text-[18px] text-cream mb-4">2. Tap to Add Cans to Box:</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-              {FLAVOR_OPTIONS.map((flavor) => (
-                <button
-                  key={flavor.id}
-                  onClick={() => addCan(flavor.id)}
-                  disabled={selectedCans.length >= packSize}
-                  className="bg-navy/80 hover:bg-navy p-4 rounded-2xl border border-cream/15 flex flex-col items-center text-center transition-all hover:scale-105 hover:border-sand/50 cursor-pointer disabled:opacity-50 disabled:hover:scale-100 group"
-                >
-                  <div className="relative w-24 h-24 mb-3">
-                    <Image src={flavor.image} alt={flavor.name} fill className="object-contain" />
-                  </div>
-                  <span className="font-bold text-[13px] text-cream group-hover:text-sand mb-1">{flavor.name}</span>
-                  <div className="mt-auto inline-flex items-center gap-1 text-[11px] font-bold text-sand bg-cream/10 px-2.5 py-1 rounded-full">
-                    <Plus className="w-3 h-3" /> Add Can
-                  </div>
-                </button>
-              ))}
+              {FLAVOR_OPTIONS.map((flavor) => {
+                const dbStock = flavorStocks[flavor.id] ?? 999;
+                const countInBox = selectedCans.filter((id) => id === flavor.id).length;
+                const remainingStock = dbStock - countInBox;
+                const isFlavorOutOfStock = dbStock <= 0;
+                const isFlavorDisabled = selectedCans.length >= packSize || remainingStock <= 0;
+
+                return (
+                  <button
+                    key={flavor.id}
+                    onClick={() => addCan(flavor.id)}
+                    disabled={isFlavorDisabled}
+                    className="bg-navy/80 hover:bg-navy p-4 rounded-2xl border border-cream/15 flex flex-col items-center text-center transition-all hover:scale-105 hover:border-sand/50 cursor-pointer disabled:opacity-50 disabled:hover:scale-100 group relative"
+                  >
+                    {isFlavorOutOfStock && (
+                      <span className="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full z-10">
+                        Out of Stock
+                      </span>
+                    )}
+                    <div className="relative w-24 h-24 mb-3">
+                      <Image src={flavor.image} alt={flavor.name} fill className="object-contain" />
+                    </div>
+                    <span className="font-bold text-[13px] text-cream group-hover:text-sand mb-1">{flavor.name}</span>
+                    <div
+                      className={`mt-auto inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                        isFlavorOutOfStock
+                          ? "bg-red-500/20 text-red-300"
+                          : remainingStock <= 0
+                          ? "bg-cream/10 text-cream/40"
+                          : "text-sand bg-cream/10"
+                      }`}
+                    >
+                      {isFlavorOutOfStock ? (
+                        <span>Out of Stock</span>
+                      ) : remainingStock <= 0 ? (
+                        <span>Max Stock ({countInBox})</span>
+                      ) : (
+                        <>
+                          <Plus className="w-3 h-3" /> Add Can
+                        </>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

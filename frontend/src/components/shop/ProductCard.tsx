@@ -46,10 +46,55 @@ export function ProductCard({ product }: ProductCardProps) {
   const [selectedPackIndex, setSelectedPackIndex] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
   const [is3DModalOpen, setIs3DModalOpen] = useState(false);
+  const [dbStock, setDbStock] = useState<number | null>(null);
+  const [allDbProducts, setAllDbProducts] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success && Array.isArray(resData.data)) {
+          setAllDbProducts(resData.data);
+          const matched = resData.data.find(
+            (p: any) =>
+              p.name.toLowerCase().includes(product.id.replace("-", " ")) ||
+              product.id.toLowerCase().includes(p.name.toLowerCase().replace(/\s+/g, "-")) ||
+              p.sku.toLowerCase().includes(product.id.substring(0, 4))
+          );
+          if (matched && typeof matched.stock === "number") {
+            setDbStock(matched.stock);
+          }
+        }
+      })
+      .catch((err) => console.error("Failed to load product stock for card", err));
+  }, [product.id]);
 
   const selectedPack = product.packPrices[selectedPackIndex];
 
+  const getRequiredCans = (pack: { size: string; cans?: number }) => {
+    if (pack.cans) return pack.cans;
+    const m = pack.size.match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : 4;
+  };
+
+  const selectedRequiredCans = getRequiredCans(selectedPack);
+
+  const isVariety = product.id.includes("variety") || product.name.toLowerCase().includes("variety");
+
+  const isPackOutOfStock = (packReqCans: number) => {
+    if (allDbProducts.length === 0 && dbStock === null) return false;
+    if (isVariety && allDbProducts.length > 0) {
+      const reqPerFlavor = Math.max(1, Math.floor(packReqCans / 4));
+      return allDbProducts.some((p: any) => typeof p.stock === "number" && p.stock < reqPerFlavor);
+    } else {
+      return dbStock !== null && dbStock < packReqCans;
+    }
+  };
+
+  const isSelectedOutOfStock = isPackOutOfStock(selectedRequiredCans);
+
   const handleAddToCart = () => {
+    if (isSelectedOutOfStock) return;
     addToCart({
       productId: product.id,
       name: product.name,
@@ -64,7 +109,6 @@ export function ProductCard({ product }: ProductCardProps) {
     }, 1800);
   };
 
-
   return (
     <>
       <motion.div
@@ -74,15 +118,17 @@ export function ProductCard({ product }: ProductCardProps) {
       >
         {/* Top Badges */}
         <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
-          {product.badge ? (
+          {isSelectedOutOfStock ? (
+            <span className="bg-red-600 text-white text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full shadow-sm pointer-events-auto">
+              Out of Stock
+            </span>
+          ) : product.badge ? (
             <span className="bg-navy text-sand text-[10px] font-black tracking-widest uppercase px-3 py-1 rounded-full shadow-sm pointer-events-auto">
               {product.badge}
             </span>
           ) : (
             <span />
           )}
-
-          {/* Removed 3D button as per request */}
         </div>
 
         {/* Product Image Container */}
@@ -129,20 +175,29 @@ export function ProductCard({ product }: ProductCardProps) {
             <div className="grid grid-cols-4 gap-1 mb-5">
               {product.packPrices.map((pack, idx) => {
                 const isSelected = selectedPackIndex === idx;
+                const reqCans = getRequiredCans(pack);
+                const isPackDisabled = isPackOutOfStock(reqCans);
+
                 return (
                   <button
                     key={idx}
                     onClick={() => setSelectedPackIndex(idx)}
                     className={`py-2 px-1 rounded-xl text-center transition-all cursor-pointer border ${
-                      isSelected
+                      isPackDisabled
+                        ? "bg-gray-100 text-gray-400 border-gray-200 line-through opacity-70"
+                        : isSelected
                         ? "bg-navy text-white border-navy font-bold shadow-sm"
                         : "bg-cream/50 text-navy/80 border-navy/10 hover:bg-cream hover:border-navy/30"
                     }`}
                   >
                     <div className="text-[11px] leading-tight font-semibold whitespace-nowrap overflow-hidden text-ellipsis">{pack.size.replace('Pack of', 'Pack')}</div>
-                    <div className={`text-[10px] mt-0.5 ${isSelected ? "text-sand" : "text-ink/50"}`}>
-                      ₹{pack.price}
-                    </div>
+                    {isPackDisabled ? (
+                      <div className="text-[9px] mt-0.5 font-bold text-red-500 uppercase">Out</div>
+                    ) : (
+                      <div className={`text-[10px] mt-0.5 ${isSelected ? "text-sand" : "text-ink/50"}`}>
+                        ₹{pack.price}
+                      </div>
+                    )}
                   </button>
                 );
               })}
@@ -159,14 +214,18 @@ export function ProductCard({ product }: ProductCardProps) {
 
               <button
                 onClick={handleAddToCart}
-                disabled={isAdded}
-                className={`flex-1 py-3 px-4 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
-                  isAdded
-                    ? "bg-[#73A642] text-white"
-                    : "bg-navy text-cream hover:bg-navy/90 hover:scale-[1.02]"
+                disabled={isAdded || isSelectedOutOfStock}
+                className={`flex-1 py-3 px-4 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 transition-all shadow-md ${
+                  isSelectedOutOfStock
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed border border-gray-300"
+                    : isAdded
+                    ? "bg-[#73A642] text-white cursor-pointer"
+                    : "bg-navy text-cream hover:bg-navy/90 hover:scale-[1.02] cursor-pointer"
                 }`}
               >
-                {isAdded ? (
+                {isSelectedOutOfStock ? (
+                  <span>Out of Stock</span>
+                ) : isAdded ? (
                   <>
                     <Check className="w-4 h-4" />
                     <span>Added to Box</span>

@@ -44,6 +44,10 @@ export function Navbar() {
               Shop All
               <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-coral transition-all duration-250 ease-out group-hover:w-full"></span>
             </Link>
+            <Link href="/track-order" className="text-[15px] font-semibold text-navy relative group">
+              Track Order
+              <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-coral transition-all duration-250 ease-out group-hover:w-full"></span>
+            </Link>
             <Link href="/contact-us" className="text-[15px] font-semibold text-navy relative group">
               Contact us
               <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-coral transition-all duration-250 ease-out group-hover:w-full"></span>
@@ -126,6 +130,16 @@ export function Navbar() {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <span>Shop All</span>
+              <span className="text-coral opacity-0 -translate-x-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">→</span>
+            </Link>
+            <div className="h-px w-full bg-navy/10"></div>
+
+            <Link
+              href="/track-order"
+              className="text-4xl font-black text-navy font-fraunces flex items-center justify-between group"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span>Track Order</span>
               <span className="text-coral opacity-0 -translate-x-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">→</span>
             </Link>
             <div className="h-px w-full bg-navy/10"></div>

@@ -5,6 +5,7 @@ import { Order, OrderStatus, PaymentStatus } from "@/models/Order";
 import { Customer } from "@/models/Customer";
 import { Settings } from "@/models/Settings";
 import { deductInventoryForOrder } from "@/lib/inventory";
+import { sendOrderConfirmationEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -67,6 +68,21 @@ export async function POST(request: Request) {
       }
 
       await order.save();
+
+      // 3. Send Order Confirmation Email (non-blocking)
+      sendOrderConfirmationEmail({
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        orderNumber: order.orderNumber,
+        items: order.items.map((item: any) => ({
+          name: item.name,
+          size: item.size,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        pricing: order.pricing,
+        shippingAddress: order.shippingAddress,
+      }).catch((err) => console.error("Email send failed (non-blocking):", err));
     }
 
     return NextResponse.json({

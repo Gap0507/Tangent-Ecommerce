@@ -36,8 +36,8 @@ export default function CheckoutPage() {
   const [fullName, setFullName] = useState("");
   const [address, setAddress] = useState("");
   const [apartment, setApartment] = useState("");
-  const [selectedStateCode, setSelectedStateCode] = useState("KA");
-  const [stateName, setStateName] = useState("Karnataka");
+  const [selectedStateCode, setSelectedStateCode] = useState("GJ");
+  const [stateName, setStateName] = useState("Gujarat");
   const [city, setCity] = useState("");
   const [pincode, setPincode] = useState("");
   const [landmark, setLandmark] = useState("");
@@ -52,11 +52,28 @@ export default function CheckoutPage() {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponMessage, setCouponMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
-  const [shippingFee, setShippingFee] = useState<number | null>(subtotal >= 1999 ? 0 : null);
+  const [shippingFee, setShippingFee] = useState<number | null>(null);
   const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [completedOrder, setCompletedOrder] = useState<any>(null);
+  
+  const [storeSettings, setStoreSettings] = useState<any>(null);
+
+  // Fetch store settings on mount
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setStoreSettings(data.data);
+          if (!data.data.useRealTimeRates) {
+            setShippingFee(data.data.flatShippingRate ?? 49);
+          }
+        }
+      })
+      .catch((err) => console.error("Error fetching settings:", err));
+  }, []);
 
   // Dynamically load Razorpay SDK script
   useEffect(() => {
@@ -71,9 +88,15 @@ export default function CheckoutPage() {
     };
   }, []);
 
-  // Update shipping when pincode changes
+  // Update shipping when pincode or settings change
   useEffect(() => {
-    if (pincode && pincode.length >= 6) {
+    if (storeSettings && !storeSettings.useRealTimeRates) {
+      setShippingFee(storeSettings.flatShippingRate ?? 49);
+      setEtd("");
+      return;
+    }
+
+    if (storeSettings?.useRealTimeRates && pincode && pincode.length >= 6) {
       setIsCalculatingShipping(true);
       fetch("/api/shipping/calculate", {
         method: "POST",
@@ -83,22 +106,18 @@ export default function CheckoutPage() {
         .then((res) => res.json())
         .then((data) => {
           console.log("Shiprocket Calculate Response:", data);
-          if (data.success) {
-            setShippingFee(subtotal >= 1999 ? 0 : data.data.shippingCost);
-            if (data.data.etd) {
-              setEtd(data.data.etd);
-            } else {
-              setEtd("");
-            }
+          if (data.success && typeof data.data.shippingCost === "number") {
+            setShippingFee(data.data.shippingCost);
+            setEtd(data.data.etd || "");
           }
         })
         .catch((err) => console.error("Error fetching shipping rates:", err))
         .finally(() => setIsCalculatingShipping(false));
-    } else {
-      setShippingFee(subtotal >= 1999 ? 0 : null);
+    } else if (storeSettings?.useRealTimeRates) {
+      setShippingFee(null);
       setEtd("");
     }
-  }, [pincode, subtotal, items]);
+  }, [pincode, subtotal, items, storeSettings]);
 
   // Apply Coupon
   const handleApplyCoupon = async () => {
@@ -523,17 +542,14 @@ export default function CheckoutPage() {
                 <div className="sm:text-right pl-[4.5rem] sm:pl-0">
                   {isCalculatingShipping ? (
                     <Loader2 className="w-4 h-4 animate-spin text-navy" />
-                  ) : shippingFee === 0 ? (
-                    <>
-                      <span className="font-black text-[#166534] text-[15px] block">FREE</span>
-                      <span className="text-[11px] text-ink/50 font-medium">Unlocked (Orders ₹1999+ ship FREE)</span>
-                    </>
                   ) : shippingFee === null ? (
                     <span className="text-[12px] font-bold text-[#B45309] block leading-tight">
                       Please enter your state, city,<br />and PIN to calculate shipping
                     </span>
+                  ) : shippingFee === 0 ? (
+                    <span className="font-black text-[#166534] text-[15px]">FREE</span>
                   ) : (
-                    <span className="font-black text-navy text-[15px]">₹{shippingFee}</span>
+                    <span className="font-black text-navy text-[15px]">₹{shippingFee.toFixed(2)}</span>
                   )}
                 </div>
               </div>
@@ -607,14 +623,14 @@ export default function CheckoutPage() {
               </div>
 
               {/* Items List */}
-              <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto no-scrollbar pr-1">
+              <div className="space-y-4 mb-6">
                 {items.length === 0 ? (
                   <p className="text-[13px] text-ink/50 py-4 text-center">Your cart is empty.</p>
                 ) : (
                   items.map((item) => (
                     <div key={item.id} className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-[#FAF7F2] border border-black/5 p-2 flex items-center justify-center shrink-0">
-                        <Image src={item.image} alt={item.name} width={40} height={40} className="object-contain" />
+                      <div className="relative w-16 h-16 rounded-2xl bg-[#FAF7F2] border border-black/5 flex items-center justify-center shrink-0 overflow-hidden">
+                        <Image src={item.image} alt={item.name} width={48} height={48} className="object-contain" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-navy text-[13px] truncate">{item.name}</h4>
@@ -641,10 +657,10 @@ export default function CheckoutPage() {
                 )}
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-ink/70">Shipping</span>
-                  {shippingFee === 0 ? (
-                    <span className="font-black text-[#166534]">FREE</span>
-                  ) : shippingFee === null ? (
+                  {shippingFee === null ? (
                     <span className="font-bold text-[#B45309] text-[11px]">Calculated below</span>
+                  ) : shippingFee === 0 ? (
+                    <span className="font-black text-[#166534]">FREE</span>
                   ) : (
                     <span className="font-bold text-navy">₹{shippingFee.toFixed(2)}</span>
                   )}

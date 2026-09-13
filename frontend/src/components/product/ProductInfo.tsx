@@ -13,20 +13,28 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [packPrices, setPackPrices] = useState(product.packPrices);
+  const [dbStock, setDbStock] = useState<number | null>(null);
+  const [allDbProducts, setAllDbProducts] = useState<any[]>([]);
 
   useEffect(() => {
     fetch("/api/products")
       .then((res) => res.json())
       .then((resData) => {
         if (resData.success && Array.isArray(resData.data)) {
+          setAllDbProducts(resData.data);
           const dbProd = resData.data.find(
             (p: any) =>
               p.name.toLowerCase().includes(product.id.replace("-", " ")) ||
               product.id.toLowerCase().includes(p.name.toLowerCase().replace(/\s+/g, "-")) ||
               p.sku.toLowerCase().includes(product.id.substring(0, 4))
           );
-          if (dbProd && dbProd.price) {
-            setPackPrices(calculatePackPrices(dbProd.price));
+          if (dbProd) {
+            if (dbProd.price) {
+              setPackPrices(calculatePackPrices(dbProd.price));
+            }
+            if (typeof dbProd.stock === "number") {
+              setDbStock(dbProd.stock);
+            }
           }
         }
       })
@@ -37,7 +45,29 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
   const totalPrice = selectedPack.price * quantity;
   const originalTotal = selectedPack.originalPrice ? selectedPack.originalPrice * quantity : undefined;
 
+  const getRequiredCans = (sizeStr: string) => {
+    const match = sizeStr.match(/(\d+)/);
+    return match ? parseInt(match[1], 10) : 4;
+  };
+
+  const selectedPackCans = getRequiredCans(selectedPack.size);
+
+  const isVariety = product.id.includes("variety") || product.name.toLowerCase().includes("variety");
+
+  const isPackOutOfStock = (packReqCans: number, qty: number = 1) => {
+    const cansNeeded = packReqCans * qty;
+    if (isVariety && allDbProducts.length > 0) {
+      const cansPerFlavorNeeded = Math.max(1, Math.floor(cansNeeded / 4));
+      return allDbProducts.some((p: any) => typeof p.stock === "number" && p.stock < cansPerFlavorNeeded);
+    } else {
+      return dbStock !== null && dbStock < cansNeeded;
+    }
+  };
+
+  const isSelectedOutOfStock = isPackOutOfStock(selectedPackCans, quantity);
+
   const handleAddToCart = () => {
+    if (isSelectedOutOfStock) return;
     addToCart({
       productId: product.id,
       name: product.name,
@@ -51,6 +81,7 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
   };
 
   const handleBuyNow = () => {
+    if (isSelectedOutOfStock) return;
     addToCart({
       productId: product.id,
       name: product.name,
@@ -69,11 +100,20 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
     <div className="flex flex-col h-full">
       {/* Badge & Title */}
       <div className="mb-3">
-        {product.badge && (
+        {dbStock !== null && dbStock === 0 ? (
+          <span className="inline-block bg-red-100 text-red-700 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2">
+            Out of Stock
+          </span>
+        ) : isSelectedOutOfStock ? (
+          <span className="inline-block bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2">
+            Out of Stock for {selectedPack.size} ({dbStock} Cans Remaining)
+          </span>
+        ) : product.badge ? (
           <span className="inline-block bg-[#E5EDCD] text-navy text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2">
             {product.badge}
           </span>
-        )}
+        ) : null}
+
         <h1 className="font-fraunces font-black text-navy text-[32px] md:text-[42px] leading-tight mb-1">
           {product.name}
         </h1>
@@ -113,6 +153,9 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
         <div className="flex flex-wrap gap-2 md:gap-3">
           {packPrices.map((pack, idx) => {
             const isSelected = selectedPackIdx === idx;
+            const packCans = getRequiredCans(pack.size);
+            const isPackDisabled = isPackOutOfStock(packCans, 1);
+
             return (
               <button
                 key={idx}
@@ -121,17 +164,21 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
                   setQuantity(1);
                 }}
                 className={`relative px-4 py-2.5 rounded-xl border transition-all cursor-pointer flex-1 md:flex-none text-center ${
-                  isSelected 
+                  isPackDisabled
+                    ? "bg-gray-100 text-gray-400 border-gray-200 line-through opacity-70"
+                    : isSelected 
                     ? "bg-navy text-white border-navy" 
                     : "bg-transparent text-navy border-navy/20 hover:border-navy"
                 }`}
               >
                 <div className="text-[13px] font-bold">{pack.size}</div>
-                {pack.savings && (
+                {isPackDisabled ? (
+                  <div className="text-[9px] mt-0.5 font-bold text-red-500 uppercase">Out of Stock</div>
+                ) : pack.savings ? (
                   <div className={`text-[10px] mt-0.5 ${isSelected ? 'text-emerald-400' : 'text-[#6A9A4A]'}`}>
                     {pack.savings}
                   </div>
-                )}
+                ) : null}
               </button>
             );
           })}
@@ -173,14 +220,18 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
       <div className="flex gap-3 mb-5">
         <button
           onClick={handleAddToCart}
-          disabled={isAdded}
-          className={`flex-1 h-[54px] rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all cursor-pointer ${
-            isAdded
-              ? "bg-[#6A9A4A] text-white"
-              : "bg-navy text-white hover:bg-navy/90"
+          disabled={isAdded || isSelectedOutOfStock}
+          className={`flex-1 h-[54px] rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all ${
+            isSelectedOutOfStock
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed border border-gray-300"
+              : isAdded
+              ? "bg-[#6A9A4A] text-white cursor-pointer"
+              : "bg-navy text-white hover:bg-navy/90 cursor-pointer"
           }`}
         >
-          {isAdded ? (
+          {isSelectedOutOfStock ? (
+            <span>OUT OF STOCK</span>
+          ) : isAdded ? (
             <>
               <Check className="w-5 h-5" /> Added to Cart
             </>
@@ -192,9 +243,14 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
         </button>
         <button
           onClick={handleBuyNow}
-          className="flex-1 h-[54px] rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all cursor-pointer bg-white text-navy border border-navy/15 hover:border-navy hover:bg-navy/5 shadow-sm"
+          disabled={isSelectedOutOfStock}
+          className={`flex-1 h-[54px] rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all border ${
+            isSelectedOutOfStock
+              ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+              : "bg-white text-navy border-navy/15 hover:border-navy hover:bg-navy/5 cursor-pointer shadow-sm"
+          }`}
         >
-          Buy Now <Zap className="w-4 h-4" />
+          {isSelectedOutOfStock ? "Unavailable" : <>Buy Now <Zap className="w-4 h-4" /></>}
         </button>
       </div>
 

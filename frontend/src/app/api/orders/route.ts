@@ -4,6 +4,7 @@ import { Order, OrderStatus, PaymentStatus } from "@/models/Order";
 import { Product } from "@/models/Product";
 import { Settings } from "@/models/Settings";
 import { getSession } from "@/lib/auth";
+import { findMatchingProduct } from "@/lib/inventory";
 
 export async function GET(request: Request) {
   try {
@@ -47,25 +48,20 @@ export async function POST(request: Request) {
     // Ensure items have a valid ObjectId for MongoDB ref & preserve pack size info
     const parsedItems = data.items.map((item: any) => {
       let validProductId = item.productId;
-      
-      // Look up matching product in MongoDB by SKU or Name if invalid ID
-      if (!validProductId || (typeof validProductId === "string" && !validProductId.match(/^[0-9a-fA-F]{24}$/))) {
-        const cleanItemName = item.name ? item.name.replace(/\s*\([^)]*\)/g, "").trim() : "";
-        const matched = dbProducts.find((p: any) =>
-          (item.sku && p.sku.toLowerCase() === item.sku.toLowerCase()) ||
-          (cleanItemName && p.name.toLowerCase().includes(cleanItemName.toLowerCase())) ||
-          (item.productId && p.sku.toLowerCase().includes(String(item.productId).toLowerCase()))
-        );
-        if (matched) {
-          validProductId = matched._id;
-        } else {
-          validProductId = "650000000000000000000001";
-        }
+      let matchedSku = item.sku;
+
+      // Look up matching product in MongoDB using robust normalization
+      const matched = findMatchingProduct(item.name || item.sku || String(item.productId), dbProducts);
+      if (matched) {
+        validProductId = matched._id;
+        matchedSku = matched.sku;
+      } else if (!validProductId || (typeof validProductId === "string" && !validProductId.match(/^[0-9a-fA-F]{24}$/))) {
+        validProductId = "650000000000000000000001";
       }
 
       return {
         productId: validProductId,
-        sku: item.sku || item.productId || "TAN-SKU",
+        sku: matchedSku || "TAN-SKU",
         name: item.name,
         size: item.size || "Pack of 4",
         quantity: item.quantity,
@@ -73,6 +69,29 @@ export async function POST(request: Request) {
         image: item.image,
       };
     });
+
+    // Validate stock availability before allowing order creation
+    for (const item of parsedItems) {
+      const matched = findMatchingProduct(item.name || item.sku || String(item.productId), dbProducts);
+      if (matched) {
+        let cansPerPack = 1;
+        const packMatch = (item.size || "").match(/Pack of (\d+)/i) || (item.size || "").match(/(\d+)\s*cans?/i);
+        if (packMatch && packMatch[1]) {
+          cansPerPack = parseInt(packMatch[1], 10);
+        }
+        const requiredCans = cansPerPack * (item.quantity || 1);
+        const availableStock = typeof matched.stock === "number" ? matched.stock : 0;
+        
+        if (availableStock < requiredCans) {
+          return NextResponse.json({
+            success: false,
+            error: availableStock === 0 
+              ? `Sorry, ${matched.name} is currently Out of Stock!` 
+              : `Sorry, ${matched.name} (${item.size}) requires ${requiredCans} cans, but only ${availableStock} cans remain in stock.`,
+          }, { status: 400 });
+        }
+      }
+    }
 
     const razorpayKeyId = settings?.razorpayKeyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
     const razorpayKeySecret = settings?.razorpayKeySecret || process.env.RAZORPAY_KEY_SECRET;

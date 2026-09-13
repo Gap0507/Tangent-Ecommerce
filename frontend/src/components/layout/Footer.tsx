@@ -19,30 +19,31 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col">
-          <h5 className="text-[13px] tracking-[.06em] uppercase text-sand mb-4">Shop</h5>
-          <Link href="#" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">All Energy</Link>
-          <Link href="#" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Merch</Link>
-          <Link href="#" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Subscriptions</Link>
+          <h5 className="text-[13px] tracking-[.06em] uppercase text-sand mb-4">Shop Flavors</h5>
+          <Link href="/shop/watermelon-mint" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Buy Watermelon & Mint</Link>
+          <Link href="/shop/watermelon-cranberry" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Buy Watermelon Cranberry</Link>
+          <Link href="/shop/yuzu-mint" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Buy Yuzu Mint</Link>
+          <Link href="/shop/guava-chilli" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Buy Guava Chilli</Link>
         </div>
 
         <div className="flex flex-col">
-          <h5 className="text-[13px] tracking-[.06em] uppercase text-sand mb-4">Support</h5>
-          <Link href="#" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">FAQ</Link>
-          <Link href="#" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Shipping & Returns</Link>
-          <Link href="#" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Contact Us</Link>
+          <h5 className="text-[13px] tracking-[.06em] uppercase text-sand mb-4">Support & More</h5>
+          <Link href="/track-order" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Track Your Order</Link>
+          <Link href="/contact-us" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Contact Us</Link>
+          <Link href="/blog" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Our Blog</Link>
         </div>
 
         <div className="flex flex-col">
           <h5 className="text-[13px] tracking-[.06em] uppercase text-sand mb-4">Stay in the loop</h5>
           <p className="text-[14.5px] text-cream/80 mb-3">Sign up for updates, new drops, and 10% off your first order.</p>
           <form className="flex mt-3 max-w-[320px]">
-            <input 
-              type="email" 
-              placeholder="Your email address" 
+            <input
+              type="email"
+              placeholder="Your email address"
               className="flex-1 border-none py-3 px-4 rounded-l-full text-[14px] bg-white text-navy focus:outline-none"
             />
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="bg-sand text-navy font-bold py-3 px-5 rounded-r-full text-[14px] hover:bg-sand-deep transition-colors cursor-pointer"
             >
               Join
@@ -56,19 +57,19 @@ export function Footer() {
         <div className="flex gap-4">
           <Link href="#" className="hover:text-cream">
             <svg className="w-[18px] h-[18px] stroke-current" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+              <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+              <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
             </svg>
           </Link>
           <Link href="#" className="hover:text-cream">
             <svg className="w-[18px] h-[18px] stroke-current" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/>
+              <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
             </svg>
           </Link>
           <Link href="#" className="hover:text-cream">
             <svg className="w-[18px] h-[18px] stroke-current" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
             </svg>
           </Link>
         </div>

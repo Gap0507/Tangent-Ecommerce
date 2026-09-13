@@ -10,6 +10,7 @@ export function VarietyPackShowcase() {
   const { addToCart } = useCart();
   const [isAdded, setIsAdded] = useState(false);
   const [packPrice, setPackPrice] = useState(430);
+  const [isOutOfStock, setIsOutOfStock] = useState(false);
 
   React.useEffect(() => {
     fetch("/api/products")
@@ -20,12 +21,17 @@ export function VarietyPackShowcase() {
           if (sumPrices > 0) {
             setPackPrice(sumPrices);
           }
+          const hasOutOfStockFlavor = resData.data.some((item: any) => typeof item.stock === "number" && item.stock < 1);
+          if (hasOutOfStockFlavor) {
+            setIsOutOfStock(true);
+          }
         }
       })
       .catch((err) => console.error("Failed to load inventory price for variety pack", err));
   }, []);
 
   const handleBuyNow = () => {
+    if (isOutOfStock) return;
     addToCart({
       productId: "variety-pack-4",
       name: "Tangent Variety Pack",
@@ -103,9 +109,15 @@ export function VarietyPackShowcase() {
             <div className="lg:w-[400px] bg-gradient-to-br from-navy to-[#0A1F35] p-8 md:p-10 flex flex-col justify-center text-white relative overflow-hidden">
 
               <div className="relative z-10">
-                <span className="inline-block bg-sand/20 text-sand text-[11px] font-black tracking-widest uppercase px-3 py-1 rounded-full mb-5">
-                  Best Value
-                </span>
+                {isOutOfStock ? (
+                  <span className="inline-block bg-red-600 text-white text-[11px] font-black tracking-widest uppercase px-3 py-1 rounded-full mb-5">
+                    Out of Stock
+                  </span>
+                ) : (
+                  <span className="inline-block bg-sand/20 text-sand text-[11px] font-black tracking-widest uppercase px-3 py-1 rounded-full mb-5">
+                    Best Value
+                  </span>
+                )}
 
                 <h3 className="font-fraunces font-black text-[28px] md:text-[36px] leading-tight mb-2">
                   Tangent<br />
@@ -162,13 +174,18 @@ export function VarietyPackShowcase() {
                 {/* Buy Now Button */}
                 <button
                   onClick={handleBuyNow}
-                  className={`w-full py-4 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-xl ${
-                    isAdded
+                  disabled={isOutOfStock || isAdded}
+                  className={`w-full py-4 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2.5 transition-all shadow-xl ${
+                    isOutOfStock
+                      ? "bg-gray-800 text-gray-400 cursor-not-allowed border border-gray-700"
+                      : isAdded
                       ? "bg-emerald-500 text-white scale-[0.98]"
-                      : "bg-sand text-navy hover:bg-sand-deep hover:scale-[1.02]"
+                      : "bg-sand text-navy hover:bg-sand-deep hover:scale-[1.02] cursor-pointer"
                   }`}
                 >
-                  {isAdded ? (
+                  {isOutOfStock ? (
+                    <span>OUT OF STOCK</span>
+                  ) : isAdded ? (
                     <>
                       <Check className="w-5 h-5" />
                       <span>Added to Cart!</span>
