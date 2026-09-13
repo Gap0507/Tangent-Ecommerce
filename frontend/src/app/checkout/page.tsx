@@ -18,6 +18,7 @@ import {
   Loader2
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { State, City } from "country-state-city";
 
 declare global {
   interface Window {
@@ -35,17 +36,23 @@ export default function CheckoutPage() {
   const [fullName, setFullName] = useState("");
   const [address, setAddress] = useState("");
   const [apartment, setApartment] = useState("");
+  const [selectedStateCode, setSelectedStateCode] = useState("KA");
+  const [stateName, setStateName] = useState("Karnataka");
   const [city, setCity] = useState("");
-  const [state, setState] = useState("Karnataka");
   const [pincode, setPincode] = useState("");
   const [landmark, setLandmark] = useState("");
+
+  const indianStates = State.getStatesOfCountry("IN");
+  const citiesOfSelectedState = City.getCitiesOfState("IN", selectedStateCode);
+
+  const [etd, setEtd] = useState("");
 
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponMessage, setCouponMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
-  const [shippingFee, setShippingFee] = useState(subtotal >= 1999 ? 0 : 49);
+  const [shippingFee, setShippingFee] = useState<number | null>(subtotal >= 1999 ? 0 : null);
   const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -71,18 +78,27 @@ export default function CheckoutPage() {
       fetch("/api/shipping/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pincode, subtotal }),
+        body: JSON.stringify({ pincode, subtotal, items }),
       })
         .then((res) => res.json())
         .then((data) => {
+          console.log("Shiprocket Calculate Response:", data);
           if (data.success) {
             setShippingFee(subtotal >= 1999 ? 0 : data.data.shippingCost);
+            if (data.data.etd) {
+              setEtd(data.data.etd);
+            } else {
+              setEtd("");
+            }
           }
         })
         .catch((err) => console.error("Error fetching shipping rates:", err))
         .finally(() => setIsCalculatingShipping(false));
+    } else {
+      setShippingFee(subtotal >= 1999 ? 0 : null);
+      setEtd("");
     }
-  }, [pincode, subtotal]);
+  }, [pincode, subtotal, items]);
 
   // Apply Coupon
   const handleApplyCoupon = async () => {
@@ -107,7 +123,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const finalTotal = Math.max(0, subtotal - couponDiscount + shippingFee);
+  const finalTotal = Math.max(0, subtotal - couponDiscount + (shippingFee || 0));
 
   // Handle Order Submission
   const handlePlaceOrder = async (e: React.FormEvent) => {
@@ -117,8 +133,13 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (!fullName || !email || !phone || !address || !city || !state || !pincode) {
+    if (!fullName || !email || !phone || !address || !city || !stateName || !pincode) {
       setErrorMsg("Please fill in all required shipping address fields.");
+      return;
+    }
+
+    if (shippingFee === null && subtotal < 1999) {
+      setErrorMsg("Please enter a valid PIN code to calculate shipping before placing your order.");
       return;
     }
 
@@ -134,7 +155,7 @@ export default function CheckoutPage() {
         shippingAddress: {
           street: `${address}${apartment ? `, ${apartment}` : ""}`,
           city,
-          state,
+          state: stateName,
           pincode,
           country: "India",
         },
@@ -149,7 +170,7 @@ export default function CheckoutPage() {
         })),
         pricing: {
           subtotal,
-          shipping: shippingFee,
+          shipping: shippingFee || 0,
           discount: couponDiscount,
           total: finalTotal,
         },
@@ -420,29 +441,37 @@ export default function CheckoutPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[13px] font-bold text-navy mb-1.5">City *</label>
-                    <input
-                      type="text"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="City name"
-                      required
-                      className="w-full bg-transparent border border-navy/20 rounded-xl px-4 py-3 text-[14px] text-navy focus:outline-none focus:border-navy transition-colors"
-                    />
-                  </div>
-                  <div>
                     <label className="block text-[13px] font-bold text-navy mb-1.5">State *</label>
                     <select
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
+                      value={selectedStateCode}
+                      onChange={(e) => {
+                        const code = e.target.value;
+                        setSelectedStateCode(code);
+                        const sName = indianStates.find(s => s.isoCode === code)?.name || "";
+                        setStateName(sName);
+                        setCity(""); // Reset city when state changes
+                      }}
+                      className="w-full bg-transparent border border-navy/20 rounded-xl px-4 py-3 text-[14px] text-navy focus:outline-none focus:border-navy transition-colors"
+                      required
+                    >
+                      <option value="">Select State</option>
+                      {indianStates.map((s) => (
+                        <option key={s.isoCode} value={s.isoCode}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-bold text-navy mb-1.5">City *</label>
+                    <select
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      required
                       className="w-full bg-transparent border border-navy/20 rounded-xl px-4 py-3 text-[14px] text-navy focus:outline-none focus:border-navy transition-colors"
                     >
-                      <option value="Karnataka">Karnataka</option>
-                      <option value="Maharashtra">Maharashtra</option>
-                      <option value="Delhi">Delhi</option>
-                      <option value="Tamil Nadu">Tamil Nadu</option>
-                      <option value="Telangana">Telangana</option>
-                      <option value="Gujarat">Gujarat</option>
+                      <option value="">Select City</option>
+                      {citiesOfSelectedState.map((c) => (
+                        <option key={c.name} value={c.name}>{c.name}</option>
+                      ))}
                     </select>
                   </div>
                   <div>
@@ -488,6 +517,7 @@ export default function CheckoutPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-navy text-[14px]">Standard Express Delivery</h4>
+                    {etd && <p className="text-[12px] text-[#166534] font-bold mt-0.5">Expected Delivery: {etd}</p>}
                   </div>
                 </div>
                 <div className="sm:text-right pl-[4.5rem] sm:pl-0">
@@ -498,6 +528,10 @@ export default function CheckoutPage() {
                       <span className="font-black text-[#166534] text-[15px] block">FREE</span>
                       <span className="text-[11px] text-ink/50 font-medium">Unlocked (Orders ₹1999+ ship FREE)</span>
                     </>
+                  ) : shippingFee === null ? (
+                    <span className="text-[12px] font-bold text-[#B45309] block leading-tight">
+                      Please enter your state, city,<br />and PIN to calculate shipping
+                    </span>
                   ) : (
                     <span className="font-black text-navy text-[15px]">₹{shippingFee}</span>
                   )}
@@ -609,6 +643,8 @@ export default function CheckoutPage() {
                   <span className="font-medium text-ink/70">Shipping</span>
                   {shippingFee === 0 ? (
                     <span className="font-black text-[#166534]">FREE</span>
+                  ) : shippingFee === null ? (
+                    <span className="font-bold text-[#B45309] text-[11px]">Calculated below</span>
                   ) : (
                     <span className="font-bold text-navy">₹{shippingFee.toFixed(2)}</span>
                   )}

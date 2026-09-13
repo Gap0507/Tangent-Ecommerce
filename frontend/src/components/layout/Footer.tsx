@@ -1,11 +1,18 @@
 import Link from "next/link";
+import Image from "next/image";
+
 export function Footer() {
   return (
     <footer className="bg-navy text-cream pt-[70px] px-10 pb-[30px]">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 max-w-[1180px] mx-auto mb-[50px]">
         <div className="flex flex-col">
-          {/* Logo Placeholder */}
-          <span className="text-cream font-fraunces font-black text-2xl tracking-tighter mb-4">TANGENT</span>
+          <Image
+            src="/tangent-logo.avif"
+            alt="Tangent Logo"
+            width={160}
+            height={40}
+            className="h-[40px] w-auto object-contain object-left brightness-0 invert mb-6"
+          />
           <p className="text-[14px] text-cream/65 max-w-[260px] leading-[1.6]">
             Stay Sharp. Stay Tangent. Elevating everyday energy with unmatched taste and focus.
           </p>

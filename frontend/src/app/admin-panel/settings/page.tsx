@@ -22,6 +22,18 @@ export default function SettingsPage() {
     storeEmail: "hello@tangentdrinks.com",
     storePhone: "+9724565952",
     storeName: "Tangent Drinks",
+    pack4Weight: 1.5,
+    pack4Length: 25,
+    pack4Breadth: 18,
+    pack4Height: 12,
+    pack8Weight: 3.0,
+    pack8Length: 30,
+    pack8Breadth: 22,
+    pack8Height: 15,
+    pack24Weight: 9.0,
+    pack24Length: 45,
+    pack24Breadth: 30,
+    pack24Height: 25,
   });
 
   // Fetch settings from API on mount
@@ -41,6 +53,18 @@ export default function SettingsPage() {
             storeEmail: d.storeEmail || "hello@tangentdrinks.com",
             storePhone: d.storePhone || "+9724565952",
             storeName: d.storeName || "Tangent Drinks",
+            pack4Weight: d.pack4Weight ?? 1.5,
+            pack4Length: d.pack4Length ?? 25,
+            pack4Breadth: d.pack4Breadth ?? 18,
+            pack4Height: d.pack4Height ?? 12,
+            pack8Weight: d.pack8Weight ?? 3.0,
+            pack8Length: d.pack8Length ?? 30,
+            pack8Breadth: d.pack8Breadth ?? 22,
+            pack8Height: d.pack8Height ?? 15,
+            pack24Weight: d.pack24Weight ?? 9.0,
+            pack24Length: d.pack24Length ?? 45,
+            pack24Breadth: d.pack24Breadth ?? 30,
+            pack24Height: d.pack24Height ?? 25,
           });
         }
       })
@@ -73,6 +97,18 @@ export default function SettingsPage() {
           storeEmail: updated.storeEmail || "hello@tangentdrinks.com",
           storePhone: updated.storePhone || "+9724565952",
           storeName: updated.storeName || "Tangent Drinks",
+          pack4Weight: updated.pack4Weight ?? 1.5,
+          pack4Length: updated.pack4Length ?? 25,
+          pack4Breadth: updated.pack4Breadth ?? 18,
+          pack4Height: updated.pack4Height ?? 12,
+          pack8Weight: updated.pack8Weight ?? 3.0,
+          pack8Length: updated.pack8Length ?? 30,
+          pack8Breadth: updated.pack8Breadth ?? 22,
+          pack8Height: updated.pack8Height ?? 15,
+          pack24Weight: updated.pack24Weight ?? 9.0,
+          pack24Length: updated.pack24Length ?? 45,
+          pack24Breadth: updated.pack24Breadth ?? 30,
+          pack24Height: updated.pack24Height ?? 25,
         });
         setStatusMessage({ type: "success", text: "Settings saved successfully" });
       } else {
@@ -347,6 +383,101 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+
+        {/* 3.5. Package Dimensions Card */}
+        <div className="bg-white rounded-3xl p-6 border border-navy/10 shadow-sm flex flex-col md:col-span-1 xl:col-span-2">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 rounded-2xl bg-[#FFF6EE] flex items-center justify-center shrink-0 text-[#C2410C]">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 16V8C21 7.46957 20.7893 6.96086 20.4142 6.58579C20.0391 6.21071 19.5304 6 19 6H5C4.46957 6 3.96086 6.21071 3.58579 6.58579C3.21071 6.96086 3 7.46957 3 8V16C3 16.5304 3.21071 17.0391 3.58579 17.4142C3.96086 17.7893 4.46957 18 5 18H19C19.5304 18 20.0391 17.7893 20.4142 17.4142C20.7893 17.0391 21 16.5304 21 16Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M3 10H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M7 6V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-fraunces font-black text-[20px] text-navy">Shipping / Package Settings</h3>
+              <p className="text-[13px] text-ink/60 mt-0.5">Define weights and dimensions for standard Tangent pack sizes.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Pack of 4 */}
+            <div className="space-y-4 bg-cream/10 p-4 rounded-2xl border border-navy/5">
+              <h4 className="font-bold text-navy text-[15px]">Pack of 4</h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[12px] font-bold text-navy mb-1">Weight (kg)</label>
+                  <input type="number" step="0.1" value={formData.pack4Weight} onChange={(e) => setFormData({...formData, pack4Weight: Number(e.target.value)})} className="w-full bg-white border border-navy/15 rounded-xl py-2 px-3 text-[13px] focus:border-navy outline-none" />
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-bold text-navy/70 mb-1">L (cm)</label>
+                    <input type="number" value={formData.pack4Length} onChange={(e) => setFormData({...formData, pack4Length: Number(e.target.value)})} className="w-full bg-white border border-navy/15 rounded-xl py-2 px-2 text-[13px] focus:border-navy outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-navy/70 mb-1">B (cm)</label>
+                    <input type="number" value={formData.pack4Breadth} onChange={(e) => setFormData({...formData, pack4Breadth: Number(e.target.value)})} className="w-full bg-white border border-navy/15 rounded-xl py-2 px-2 text-[13px] focus:border-navy outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-navy/70 mb-1">H (cm)</label>
+                    <input type="number" value={formData.pack4Height} onChange={(e) => setFormData({...formData, pack4Height: Number(e.target.value)})} className="w-full bg-white border border-navy/15 rounded-xl py-2 px-2 text-[13px] focus:border-navy outline-none" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pack of 8 */}
+            <div className="space-y-4 bg-cream/10 p-4 rounded-2xl border border-navy/5">
+              <h4 className="font-bold text-navy text-[15px]">Pack of 8</h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[12px] font-bold text-navy mb-1">Weight (kg)</label>
+                  <input type="number" step="0.1" value={formData.pack8Weight} onChange={(e) => setFormData({...formData, pack8Weight: Number(e.target.value)})} className="w-full bg-white border border-navy/15 rounded-xl py-2 px-3 text-[13px] focus:border-navy outline-none" />
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-bold text-navy/70 mb-1">L (cm)</label>
+                    <input type="number" value={formData.pack8Length} onChange={(e) => setFormData({...formData, pack8Length: Number(e.target.value)})} className="w-full bg-white border border-navy/15 rounded-xl py-2 px-2 text-[13px] focus:border-navy outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-navy/70 mb-1">B (cm)</label>
+                    <input type="number" value={formData.pack8Breadth} onChange={(e) => setFormData({...formData, pack8Breadth: Number(e.target.value)})} className="w-full bg-white border border-navy/15 rounded-xl py-2 px-2 text-[13px] focus:border-navy outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-navy/70 mb-1">H (cm)</label>
+                    <input type="number" value={formData.pack8Height} onChange={(e) => setFormData({...formData, pack8Height: Number(e.target.value)})} className="w-full bg-white border border-navy/15 rounded-xl py-2 px-2 text-[13px] focus:border-navy outline-none" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pack of 24 */}
+            <div className="space-y-4 bg-cream/10 p-4 rounded-2xl border border-navy/5">
+              <h4 className="font-bold text-navy text-[15px]">Pack of 24</h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[12px] font-bold text-navy mb-1">Weight (kg)</label>
+                  <input type="number" step="0.1" value={formData.pack24Weight} onChange={(e) => setFormData({...formData, pack24Weight: Number(e.target.value)})} className="w-full bg-white border border-navy/15 rounded-xl py-2 px-3 text-[13px] focus:border-navy outline-none" />
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="block text-[11px] font-bold text-navy/70 mb-1">L (cm)</label>
+                    <input type="number" value={formData.pack24Length} onChange={(e) => setFormData({...formData, pack24Length: Number(e.target.value)})} className="w-full bg-white border border-navy/15 rounded-xl py-2 px-2 text-[13px] focus:border-navy outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-navy/70 mb-1">B (cm)</label>
+                    <input type="number" value={formData.pack24Breadth} onChange={(e) => setFormData({...formData, pack24Breadth: Number(e.target.value)})} className="w-full bg-white border border-navy/15 rounded-xl py-2 px-2 text-[13px] focus:border-navy outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-navy/70 mb-1">H (cm)</label>
+                    <input type="number" value={formData.pack24Height} onChange={(e) => setFormData({...formData, pack24Height: Number(e.target.value)})} className="w-full bg-white border border-navy/15 rounded-xl py-2 px-2 text-[13px] focus:border-navy outline-none" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
 
       </div>
 

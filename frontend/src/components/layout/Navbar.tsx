@@ -10,6 +10,7 @@ import { CartDropdown } from "@/components/cart/CartDropdown";
 export function Navbar() {
   const { totalItems, isCartOpen, setIsCartOpen } = useCart();
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const handleMouseEnter = () => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -28,10 +29,14 @@ export function Navbar() {
         ₹49 flat rate shipping <span className="opacity-55 mx-2">•</span> Orders ₹1999+ ship FREE
       </div>
 
-      <nav className="bg-cream grid grid-cols-3 items-center py-[18px] px-6 md:px-10 sticky top-0 z-50 border-b border-navy/10">
+      <nav className="bg-cream grid grid-cols-3 items-center py-[18px] px-6 md:px-10 sticky top-0 z-50 border-b border-navy/10 relative">
         {/* Left Links */}
         <div className="flex items-center justify-start gap-8">
-          <button className="md:hidden bg-transparent p-0.5 flex items-center" aria-label="Open Menu">
+          <button
+            className="md:hidden bg-transparent p-0.5 flex items-center cursor-pointer"
+            aria-label="Open Menu"
+            onClick={() => setIsMobileMenuOpen(true)}
+          >
             <Menu className="w-6 h-6 stroke-navy" />
           </button>
           <div className="hidden md:flex gap-8 items-center">
@@ -67,9 +72,6 @@ export function Navbar() {
 
         {/* Right Icons & Cart Popover */}
         <div className="flex items-center justify-end gap-[26px]">
-          <button className="bg-transparent p-0.5 flex items-center group cursor-pointer" aria-label="User Account">
-            <User className="w-[21px] h-[21px] stroke-navy group-hover:stroke-coral transition-colors" />
-          </button>
 
           {/* Cart Icon & Dropdown Trigger */}
           <div
@@ -91,12 +93,71 @@ export function Navbar() {
               )}
             </Link>
 
-
             {/* Cart Dropdown Modal */}
             <CartDropdown isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
           </div>
         </div>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[100] bg-cream flex flex-col pt-8 px-8 pb-8 md:hidden overflow-y-auto animate-in fade-in duration-200">
+          <div className="flex justify-between items-center mb-16">
+            <Image
+              src="/tangent-logo.avif"
+              alt="Tangent Logo"
+              width={140}
+              height={36}
+              className="h-[36px] w-auto object-contain"
+            />
+            <button
+              className="p-2 rounded-full hover:bg-navy/5 transition-colors cursor-pointer"
+              onClick={() => setIsMobileMenuOpen(false)}
+              aria-label="Close Menu"
+            >
+              <span className="text-navy font-bold text-2xl">✕</span>
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-8 flex-grow">
+            <Link
+              href="/shop"
+              className="text-4xl font-black text-navy font-fraunces flex items-center justify-between group"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span>Shop All</span>
+              <span className="text-coral opacity-0 -translate-x-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">→</span>
+            </Link>
+            <div className="h-px w-full bg-navy/10"></div>
+            
+            <Link
+              href="/contact-us"
+              className="text-4xl font-black text-navy font-fraunces flex items-center justify-between group"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span>Contact Us</span>
+              <span className="text-coral opacity-0 -translate-x-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">→</span>
+            </Link>
+            <div className="h-px w-full bg-navy/10"></div>
+
+            <Link
+              href="/blog"
+              className="text-4xl font-black text-navy font-fraunces flex items-center justify-between group"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <span>Blog</span>
+              <span className="text-coral opacity-0 -translate-x-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">→</span>
+            </Link>
+            <div className="h-px w-full bg-navy/10"></div>
+          </div>
+
+          <div className="mt-auto pt-10">
+            <p className="text-navy/60 text-[13px] font-bold mb-2 uppercase tracking-wider">Get in touch</p>
+            <a href="mailto:info@tangentfnb.com" className="text-navy font-semibold text-[15px] block mb-1">info@tangentfnb.com</a>
+            <a href="tel:9724565952" className="text-navy font-semibold text-[15px] block">+91 9724565952</a>
+          </div>
+        </div>
+      )}
     </>
   );
 }

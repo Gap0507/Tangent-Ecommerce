@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Search, Filter, Eye, Send, Clock, Truck, Wallet, Loader2 } from "lucide-react";
+import { Search, Filter, Eye, Send, Clock, Truck, Wallet, Loader2, AlertTriangle, CheckCircle2, X } from "lucide-react";
 
 interface OrderItem {
   productId: string;
@@ -95,10 +95,19 @@ export default function PendingOrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOrderModal, setSelectedOrderModal] = useState<Order | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "wallet" } | null>(null);
 
   useEffect(() => {
     fetchPendingOrders();
   }, []);
+
+  // Auto-dismiss success toasts after 5 seconds
+  useEffect(() => {
+    if (toast && toast.type === "success") {
+      const t = setTimeout(() => setToast(null), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [toast]);
 
   const fetchPendingOrders = async () => {
     try {
@@ -124,10 +133,11 @@ export default function PendingOrdersPage() {
 
   const handlePushToShiprocket = async (order: Order) => {
     if (order.paymentStatus !== 'PAID') {
-      alert("Cannot push unpaid orders to Shiprocket.");
+      setToast({ message: "Cannot push unpaid orders to Shiprocket.", type: "error" });
       return;
     }
     setProcessingId(order._id);
+    setToast(null);
     try {
       const res = await fetch('/api/shipments/create', {
         method: 'POST',
@@ -139,13 +149,24 @@ export default function PendingOrdersPage() {
       if (data.success) {
         // Remove from pending list once shipped
         setOrders((prev) => prev.filter((o) => o._id !== order._id));
-        alert(`Shipment created! AWB: ${data.data.awbCode}`);
+        setToast({
+          message: data.message || `Shipment created! AWB: ${data.data?.awbCode || "Pending"}`,
+          type: "success"
+        });
+      } else if (data.errorType === "INSUFFICIENT_BALANCE") {
+        setToast({
+          message: data.error,
+          type: "wallet"
+        });
       } else {
-        alert(data.error || "Failed to push to Shiprocket");
+        setToast({
+          message: data.error || "Failed to push to Shiprocket",
+          type: "error"
+        });
       }
     } catch (e) {
       console.error(e);
-      alert("Error pushing to Shiprocket");
+      setToast({ message: "Network error while connecting to Shiprocket.", type: "error" });
     } finally {
       setProcessingId(null);
     }
@@ -210,6 +231,46 @@ export default function PendingOrdersPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`rounded-2xl p-4 flex items-start gap-3 border shadow-sm ${
+          toast.type === "success" ? "bg-[#F0FDF4] border-[#166534]/20 text-[#166534]" :
+          toast.type === "wallet" ? "bg-[#FFFBEB] border-[#B45309]/20 text-[#B45309]" :
+          "bg-[#FEF2F2] border-[#B91C1C]/20 text-[#B91C1C]"
+        }`}>
+          <div className="shrink-0 mt-0.5">
+            {toast.type === "success" ? <CheckCircle2 className="w-5 h-5" /> :
+             toast.type === "wallet" ? <Wallet className="w-5 h-5" /> :
+             <AlertTriangle className="w-5 h-5" />}
+          </div>
+          <div className="flex-1">
+            <h4 className="font-bold text-[13px] mb-0.5">
+              {toast.type === "success" ? "Shipment Created Successfully" :
+               toast.type === "wallet" ? "Insufficient Shiprocket Balance" :
+               "Shipment Failed"}
+            </h4>
+            <p className="text-[12px] font-medium opacity-80 leading-relaxed">{toast.message}</p>
+            {toast.type === "wallet" && (
+              <a
+                href="https://app.shiprocket.in/recharge"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 mt-2 bg-[#B45309] text-white text-[11px] font-bold px-3 py-1.5 rounded-lg hover:bg-[#92400E] transition-colors"
+              >
+                <Wallet className="w-3 h-3" />
+                Recharge Shiprocket Wallet
+              </a>
+            )}
+          </div>
+          <button
+            onClick={() => setToast(null)}
+            className="shrink-0 p-1 rounded-full hover:bg-black/10 transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Search & Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-navy/10 shadow-sm">
