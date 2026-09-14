@@ -95,7 +95,7 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
       text: "Watermelon Mint is your go-to drink for instant refreshment. It's light, hydrating, and made with real ingredients that nourish your body and delight your senses.",
       points: [
         "Made with natural Flavours",
-        "Contains essential vitamins like B12, b7, b6, b5 b3 b1 C and prebiotic",
+        "Contains essential vitamins like B12, B7, B6, B5, B3, B1, C and prebiotics",
         "Helps keep you hydrated and energized",
         "Perfect for workouts, weekdays, or weekend chill",
         "Sweetened with stevia and monk fruit"
@@ -171,7 +171,7 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
       text: "Watermelon Cranberry is the ultimate thirst quencher. The subtle tartness of cranberry perfectly balances the sweet watermelon, creating an irresistible daily refresher.",
       points: [
         "Made with natural Flavours",
-        "Contains essential vitamins like B12, b7, b6, b5 b3 b1 C and prebiotic",
+        "Contains essential vitamins like B12, B7, B6, B5, B3, B1, C and prebiotics",
         "Helps keep you hydrated and energized",
         "Perfect for workouts, weekdays, or weekend chill",
         "Sweetened with stevia and monk fruit"
@@ -226,7 +226,7 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
       text: "Yuzu Mint brings a unique citrusy brightness. It's an invigorating lift for your afternoons, crafted carefully for a complex but highly drinkable flavor profile.",
       points: [
         "Made with natural Flavours",
-        "Contains essential vitamins like B12, b7, b6, b5 b3 b1 C and prebiotic",
+        "Contains essential vitamins like B12, B7, B6, B5, B3, B1, C and prebiotics",
         "Helps keep you hydrated and energized",
         "Perfect for workouts, weekdays, or weekend chill",
         "Sweetened with stevia and monk fruit"
@@ -281,7 +281,7 @@ export const PRODUCTS_CATALOG_DETAILED: Record<string, ProductDetails> = {
       text: "Guava Chilli is not your average drink. The sweet, tropical aroma of guava is perfectly complemented by a warm, lingering spice that makes every sip exciting.",
       points: [
         "Made with natural identical flavour and natural colour",
-        "Contains essential vitamins like B12, b7, b6, b5 b3 b1 C and prebiotic",
+        "Contains essential vitamins like B12, B7, B6, B5, B3, B1, C and prebiotics",
         "Helps keep you hydrated and energized",
         "Perfect for workouts, weekdays, or weekend chill",
         "Sweetened with stevia and monk fruit"

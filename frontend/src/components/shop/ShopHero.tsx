@@ -129,7 +129,7 @@ export function ShopHero() {
             </h1>
 
             <p className="text-ink/60 text-[16px] md:text-[17px] leading-[1.7] mb-10 max-w-[440px]">
-              Vitamin-infused, botanical prebiotic sparkling beverages. Zero added sugar, low calorie, crafted with 100 natural flavours.
+              Vitamin-infused, botanical prebiotic sparkling beverages. Zero added sugar, low calorie, crafted with 100% natural flavours.
             </p>
 
             {/* Flavor Selector — Clean Tabs */}
