@@ -2,12 +2,15 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Kaushan_Script, Poppins } from "next/font/google";
 import gsap from "gsap";
 import Can3DViewer from "./Can3DViewer";
 import { IceCubes } from "./ice-cubes";
 import AnimatedBackground from "./AnimatedBackground";
+
+const script = Kaushan_Script({ weight: "400", subsets: ["latin"], display: "swap" });
+const poppins = Poppins({ weight: ["400", "500", "600"], subsets: ["latin"], display: "swap" });
 
 // Optimize loading of react-water-wave
 const WaterWave = dynamic(() => import("react-water-wave"), {
@@ -24,7 +27,8 @@ const CANS = [
     image: "/can2.png",
     color: "#85C7D3",
     model: "/assets/3d/can/Tangent_Watermelon_Cranberry_v2_FINAL_4K.glb",
-    rotation: [0, Math.PI / 3, 0],
+    rotation: [0, Math.PI / 1.85, 0],
+    offset: [0, 0, 0] as [number, number, number],
   },
   {
     id: 2,
@@ -32,7 +36,8 @@ const CANS = [
     image: "/can3.png",
     color: "#F28C8C",
     model: "/assets/3d/can/Tangent_Watermelon_Mint.glb",
-    rotation: [0, Math.PI / 3, 0],
+    rotation: [0, Math.PI / 1.85, 0],
+    offset: [0, 0, 0] as [number, number, number],
   },
   {
     id: 3,
@@ -40,7 +45,8 @@ const CANS = [
     image: "/can1.png",
     color: "#E8706B",
     model: "/assets/3d/can/Tangent_Guava_Chilli_FINAL_4K.glb",
-    rotation: [0, Math.PI / 3, 0],
+    rotation: [0, Math.PI / 1.85, 0],
+    offset: [0, 0, 0] as [number, number, number],
   },
   {
     id: 4,
@@ -48,9 +54,31 @@ const CANS = [
     image: "/can4.png",
     color: "#F9D949",
     model: "/assets/3d/can/Tangent_Yuzu_Mint_FINAL_4K.glb",
-    rotation: [0, Math.PI / 3, 0],
+    rotation: [0, Math.PI / 1.85, 0],
+    offset: [0, 0, 0] as [number, number, number],
   },
 ];
+
+/* Small SVG leaf used to decorate the paper note */
+function Leaf({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} aria-hidden>
+      <defs>
+        <linearGradient id="leafGrad" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%" stopColor="#3f8f2f" />
+          <stop offset="100%" stopColor="#a6dc4a" />
+        </linearGradient>
+      </defs>
+      <path d="M6 58 C6 26 26 6 60 4 C58 38 38 58 6 58 Z" fill="url(#leafGrad)" />
+      <path
+        d="M8 56 C24 40 40 24 58 6"
+        stroke="rgba(255,255,255,0.55)"
+        strokeWidth="1.5"
+        fill="none"
+      />
+    </svg>
+  );
+}
 
 export function Juice3DShowcase() {
   const [isMobile, setIsMobile] = useState(false);
@@ -60,6 +88,8 @@ export function Juice3DShowcase() {
   const [isAnimating, setIsAnimating] = useState(false);
 
   const activeCan = CANS[currentIndex];
+  const [firstWord, ...otherWords] = activeCan.name.split(" ");
+  const restOfName = otherWords.join(" ");
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -84,7 +114,7 @@ export function Juice3DShowcase() {
       onUpdate: () => {
         setWheelAngle(wheelStateRef.current.angle);
       },
-      onComplete: () => setIsAnimating(false)
+      onComplete: () => setIsAnimating(false),
     });
   };
 
@@ -104,16 +134,20 @@ export function Juice3DShowcase() {
       onUpdate: () => {
         setWheelAngle(wheelStateRef.current.angle);
       },
-      onComplete: () => setIsAnimating(false)
+      onComplete: () => setIsAnimating(false),
     });
   };
 
-  const radius = isMobile ? 1000 : 1400;
+  const radius = isMobile ? 1000 : 1200;
 
   return (
-    <section className="relative w-full h-[600px] sm:h-[800px] overflow-hidden">
+    <section className="relative w-full h-[550px] sm:h-[calc(100vh-80px)] sm:min-h-[600px] sm:max-h-[750px] overflow-hidden">
       <div className="absolute inset-y-0 left-0 right-0 max-w-[1440px] mx-auto w-full h-full pointer-events-none z-10">
-        <IceCubes containerWidth={isMobile ? 320 : 1220} cubeCount={isMobile ? 4 : 8} leafCount={isMobile ? 6 : 12} />
+        <IceCubes
+          containerWidth={isMobile ? 320 : 1220}
+          cubeCount={isMobile ? 4 : 8}
+          leafCount={isMobile ? 6 : 12}
+        />
       </div>
       <WaterWave
         dropRadius={isMobile ? 8 : 10}
@@ -132,20 +166,6 @@ export function Juice3DShowcase() {
 
             {/* GSAP Animated Background */}
             <AnimatedBackground backgroundColor={activeCan.color} />
-
-            {/* Background text */}
-            <div className="absolute z-[0] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full pointer-events-none text-center px-1">
-              <h1
-                className="text-[#F2F2F2] uppercase select-none leading-none inline-block opacity-40 mix-blend-overlay max-w-full"
-                style={{
-                  fontFamily: "var(--font-thunder)",
-                  fontSize: isMobile ? "clamp(5.8rem, 23.5vw, 14rem)" : "clamp(8rem, 10rem + 12vw, 26rem)",
-                  letterSpacing: "0.02em"
-                }}
-              >
-                TANGENT
-              </h1>
-            </div>
 
             {/* 3D GLB Models on Circular Arc Path */}
             <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
@@ -168,7 +188,7 @@ export function Juice3DShowcase() {
                 return (
                   <div
                     key={can.id}
-                    className="absolute w-[300px] sm:w-[450px] h-[500px] sm:h-[750px] pointer-events-auto"
+                    className="absolute w-[280px] sm:w-[420px] h-[460px] sm:h-[680px] pointer-events-auto"
                     style={{
                       transform: `translate3d(${x}px, ${y}px, 0px)`,
                     }}
@@ -177,50 +197,87 @@ export function Juice3DShowcase() {
                       modelPath={can.model}
                       isMobile={isMobile}
                       rotation={can.rotation}
+                      positionOffset={can.offset}
                     />
                   </div>
                 );
               })}
             </div>
 
-            {/* Active Flavor Details & Shop Now Button */}
+            {/* Active Flavor Details - torn wet paper note */}
             <div
               key={activeCan.id}
-              className="absolute bottom-24 left-5 sm:bottom-28 sm:left-48 z-30 pointer-events-auto flex flex-col items-start max-w-[280px] sm:max-w-[400px] transition-all duration-500 animate-in fade-in slide-in-from-bottom-4"
+              className="absolute bottom-16 left-6 sm:bottom-20 sm:left-28 lg:left-44 z-30 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-700"
             >
-              <span className="text-[10px] sm:text-xs uppercase tracking-widest text-white/70 font-semibold mb-1">
-                Featured Flavor
-              </span>
-              <h2 className="text-xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-md leading-tight">
-                {activeCan.name}
-              </h2>
-              <p className="text-xs sm:text-sm text-white/80 mt-1 sm:mt-2 font-medium line-clamp-2 drop-shadow-sm">
-                Zero added sugar. Crisp, sparkling infusion crafted with 100% natural ingredients.
-              </p>
-              <button
-                className="mt-3 sm:mt-4 px-5 py-2 sm:px-7 sm:py-3 rounded-full bg-white text-slate-900 font-bold text-xs sm:text-base transition-all duration-300 shadow-xl hover:bg-white/90 hover:scale-105 active:scale-95 flex items-center gap-2 group cursor-pointer"
-              >
-                <span>Shop Now</span>
-                <ChevronRight size={16} className="sm:w-5 sm:h-5 transition-transform duration-300 group-hover:translate-x-1" />
-              </button>
-            </div>
+              <div className="paper-wrap">
+                <div
+                  className={`paper-note w-[250px] sm:w-[330px] px-6 pt-7 pb-7 sm:px-8 sm:pt-9 sm:pb-9 ${poppins.className}`}
+                >
+                  <span className="block text-[9px] sm:text-[11px] uppercase tracking-[0.3em] font-semibold text-[#2a6f80]">
+                    Featured Flavor
+                  </span>
 
-            {/* Navigation Buttons */}
-            <div className="absolute bottom-6 sm:bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-3 sm:gap-4 z-40">
-              <button
-                onClick={handlePrev}
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white/30 flex items-center justify-center text-white hover:bg-white/10 transition-colors backdrop-blur-sm"
-                aria-label="Previous Flavor"
-              >
-                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-              </button>
-              <button
-                onClick={handleNext}
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-white/30 flex items-center justify-center text-white hover:bg-white/10 transition-colors backdrop-blur-sm"
-                aria-label="Next Flavor"
-              >
-                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-              </button>
+                  <h2
+                    className={`${script.className} mt-1 leading-[0.95] text-[30px] sm:text-[44px]`}
+                  >
+                    <span className="block text-[#1f7a8c]">{firstWord}</span>
+                    {restOfName && (
+                      <span
+                        className="block ml-3 sm:ml-5 -rotate-2 origin-left"
+                        style={{ color: activeCan.color }}
+                      >
+                        {restOfName}
+                      </span>
+                    )}
+                  </h2>
+
+                  <p className="mt-2.5 text-[10px] sm:text-[12px] leading-relaxed text-slate-700 max-w-[210px] sm:max-w-[260px]">
+                    Zero added sugar. Crisp, sparkling infusion crafted with 100% natural
+                    ingredients.
+                  </p>
+
+                  <div className="mt-3 sm:mt-4 flex items-center justify-between gap-3">
+                    <button className="paper-btn relative inline-flex items-center gap-2 rounded-full px-5 py-2 sm:px-6 sm:py-2.5 text-white text-xs sm:text-sm font-semibold cursor-pointer group">
+                      <span>Shop Now</span>
+                      <ChevronRight
+                        size={16}
+                        className="transition-transform duration-300 group-hover:translate-x-1"
+                      />
+                      <span className="paper-drop w-2.5 h-2.5 top-1 left-5" aria-hidden />
+                      <span className="paper-drop w-2 h-2 bottom-1 right-8" aria-hidden />
+                    </button>
+
+                    {/* Navigation Buttons inside paper card */}
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <button
+                        onClick={handlePrev}
+                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#1b6b7d] hover:bg-[#155665] flex items-center justify-center text-white transition-all shadow-md active:scale-95 cursor-pointer"
+                        aria-label="Previous Flavor"
+                      >
+                        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                      <button
+                        onClick={handleNext}
+                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#1b6b7d] hover:bg-[#155665] flex items-center justify-center text-white transition-all shadow-md active:scale-95 cursor-pointer"
+                        aria-label="Next Flavor"
+                      >
+                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* droplets sitting on the paper */}
+                  <span className="paper-drop w-4 h-4 sm:w-5 sm:h-5 top-[62%] right-6" aria-hidden />
+                  <span className="paper-drop w-2.5 h-2.5 top-[18%] right-10" aria-hidden />
+                  <span className="paper-drop w-2 h-2 bottom-8 left-8" aria-hidden />
+                </div>
+
+                {/* leaves sit outside the torn shape so they overlap its edge */}
+                <Leaf className="absolute -top-4 left-3 w-10 sm:w-14 rotate-[25deg] drop-shadow-md" />
+                <Leaf className="absolute -bottom-5 left-0 w-9 sm:w-12 -rotate-[35deg] drop-shadow-md" />
+                <Leaf className="absolute top-[45%] -left-4 w-6 sm:w-8 rotate-[70deg] drop-shadow-md" />
+                <span className="paper-drop w-5 h-5 sm:w-6 sm:h-6 bottom-6 -right-2" aria-hidden />
+              </div>
             </div>
           </div>
         )}

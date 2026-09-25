@@ -25,7 +25,8 @@ const FLAVORS = [
     modelPath: "/assets/3d/can/Tangent_Watermelon_Mint.glb",
     price: "₹520",
     packLabel: "1000 ml (Pack of 4)",
-    offset: [0, -0.04, 0] as [number, number, number],
+    offset: [0, 0, 0] as [number, number, number],
+    rotation: [0, Math.PI / 1.85, 0],
   },
   {
     id: "watermelon-cranberry",
@@ -35,7 +36,8 @@ const FLAVORS = [
     modelPath: "/assets/3d/can/Tangent_Watermelon_Cranberry_v2_FINAL_4K.glb",
     price: "₹320",
     packLabel: "1000 ml (Pack of 4)",
-    offset: [0, -0.04, 0] as [number, number, number],
+    offset: [0, 0, 0] as [number, number, number],
+    rotation: [0, Math.PI / 1.85, 0],
   },
   {
     id: "yuzu-mint",
@@ -45,7 +47,8 @@ const FLAVORS = [
     modelPath: "/assets/3d/can/Tangent_Yuzu_Mint_FINAL_4K.glb",
     price: "₹480",
     packLabel: "1000 ml (Pack of 4)",
-    offset: [0, -0.04, 0] as [number, number, number],
+    offset: [0, 0, 0] as [number, number, number],
+    rotation: [0, Math.PI / 1.85, 0],
   },
   {
     id: "guava-chilli",
@@ -55,7 +58,8 @@ const FLAVORS = [
     modelPath: "/assets/3d/can/Tangent_Guava_Chilli_FINAL_4K.glb",
     price: "₹400",
     packLabel: "1000 ml (Pack of 4)",
-    offset: [0, -0.04, 0] as [number, number, number],
+    offset: [0, 0, 0] as [number, number, number],
+    rotation: [0, Math.PI / 1.85, 0],
   },
 ];
 
@@ -183,8 +187,14 @@ export function ShopHero() {
             style={{ width: "100%", height: "100%" }}
           >
             {() => (
-              <div className="relative w-full h-full flex items-center justify-center">
-                {/* Animated color background */}
+              <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+                {/* Blurred background overlay similar to juicy */}
+                <div
+                  className="absolute top-0 left-0 w-full h-full z-[0] bg-black/5"
+                  style={{ backdropFilter: "blur(0px)" }}
+                />
+
+                {/* GSAP Animated Background */}
                 <AnimatedBackground backgroundColor={activeFlavor.color} />
 
                 {/* Large background text */}
@@ -201,6 +211,8 @@ export function ShopHero() {
                   </h1>
                 </div>
 
+
+
                 {/* 3D Can — Large and Centered */}
                 <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-auto">
                   <AnimatePresence mode="wait">
@@ -210,12 +222,12 @@ export function ShopHero() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.85 }}
                       transition={{ duration: 0.5 }}
-                      className="w-[380px] md:w-[550px] lg:w-[620px] h-[520px] md:h-[700px] lg:h-[750px]"
+                      className="w-[280px] md:w-[420px] lg:w-[480px] h-[440px] md:h-[600px] lg:h-[660px]"
                     >
                       <Can3DViewer
                         modelPath={activeFlavor.modelPath}
                         isMobile={isMobile}
-                        rotation={[0, Math.PI / 3, 0]}
+                        rotation={(activeFlavor as any).rotation || [0, Math.PI / 3, 0]}
                         positionOffset={activeFlavor.offset}
                       />
                     </motion.div>
