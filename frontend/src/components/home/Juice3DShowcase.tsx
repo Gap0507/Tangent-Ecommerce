@@ -183,12 +183,12 @@ export function Juice3DShowcase() {
 
                 // Trigonometric arc coordinates
                 const x = radius * Math.sin(rad);
-                const y = radius * (1 - Math.cos(rad));
+                const y = radius * (1 - Math.cos(rad)) - (isMobile ? 60 : 0);
 
                 return (
                   <div
                     key={can.id}
-                    className="absolute w-[280px] sm:w-[420px] h-[460px] sm:h-[680px] pointer-events-auto"
+                    className="absolute w-[300px] sm:w-[420px] h-[480px] sm:h-[680px] pointer-events-auto"
                     style={{
                       transform: `translate3d(${x}px, ${y}px, 0px)`,
                     }}
@@ -207,18 +207,18 @@ export function Juice3DShowcase() {
             {/* Active Flavor Details - torn wet paper note */}
             <div
               key={activeCan.id}
-              className="absolute bottom-16 left-6 sm:bottom-20 sm:left-28 lg:left-44 z-30 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-700"
+              className="absolute bottom-3 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:bottom-20 sm:left-28 lg:left-44 z-30 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-700"
             >
               <div className="paper-wrap">
                 <div
-                  className={`paper-note w-[250px] sm:w-[330px] px-6 pt-7 pb-7 sm:px-8 sm:pt-9 sm:pb-9 ${poppins.className}`}
+                  className={`paper-note w-[210px] sm:w-[330px] px-4 pt-4 pb-4 sm:px-8 sm:pt-9 sm:pb-9 ${poppins.className}`}
                 >
-                  <span className="block text-[9px] sm:text-[11px] uppercase tracking-[0.3em] font-semibold text-[#2a6f80]">
+                  <span className="block text-[7px] sm:text-[11px] uppercase tracking-[0.25em] sm:tracking-[0.3em] font-semibold text-[#2a6f80]">
                     Featured Flavor
                   </span>
 
                   <h2
-                    className={`${script.className} mt-1 leading-[0.95] text-[30px] sm:text-[44px]`}
+                    className={`${script.className} mt-0.5 sm:mt-1 leading-[0.95] text-[22px] sm:text-[44px]`}
                   >
                     <span className="block text-[#1f7a8c]">{firstWord}</span>
                     {restOfName && (
@@ -231,13 +231,13 @@ export function Juice3DShowcase() {
                     )}
                   </h2>
 
-                  <p className="mt-2.5 text-[10px] sm:text-[12px] leading-relaxed text-slate-700 max-w-[210px] sm:max-w-[260px]">
+                  <p className="mt-1 sm:mt-2.5 text-[8px] sm:text-[12px] leading-relaxed text-slate-700 max-w-[170px] sm:max-w-[260px]">
                     Zero added sugar. Crisp, sparkling infusion crafted with 100% natural
                     ingredients.
                   </p>
 
-                  <div className="mt-3 sm:mt-4 flex items-center justify-between gap-3">
-                    <button className="paper-btn relative inline-flex items-center gap-2 rounded-full px-5 py-2 sm:px-6 sm:py-2.5 text-white text-xs sm:text-sm font-semibold cursor-pointer group">
+                  <div className="mt-1.5 sm:mt-4 flex items-center justify-between gap-2 sm:gap-3">
+                    <button className="paper-btn relative inline-flex items-center gap-1.5 sm:gap-2 rounded-full px-3 py-1.5 sm:px-6 sm:py-2.5 text-white text-[10px] sm:text-sm font-semibold cursor-pointer group">
                       <span>Shop Now</span>
                       <ChevronRight
                         size={16}
@@ -248,17 +248,17 @@ export function Juice3DShowcase() {
                     </button>
 
                     {/* Navigation Buttons inside paper card */}
-                    <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2">
                       <button
                         onClick={handlePrev}
-                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#1b6b7d] hover:bg-[#155665] flex items-center justify-center text-white transition-all shadow-md active:scale-95 cursor-pointer"
+                        className="w-6 h-6 sm:w-9 sm:h-9 rounded-full bg-[#1b6b7d] hover:bg-[#155665] flex items-center justify-center text-white transition-all shadow-md active:scale-95 cursor-pointer"
                         aria-label="Previous Flavor"
                       >
                         <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                       <button
                         onClick={handleNext}
-                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#1b6b7d] hover:bg-[#155665] flex items-center justify-center text-white transition-all shadow-md active:scale-95 cursor-pointer"
+                        className="w-6 h-6 sm:w-9 sm:h-9 rounded-full bg-[#1b6b7d] hover:bg-[#155665] flex items-center justify-center text-white transition-all shadow-md active:scale-95 cursor-pointer"
                         aria-label="Next Flavor"
                       >
                         <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
