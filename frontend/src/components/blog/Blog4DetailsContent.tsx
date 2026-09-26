@@ -67,7 +67,7 @@ export function Blog4DetailsContent() {
               transition={{ duration: 0.6 }}
               className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-lg"
             >
-              <Image src="/blogdetails/can4guavachilli/img1.png" alt="Guava slices" fill className="object-cover" unoptimized />
+              <Image src="/blogdetails/can4guavachilli/img1.png" alt="Guava slices" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 450px" />
             </motion.div>
 
             <motion.div
@@ -77,7 +77,7 @@ export function Blog4DetailsContent() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-lg"
             >
-              <Image src="/blogdetails/can4guavachilli/img2.png" alt="Chilli peppers" fill className="object-cover" unoptimized />
+              <Image src="/blogdetails/can4guavachilli/img2.png" alt="Chilli peppers" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 450px" />
             </motion.div>
 
             <motion.div
@@ -87,7 +87,7 @@ export function Blog4DetailsContent() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-lg"
             >
-              <Image src="/blogdetails/can4guavachilli/img3.png" alt="Guava Chilli drink" fill className="object-cover" unoptimized />
+              <Image src="/blogdetails/can4guavachilli/img3.png" alt="Guava Chilli drink" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 450px" />
             </motion.div>
           </div>
 

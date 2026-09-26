@@ -44,12 +44,12 @@ export function ContactFAQ() {
     <section className="relative bg-cream overflow-hidden py-16 md:py-24 px-6 md:px-12">
       {/* Decorative watermelon — bottom left */}
       <div className="absolute bottom-[-20px] left-[-20px] w-[100px] md:w-[160px] h-[100px] md:h-[160px] z-0 pointer-events-none rotate-[15deg]">
-        <Image src="/watermelonfruit.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/watermelonfruit.png" alt="" fill className="object-contain" sizes="(max-width: 768px) 100px, 160px" />
       </div>
 
       {/* Decorative leaf — top right */}
       <div className="absolute top-[20px] right-[-10px] w-[60px] md:w-[90px] h-[60px] md:h-[90px] z-0 pointer-events-none rotate-[-25deg]">
-        <Image src="/assets/images/leaf/2.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/assets/images/leaf/2.png" alt="" fill className="object-contain" sizes="(max-width: 768px) 60px, 90px" />
       </div>
 
       <div className="relative z-10 max-w-[720px] mx-auto">

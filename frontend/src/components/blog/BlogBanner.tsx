@@ -15,7 +15,7 @@ export function BlogBanner() {
           className="relative bg-[#E8DFD3] rounded-3xl overflow-hidden py-12 md:py-16 px-8 md:px-16 flex flex-col md:flex-row items-center min-h-[300px]"
         >
           <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
-             <Image src="/blogquote.png" alt="Quote Background" fill className="object-cover object-right" unoptimized />
+             <Image src="/blogquote.png" alt="Quote Background" fill className="object-cover object-right" sizes="(max-width: 1280px) 100vw, 1280px" />
           </div>
 
           <div className="relative z-10 max-w-[500px]">

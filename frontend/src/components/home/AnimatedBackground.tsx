@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import gsap from "gsap";
 
 interface AnimatedBackgroundProps {
@@ -10,47 +10,49 @@ interface AnimatedBackgroundProps {
 export default function AnimatedBackground({
   backgroundColor,
 }: AnimatedBackgroundProps) {
-  const [currentColor, setCurrentColor] = useState(backgroundColor);
+  // Use refs for color tracking to avoid re-render loops that cause blinks
+  const currentColorRef = useRef(backgroundColor);
   const animationRef = useRef<gsap.core.Timeline | null>(null);
   const currentBgRef = useRef<HTMLDivElement>(null);
   const nextBgRef = useRef<HTMLDivElement>(null);
-  const [initialRender, setInitialRender] = useState(true);
-  const [, setIsAnimating] = useState(false);
+  const initialRenderRef = useRef(true);
 
   // Pre-create the animation timeline for reuse
   const createAnimation = useCallback(
     (nextBgElement: HTMLDivElement, newColor: string) => {
-      // Kill any existing animations
+      // Kill any existing animations immediately
       if (animationRef.current) {
         animationRef.current.kill();
+        animationRef.current = null;
       }
 
-      // Pre-configure next background for animation
-      nextBgElement.style.backgroundColor = "";
-      nextBgElement.style.background = `radial-gradient(circle, ${newColor} 90%, ${newColor}00 100%)`;
-      nextBgElement.style.boxShadow = `0 0 70px 20px ${newColor}`;
+      // Use solid color — NOT a radial-gradient. The clip-path circle already
+      // provides the expanding-circle visual. A gradient fading to transparent
+      // at the edges lets the OLD base color bleed through the corners.
+      nextBgElement.style.background = "none";
+      nextBgElement.style.backgroundColor = newColor;
       nextBgElement.style.display = "block";
 
       // Apply initial GSAP properties with force3D for hardware acceleration
       gsap.set(nextBgElement, {
         clipPath: "circle(0% at center)",
-        scale: 0.1,
         opacity: 1,
         zIndex: -2,
-        force3D: true, // Force hardware acceleration
-        willChange: "transform", // Hint to browser for optimization
+        force3D: true,
+        willChange: "clip-path",
       });
 
       // Create the optimized timeline
       return gsap.timeline({
         onComplete: () => {
-          setCurrentColor(newColor);
-          setIsAnimating(false);
+          // Update ref synchronously — no state update, no re-render, no blink
+          currentColorRef.current = newColor;
 
-          // Update DOM after animation completes
+          // Directly set the base layer to the new color
           if (currentBgRef.current) {
             currentBgRef.current.style.backgroundColor = newColor;
           }
+          // Hide the overlay
           nextBgElement.style.display = "none";
         },
       });
@@ -61,55 +63,61 @@ export default function AnimatedBackground({
   // Optimized effect for background color change
   useEffect(() => {
     // On first render, just set the color directly
-    if (initialRender) {
+    if (initialRenderRef.current) {
       if (currentBgRef.current) {
         currentBgRef.current.style.backgroundColor = backgroundColor;
       }
-      setInitialRender(false);
-      setCurrentColor(backgroundColor);
+      initialRenderRef.current = false;
+      currentColorRef.current = backgroundColor;
       return;
     }
 
-    // Skip if color hasn't changed
-    if (backgroundColor === currentColor) return;
+    // Skip if color hasn't actually changed (compare against ref, not state)
+    if (backgroundColor === currentColorRef.current) return;
 
     // Ensure we have DOM refs
     if (!currentBgRef.current || !nextBgRef.current) return;
 
-    // Prepare for animation immediately
-    setIsAnimating(true);
-
     // Use requestAnimationFrame to start animation on next frame for smoother transition
     requestAnimationFrame(() => {
-      const tl = createAnimation(nextBgRef.current!, backgroundColor);
+      if (!nextBgRef.current) return;
+
+      const tl = createAnimation(nextBgRef.current, backgroundColor);
 
       // Start the animation immediately
       tl.to(nextBgRef.current, {
         clipPath: "circle(150% at center)",
-        scale: 10,
-        duration: 2,
-        ease: "power3.out",
-        immediateRender: true, // Start immediately
+        duration: 1.5,
+        ease: "power2.inOut",
+        immediateRender: true,
       });
 
       // Store reference
       animationRef.current = tl;
     });
-  }, [backgroundColor, currentColor, initialRender, createAnimation]);
+  }, [backgroundColor, createAnimation]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) {
+        animationRef.current.kill();
+      }
+    };
+  }, []);
 
   return (
     <>
-      {/* Base background with current color */}
-      <div ref={currentBgRef} className="absolute inset-0 z-[-3] " />
+      {/* Base background with current color — NO CSS transition, GSAP handles it */}
+      <div ref={currentBgRef} className="absolute inset-0 z-[-3]" />
 
-      {/* Animated overlay - pre-positioned for faster animation start */}
+      {/* Animated overlay - full screen for clip path */}
       <div
         ref={nextBgRef}
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[-2] w-[200px] h-[200px] rounded-full"
+        className="absolute inset-0 z-[-2]"
         style={{
           display: "none",
-          transformOrigin: "center center",
-          willChange: "transform, opacity", // Performance optimization hint
+          willChange: "clip-path",
         }}
       />
     </>

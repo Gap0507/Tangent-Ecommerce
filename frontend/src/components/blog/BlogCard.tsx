@@ -30,7 +30,7 @@ export function BlogCard({ imageSrc, category, date, title, excerpt, link, bgCol
             alt={title} 
             fill 
             className="object-cover object-center group-hover/card:scale-105 transition-transform duration-500" 
-            unoptimized
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 400px"
           />
         </div>
 

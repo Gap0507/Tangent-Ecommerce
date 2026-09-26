@@ -13,10 +13,10 @@ export function BlogHero() {
         
         {/* Some decorative leaves */}
         <div className="absolute top-[20%] right-[5%] w-[60px] h-[60px] rotate-[15deg]">
-          <Image src="/assets/images/leaf/1.png" alt="" fill className="object-contain" unoptimized />
+          <Image src="/assets/images/leaf/1.png" alt="" fill className="object-contain" sizes="60px" />
         </div>
         <div className="absolute top-[60%] right-[40%] w-[40px] h-[40px] rotate-[-25deg]">
-          <Image src="/assets/images/leaf/2.png" alt="" fill className="object-contain" unoptimized />
+          <Image src="/assets/images/leaf/2.png" alt="" fill className="object-contain" sizes="40px" />
         </div>
       </div>
 
@@ -55,7 +55,7 @@ export function BlogHero() {
               alt="Tangent Blog Hero"
               fill
               className="object-contain lg:object-right"
-              unoptimized
+              sizes="(max-width: 768px) 100vw, 700px"
             />
           </motion.div>
         </div>

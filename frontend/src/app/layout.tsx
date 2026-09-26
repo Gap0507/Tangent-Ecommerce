@@ -8,14 +8,14 @@ import "./globals.css";
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "700"],
 });
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "900"],
-  style: ["normal", "italic"],
+  weight: ["700", "900"],
+  style: ["normal"],
 });
 
 const thunder = localFont({

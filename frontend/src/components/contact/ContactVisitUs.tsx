@@ -9,12 +9,12 @@ export function ContactVisitUs() {
     <section className="relative bg-cream py-16 md:py-24 px-6 md:px-12" style={{ overflowX: 'clip', overflowY: 'visible' }}>
       {/* Decorative leaves */}
       <div className="absolute top-[-20px] right-[-20px] w-[100px] md:w-[150px] h-[100px] md:h-[150px] z-0 pointer-events-none rotate-[15deg]">
-        <Image src="/assets/images/leaf/1.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/assets/images/leaf/1.png" alt="" fill className="object-contain" sizes="(max-width: 768px) 100px, 150px" />
       </div>
 
       {/* Decorative lemon — right side, overlapping top border */}
       <div className="absolute top-[-80px] md:top-[-120px] right-[-30px] w-[140px] md:w-[220px] h-[140px] md:h-[220px] z-0 pointer-events-none">
-        <Image src="/lemonfresh.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/lemonfresh.png" alt="" fill className="object-contain" sizes="(max-width: 768px) 140px, 220px" />
       </div>
 
 

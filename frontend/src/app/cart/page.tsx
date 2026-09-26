@@ -153,14 +153,15 @@ export default function CartPage() {
                       {/* Product Thumbnail & Details (Col 6) */}
                       <div className="md:col-span-6 flex items-center gap-4 w-full">
                         <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-[#FAF7F2] border border-black/5 flex items-center justify-center shrink-0 overflow-hidden">
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            width={72}
-                            height={72}
-                            className="object-contain max-h-20"
-                            unoptimized
-                          />
+                          <div className="relative w-full h-full p-2">
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              fill
+                              className="object-contain"
+                              sizes="(max-width: 768px) 80px, 96px"
+                            />
+                          </div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-fraunces font-bold text-navy text-[18px] md:text-[20px] leading-tight mb-1 truncate">

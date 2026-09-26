@@ -67,7 +67,7 @@ export function BlogDetailsContent() {
               transition={{ duration: 0.6 }}
               className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-lg"
             >
-              <Image src="/blogdetails/can1watermelonmint/img1.png" alt="Watermelon slices" fill className="object-cover" unoptimized />
+              <Image src="/blogdetails/can1watermelonmint/img1.png" alt="Watermelon slices" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 450px" />
             </motion.div>
 
             <motion.div
@@ -77,7 +77,7 @@ export function BlogDetailsContent() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-lg"
             >
-              <Image src="/blogdetails/can1watermelonmint/img2.png" alt="Mint leaves" fill className="object-cover" unoptimized />
+              <Image src="/blogdetails/can1watermelonmint/img2.png" alt="Mint leaves" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 450px" />
             </motion.div>
 
             <motion.div
@@ -87,7 +87,7 @@ export function BlogDetailsContent() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden shadow-lg"
             >
-              <Image src="/blogdetails/can1watermelonmint/img3.png" alt="Watermelon Mint drink" fill className="object-cover" unoptimized />
+              <Image src="/blogdetails/can1watermelonmint/img3.png" alt="Watermelon Mint drink" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 450px" />
             </motion.div>
           </div>
 

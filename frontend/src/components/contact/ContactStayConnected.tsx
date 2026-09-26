@@ -9,7 +9,7 @@ export function ContactStayConnected() {
     <section className="relative bg-cream overflow-hidden py-12 md:py-20 px-6 md:px-12">
       {/* Decorative leaves */}
       <div className="absolute top-[-10px] left-[30%] w-[60px] md:w-[80px] h-[60px] md:h-[80px] z-0 pointer-events-none rotate-[20deg]">
-        <Image src="/assets/images/leaf/1.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/assets/images/leaf/1.png" alt="" fill className="object-contain" sizes="(max-width: 768px) 60px, 80px" />
       </div>
 
       <div className="relative z-10 max-w-[1280px] mx-auto">
@@ -22,7 +22,7 @@ export function ContactStayConnected() {
         >
           {/* Decorative leaf inside card — top right */}
           <div className="absolute top-[-10px] right-[20%] w-[50px] md:w-[70px] h-[50px] md:h-[70px] pointer-events-none rotate-[-30deg] opacity-60">
-            <Image src="/assets/images/leaf/2.png" alt="" fill className="object-contain" unoptimized />
+            <Image src="/assets/images/leaf/2.png" alt="" fill className="object-contain" sizes="(max-width: 768px) 50px, 70px" />
           </div>
 
           {/* LEFT — Text + Social Icons */}
@@ -101,7 +101,7 @@ export function ContactStayConnected() {
               alt="Tangent drink flavors"
               fill
               className="object-contain drop-shadow-[0_15px_35px_rgba(0,0,0,0.3)]"
-              unoptimized
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 550px, 700px"
             />
           </motion.div>
         </motion.div>

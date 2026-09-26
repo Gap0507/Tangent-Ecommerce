@@ -630,7 +630,9 @@ export default function CheckoutPage() {
                   items.map((item) => (
                     <div key={item.id} className="flex items-center gap-4">
                       <div className="relative w-16 h-16 rounded-2xl bg-[#FAF7F2] border border-black/5 flex items-center justify-center shrink-0 overflow-hidden">
-                        <Image src={item.image} alt={item.name} width={48} height={48} className="object-contain" />
+                        <div className="relative w-full h-full p-1.5">
+                          <Image src={item.image} alt={item.name} fill className="object-contain" sizes="64px" />
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-navy text-[13px] truncate">{item.name}</h4>

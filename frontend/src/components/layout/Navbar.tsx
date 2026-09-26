@@ -113,6 +113,7 @@ export function Navbar() {
               width={140}
               height={36}
               className="h-[36px] w-auto object-contain"
+              style={{ width: "auto", height: "auto" }}
             />
             <button
               className="p-2 rounded-full hover:bg-navy/5 transition-colors cursor-pointer"

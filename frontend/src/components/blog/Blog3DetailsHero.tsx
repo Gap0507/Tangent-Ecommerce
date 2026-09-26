@@ -102,7 +102,7 @@ export function Blog3DetailsHero() {
                 alt="The Zesty Power of Yuzu"
                 fill
                 className="object-cover"
-                unoptimized
+                sizes="(max-width: 768px) 100vw, 700px"
               />
             </div>
           </motion.div>

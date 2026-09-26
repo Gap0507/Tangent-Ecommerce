@@ -18,17 +18,17 @@ export function BlogNewsletter() {
     <section className="relative bg-navy py-16 md:py-24 px-6 md:px-12 overflow-hidden">
       {/* Background decorations - using existing splash/fruit images to simulate the look */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 opacity-40 mix-blend-screen">
-        <Image src="/realrefreshmentsection.png" alt="" fill className="object-cover" unoptimized />
+        <Image src="/realrefreshmentsection.png" alt="" fill className="object-cover" sizes="100vw" />
       </div>
       
       {/* Left side decorative watermelon (like the reference) */}
       <div className="absolute bottom-[-20px] left-[-30px] w-[150px] md:w-[220px] h-[150px] md:h-[220px] pointer-events-none z-0 rotate-[15deg]">
-        <Image src="/watermelonfruit.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/watermelonfruit.png" alt="" fill className="object-contain" sizes="(max-width: 768px) 150px, 220px" />
       </div>
 
       {/* Right side decorative lemon (like the reference) */}
       <div className="absolute bottom-[-10px] right-[-20px] w-[120px] md:w-[180px] h-[120px] md:h-[180px] pointer-events-none z-0">
-        <Image src="/lemonfresh.png" alt="" fill className="object-contain" unoptimized />
+        <Image src="/lemonfresh.png" alt="" fill className="object-contain" sizes="(max-width: 768px) 120px, 180px" />
       </div>
 
       <div className="relative z-10 max-w-[1280px] mx-auto">

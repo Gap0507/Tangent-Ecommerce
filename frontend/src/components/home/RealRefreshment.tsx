@@ -8,14 +8,13 @@ export function RealRefreshment() {
   return (
     <section className="relative w-full min-h-[900px] md:min-h-[500px] lg:min-h-[600px] flex items-start md:items-center overflow-hidden bg-[#F9F6EE] pt-16 pb-32 md:py-0">
       {/* Background Image - Mobile */}
-      <div className="absolute inset-0 w-full h-full z-0 md:hidden">
+      <div className="absolute inset-0 w-full h-full min-h-full z-0 md:hidden">
         <Image
           src="/realrefreshmentmobile.png"
           alt="Real Refreshment Background Mobile"
           fill
           className="object-cover object-top"
           sizes="(max-width: 768px) 100vw, 1px"
-          priority
         />
       </div>
 
@@ -27,7 +26,6 @@ export function RealRefreshment() {
           fill
           className="object-cover object-right md:object-center"
           sizes="(max-width: 768px) 1px, 100vw"
-          priority
         />
       </div>
 
