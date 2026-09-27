@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useRef, useEffect, useState, Suspense } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useFrame, Canvas } from "@react-three/fiber";
 import {
   Environment,
   Lightformer,
   PresentationControls,
   useGLTF,
+  View,
+  PerspectiveCamera,
 } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -132,7 +134,7 @@ function CanModel({
     };
   }, [scene]);
 
-  const scale = isMobile ? 0.9 : 1.2; // can size: raise = bigger, lower = smaller
+  const scale = isMobile ? 1.0 : 1.3; // can size: raise = bigger, lower = smaller
   const position: [number, number, number] = [
     0 + positionOffset[0],
     -0.01 + positionOffset[1],
@@ -164,27 +166,20 @@ export default function Can3DViewer({
 }: Can3DProps) {
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
-      <Canvas
+      <Canvas 
+        style={{ width: "100%", height: "100%" }}
         shadows={false}
         dpr={[1, 2]}
-        gl={{
-          // No tone mapping = label colours stay true to the texture
-          // (ACES was fading the reds).
-          toneMapping: THREE.NoToneMapping,
-          outputColorSpace: THREE.SRGBColorSpace,
-          antialias: true,
-          alpha: true,
-          powerPreference: "high-performance",
-        }}
-        camera={{
-          position: [0, 0, 1],
-          fov: isMobile ? 24 : 22,
-          near: 0.01,
-          far: 100,
-        }}
-        style={{ width: "100%", height: "100%" }}
+        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       >
         <Suspense fallback={null}>
+          <PerspectiveCamera 
+            makeDefault 
+            position={[0, 0, 1]} 
+            fov={isMobile ? 24 : 22} 
+            near={0.01} 
+            far={100} 
+          />
           <PresentationControls
             global={false}
             cursor={false}
@@ -230,8 +225,5 @@ export default function Can3DViewer({
   );
 }
 
-// Preload 3D GLB assets for Vercel CDN speed
-useGLTF.preload("/assets/3d/can/Tangent_Watermelon_Cranberry_v2_FINAL_4K.glb");
-useGLTF.preload("/assets/3d/can/Tangent_Watermelon_Mint.glb");
-useGLTF.preload("/assets/3d/can/Tangent_Guava_Chilli_FINAL_4K.glb");
-useGLTF.preload("/assets/3d/can/Tangent_Yuzu_Mint_FINAL_4K.glb");
+// GLB models are loaded on-demand when their component mounts
+// Removed eager preloading that was blocking ~11MB of downloads on page load

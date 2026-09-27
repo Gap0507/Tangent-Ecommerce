@@ -44,8 +44,9 @@ export function Hero() {
           loop
           muted
           playsInline
-          preload="metadata"
+          preload="none"
           className="absolute inset-0 w-full h-full object-cover"
+          style={{ backgroundColor: '#FAF6EC' }}
         >
           <source src="/hero-video.mp4" type="video/mp4" />
         </video>

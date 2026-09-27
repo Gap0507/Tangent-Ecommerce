@@ -3,12 +3,14 @@ import { Inter, Fraunces } from "next/font/google";
 import localFont from "next/font/local";
 import { CartProvider } from "@/context/CartContext";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
+import { GlobalCanvas } from "@/components/GlobalCanvas";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["400", "500", "700"],
+  display: "swap",
 });
 
 const fraunces = Fraunces({
@@ -16,6 +18,7 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   weight: ["700", "900"],
   style: ["normal"],
+  display: "swap",
 });
 
 const thunder = localFont({
@@ -61,6 +64,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans bg-cream text-ink scroll-smooth">
         <CartProvider>
           <ConditionalLayout>{children}</ConditionalLayout>
+          <GlobalCanvas />
         </CartProvider>
       </body>
     </html>

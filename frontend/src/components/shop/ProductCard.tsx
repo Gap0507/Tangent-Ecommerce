@@ -50,23 +50,29 @@ export function ProductCard({ product }: ProductCardProps) {
   const [allDbProducts, setAllDbProducts] = useState<any[]>([]);
 
   React.useEffect(() => {
-    fetch("/api/products")
-      .then((res) => res.json())
-      .then((resData) => {
-        if (resData.success && Array.isArray(resData.data)) {
-          setAllDbProducts(resData.data);
-          const matched = resData.data.find(
-            (p: any) =>
-              p.name.toLowerCase().includes(product.id.replace("-", " ")) ||
-              product.id.toLowerCase().includes(p.name.toLowerCase().replace(/\s+/g, "-")) ||
-              p.sku.toLowerCase().includes(product.id.substring(0, 4))
-          );
-          if (matched && typeof matched.stock === "number") {
-            setDbStock(matched.stock);
+    // Simple cache to prevent N+1 API calls when many ProductCards mount simultaneously
+    if (typeof window !== "undefined") {
+      const w = window as any;
+      if (!w.__PRODUCTS_PROMISE__) {
+        w.__PRODUCTS_PROMISE__ = fetch("/api/products").then((res) => res.json());
+      }
+      w.__PRODUCTS_PROMISE__
+        .then((resData: any) => {
+          if (resData.success && Array.isArray(resData.data)) {
+            setAllDbProducts(resData.data);
+            const matched = resData.data.find(
+              (p: any) =>
+                p.name.toLowerCase().includes(product.id.replace("-", " ")) ||
+                product.id.toLowerCase().includes(p.name.toLowerCase().replace(/\s+/g, "-")) ||
+                p.sku.toLowerCase().includes(product.id.substring(0, 4))
+            );
+            if (matched && typeof matched.stock === "number") {
+              setDbStock(matched.stock);
+            }
           }
-        }
-      })
-      .catch((err) => console.error("Failed to load product stock for card", err));
+        })
+        .catch((err: any) => console.error("Failed to load product stock for card", err));
+    }
   }, [product.id]);
 
   const selectedPack = product.packPrices[selectedPackIndex];

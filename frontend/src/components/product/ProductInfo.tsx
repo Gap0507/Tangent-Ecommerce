@@ -163,13 +163,12 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
                   setSelectedPackIdx(idx);
                   setQuantity(1);
                 }}
-                className={`relative px-4 py-2.5 rounded-xl border transition-all cursor-pointer flex-1 md:flex-none text-center ${
-                  isPackDisabled
+                className={`relative px-4 py-2.5 rounded-xl border transition-all cursor-pointer flex-1 md:flex-none text-center ${isPackDisabled
                     ? "bg-gray-100 text-gray-400 border-gray-200 line-through opacity-70"
-                    : isSelected 
-                    ? "bg-navy text-white border-navy" 
-                    : "bg-transparent text-navy border-navy/20 hover:border-navy"
-                }`}
+                    : isSelected
+                      ? "bg-navy text-white border-navy"
+                      : "bg-transparent text-navy border-navy/20 hover:border-navy"
+                  }`}
               >
                 <div className="text-[13px] font-bold">{pack.size}</div>
                 {isPackDisabled ? (
@@ -187,33 +186,33 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
 
       {/* Quantity & Price */}
       <div className="mb-5 flex gap-3">
-         {/* Quantity Selector */}
-         <div className="flex-1 flex items-center">
-           <div className="flex items-center justify-between bg-white border border-navy/15 rounded-xl w-[120px] h-[48px] px-2">
-             <button onClick={decrement} className="w-8 h-8 flex items-center justify-center text-navy/60 hover:text-navy cursor-pointer hover:bg-navy/5 rounded-lg transition-colors">
-               <Minus className="w-4 h-4" />
-             </button>
-             <span className="font-bold text-[15px]">{quantity}</span>
-             <button onClick={increment} className="w-8 h-8 flex items-center justify-center text-navy/60 hover:text-navy cursor-pointer hover:bg-navy/5 rounded-lg transition-colors">
-               <Plus className="w-4 h-4" />
-             </button>
-           </div>
-         </div>
-         
-         {/* Price Display */}
-         <div className="flex-1 flex flex-col justify-center">
-           <div className="flex items-end gap-2">
-             {originalTotal && (
-               <span className="text-[14px] text-ink/40 line-through font-medium pb-1">
-                 ₹{originalTotal}
-               </span>
-             )}
-             <span className="font-fraunces font-black text-[28px] leading-none text-navy">
-               ₹{totalPrice}
-             </span>
-           </div>
-           <p className="text-[10px] text-ink/40 mt-1">(Inclusive of all taxes)</p>
-         </div>
+        {/* Quantity Selector */}
+        <div className="flex-1 flex items-center">
+          <div className="flex items-center justify-between bg-white border border-navy/15 rounded-xl w-[120px] h-[48px] px-2">
+            <button onClick={decrement} className="w-8 h-8 flex items-center justify-center text-navy/60 hover:text-navy cursor-pointer hover:bg-navy/5 rounded-lg transition-colors">
+              <Minus className="w-4 h-4" />
+            </button>
+            <span className="font-bold text-[15px]">{quantity}</span>
+            <button onClick={increment} className="w-8 h-8 flex items-center justify-center text-navy/60 hover:text-navy cursor-pointer hover:bg-navy/5 rounded-lg transition-colors">
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Price Display */}
+        <div className="flex-1 flex flex-col justify-center">
+          <div className="flex items-end gap-2">
+            {originalTotal && (
+              <span className="text-[14px] text-ink/40 line-through font-medium pb-1">
+                ₹{originalTotal}
+              </span>
+            )}
+            <span className="font-fraunces font-black text-[28px] leading-none text-navy">
+              ₹{totalPrice}
+            </span>
+          </div>
+          <p className="text-[10px] text-ink/40 mt-1">(Inclusive of all taxes)</p>
+        </div>
       </div>
 
       {/* Action Buttons */}
@@ -221,13 +220,12 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
         <button
           onClick={handleAddToCart}
           disabled={isAdded || isSelectedOutOfStock}
-          className={`flex-1 h-[54px] rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all ${
-            isSelectedOutOfStock
+          className={`flex-1 h-[54px] rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all ${isSelectedOutOfStock
               ? "bg-gray-200 text-gray-500 cursor-not-allowed border border-gray-300"
               : isAdded
-              ? "bg-[#6A9A4A] text-white cursor-pointer"
-              : "bg-navy text-white hover:bg-navy/90 cursor-pointer"
-          }`}
+                ? "bg-[#6A9A4A] text-white cursor-pointer"
+                : "bg-navy text-white hover:bg-navy/90 cursor-pointer"
+            }`}
         >
           {isSelectedOutOfStock ? (
             <span>OUT OF STOCK</span>
@@ -244,11 +242,10 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
         <button
           onClick={handleBuyNow}
           disabled={isSelectedOutOfStock}
-          className={`flex-1 h-[54px] rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all border ${
-            isSelectedOutOfStock
+          className={`flex-1 h-[54px] rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 transition-all border ${isSelectedOutOfStock
               ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
               : "bg-white text-navy border-navy/15 hover:border-navy hover:bg-navy/5 cursor-pointer shadow-sm"
-          }`}
+            }`}
         >
           {isSelectedOutOfStock ? "Unavailable" : <>Buy Now <Zap className="w-4 h-4" /></>}
         </button>
@@ -257,11 +254,10 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
       {/* Delivery Info */}
       <div className="bg-[#E5EDCD]/40 border border-[#E5EDCD] rounded-2xl p-4 flex items-start gap-4">
         <div className="mt-0.5">
-           <Shield className="w-5 h-5 text-[#6A9A4A]" />
+          <Shield className="w-5 h-5 text-[#6A9A4A]" />
         </div>
         <div>
           <p className="font-bold text-[13px] text-navy">Estimated delivery: 2-4 business days</p>
-          <p className="text-[12px] text-ink/60 mt-0.5">Free shipping on orders above ₹1999</p>
         </div>
       </div>
 
