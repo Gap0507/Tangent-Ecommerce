@@ -185,23 +185,31 @@ export function Scene() {
       
       let { isDesktop, isMobile } = context.conditions as { isDesktop: boolean, isMobile: boolean };
 
+      // Dynamically adapt to viewport height for responsive 3D positioning
+      const vh = window.innerHeight;
+      const isShortScreen = vh < 700; // iPhone SE, older iPhones
+      const mobileScale = isShortScreen ? 0.30 : 0.38;
+      const mobileCanY = isShortScreen ? 0.1 : -0.22;
+      const mobileScrollEndY = isShortScreen ? 1.4 : 1.1;
+      const mobileScrollScale = isShortScreen ? 0.26 : 0.32;
+
       // Set initial scale for the entire group
       gsap.set(groupRef.current.scale, {
-        x: isDesktop ? 1 : 0.38,
-        y: isDesktop ? 1 : 0.38,
-        z: isDesktop ? 1 : 0.38
+        x: isDesktop ? 1 : mobileScale,
+        y: isDesktop ? 1 : mobileScale,
+        z: isDesktop ? 1 : mobileScale
       });
 
       // Desktop: Side by side on left/right. Mobile: Side by side under text (Guava on left tilted right, Yuzu on right tilted left).
       gsap.set(can1Ref.current.position, { 
         x: isDesktop ? -1.5 : -0.6,
-        y: isDesktop ? 0 : -0.22
+        y: isDesktop ? 0 : mobileCanY
       });
       gsap.set(can1Ref.current.rotation, { z: -0.4 });
       
       gsap.set(can2Ref.current.position, { 
         x: isDesktop ? 1.5 : 0.6,
-        y: isDesktop ? 0 : -0.22 
+        y: isDesktop ? 0 : mobileCanY 
       });
       gsap.set(can2Ref.current.rotation, { z: 0.4 });
 
@@ -226,9 +234,9 @@ export function Scene() {
       scrollTl
         .to(groupRef.current.rotation, { y: Math.PI * 2 }, 0)
         .to(groupRef.current.scale, { 
-          x: isDesktop ? 0.75 : 0.32, 
-          y: isDesktop ? 0.75 : 0.32, 
-          z: isDesktop ? 0.75 : 0.32 
+          x: isDesktop ? 0.75 : mobileScrollScale, 
+          y: isDesktop ? 0.75 : mobileScrollScale, 
+          z: isDesktop ? 0.75 : mobileScrollScale 
         }, 0)
         // Can 1 (Bottom Left)
         .to(can1Ref.current.position, { x: isDesktop ? -0.9 : -0.6, y: isDesktop ? -0.4 : -0.3, z: 0.2 }, 0)
@@ -244,7 +252,7 @@ export function Scene() {
         .to(can4Ref.current.rotation, { z: 0.1 }, 0)
         .to(groupRef.current.position, { 
           x: isDesktop ? 1 : 0, 
-          y: isDesktop ? -0.3 : 1.1, 
+          y: isDesktop ? -0.3 : mobileScrollEndY, 
           duration: 3, 
           ease: "sine.inOut" 
         }, 1.3);

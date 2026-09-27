@@ -101,7 +101,7 @@ export default function HomeHero() {
 
         <div className="-mt-[100vh] relative z-10 pointer-events-none">
           {/* Section 1: Hero */}
-          <section className="relative flex flex-col items-center h-[100dvh] pt-16 pb-4 md:grid md:place-items-center md:pt-20 md:pb-0 md:h-screen">
+          <section className="relative flex flex-col items-center h-[100svh] pt-10 sm:pt-16 pb-4 md:grid md:place-items-center md:pt-20 md:pb-0 md:h-screen">
             <View className="absolute inset-0 z-0 pointer-events-none h-full w-full">
               <Bubbles count={150} speed={2} repeat={true} />
             </View>
@@ -112,17 +112,17 @@ export default function HomeHero() {
                   Meet Your New Daily Driver
                 </div>
 
-                <h1 className="hero-header font-fraunces font-black text-4xl sm:text-5xl md:text-5xl lg:text-6xl leading-[1.04] text-cream mb-2 md:mb-4">
+                <h1 className="hero-header font-fraunces font-black text-3xl sm:text-5xl md:text-5xl lg:text-6xl leading-[1.04] text-cream mb-2 md:mb-4">
                   Daily Vitamins.<br />Zero Crash.
                 </h1>
 
-                <div className="hero-body text-sm sm:text-lg max-w-md font-medium text-cream/85 mt-0.5 md:mt-4 px-4">
+                <div className="hero-body text-[13px] sm:text-lg max-w-md font-medium text-cream/85 mt-0.5 md:mt-4 px-4">
                   Tangent is a vitamin-infused functional drink that supports everyday energy, hydration, and wellness with zero sugar and great taste.
                 </div>
               </div>
 
               {/* Bottom Button Group */}
-              <div className="pb-1 mt-auto mb-36 md:pb-0 md:mt-8 md:mb-0 flex flex-col items-center">
+              <div className="pb-1 mt-auto mb-24 sm:mb-36 md:pb-0 md:mt-8 md:mb-0 flex flex-col items-center">
                 <Link
                   href="/shop"
                   className="hero-button bg-sand text-navy hover:bg-sand-deep text-lg sm:text-xl font-bold py-3.5 px-8 sm:py-4 sm:px-10 rounded-full transition-colors duration-300 pointer-events-auto shadow-xl flex items-center gap-2"
