@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import React from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -12,6 +13,43 @@ import { ProductTabs } from "@/components/product/ProductTabs";
 import { WhyLoveIt } from "@/components/product/WhyLoveIt";
 import { CustomerReviews } from "@/components/product/CustomerReviews";
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const product = PRODUCTS_CATALOG_DETAILED[resolvedParams.id];
+
+  if (!product) {
+    return {
+      title: "Product Not Found | Tangent",
+      description: "The requested product could not be found.",
+    };
+  }
+
+  return {
+    title: `${product.name} | Tangent`,
+    description: product.description,
+    openGraph: {
+      title: `${product.name} | Tangent`,
+      description: product.description,
+      url: `https://tangentfnb.com//shop/${resolvedParams.id}`,
+      images: [
+        {
+          url: product.images.main,
+          width: 800,
+          height: 800,
+          alt: product.name,
+        },
+      ],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} | Tangent`,
+      description: product.description,
+      images: [product.images.main],
+    },
+  };
+}
+
 export default async function ProductDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
   const product = PRODUCTS_CATALOG_DETAILED[resolvedParams.id];
@@ -20,13 +58,45 @@ export default async function ProductDetailsPage({ params }: { params: Promise<{
     notFound();
   }
 
+  // Generate JSON-LD Structured Data for the product
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: `https://tangentfnb.com/${product.images.main}`,
+    description: product.description,
+    brand: {
+      "@type": "Brand",
+      name: "Tangent",
+    },
+    offers: product.packPrices.map((pack: any) => ({
+      "@type": "Offer",
+      url: `https://tangentfnb.com//shop/${resolvedParams.id}`,
+      priceCurrency: "INR",
+      price: pack.price,
+      itemCondition: "https://schema.org/NewCondition",
+      availability: "https://schema.org/InStock",
+      name: pack.size,
+    })),
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: product.rating,
+      reviewCount: product.reviewsCount,
+    },
+  };
+
   return (
     <div className="bg-[#FAF8F5] min-h-screen text-navy font-sans">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Breadcrumbs */}
       <div className="max-w-[1280px] mx-auto px-6 md:px-12 py-6 pt-10">
         <nav className="flex items-center gap-2 text-[13px] text-ink/60 font-medium">
           <Link href="/" className="hover:text-navy transition-colors flex items-center gap-1">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
             Home
           </Link>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -44,7 +114,7 @@ export default async function ProductDetailsPage({ params }: { params: Promise<{
           {/* Left: Gallery */}
           <div className="w-full lg:w-1/2">
             <ProductGallery images={product.images} productName={product.name} />
-            
+
             {/* Features below gallery */}
             <div className="mt-8">
               <ProductFeatures features={product.features} />
@@ -62,7 +132,7 @@ export default async function ProductDetailsPage({ params }: { params: Promise<{
       <section className="max-w-[1280px] mx-auto px-6 md:px-12 pb-24">
         <ProductTabs product={product} />
         <div className="pt-16 mt-8">
-           <WhyLoveIt data={product.whyLoveIt} />
+          <WhyLoveIt data={product.whyLoveIt} />
         </div>
       </section>
 

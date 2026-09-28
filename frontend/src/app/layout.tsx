@@ -44,11 +44,57 @@ const thunder = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Tangent | Sparkling Infusion",
-  description: "Zero added sugar. Crisp, sparkling infusion crafted with 100% natural ingredients.",
+  metadataBase: new URL("https://tangentfnb.com/"), // Placeholder URL, replace with actual
+  title: {
+    default: "Tangent | Daily Vitamins. Zero Crash.",
+    template: "%s | Tangent",
+  },
+  description: "Tangent is a vitamin-infused functional drink that supports everyday energy, hydration, and wellness with zero sugar and great taste. 100% natural ingredients.",
+  keywords: [
+    "sparkling water", "vitamin infused drink", "zero sugar beverage", "healthy energy drink",
+    "prebiotic drink", "low calorie drink", "vegan drink", "watermelon mint", "yuzu mint",
+    "guava chilli", "watermelon cranberry", "functional beverage"
+  ],
+  authors: [{ name: "Tangent" }],
+  creator: "Tangent",
+  publisher: "Tangent",
+  openGraph: {
+    type: "website",
+    locale: "en_IN", // Assuming India based on INR pricing
+    url: "https://tangentfnb.com/",
+    title: "Tangent | Daily Vitamins. Zero Crash.",
+    description: "Tangent is a vitamin-infused functional drink that supports everyday energy, hydration, and wellness with zero sugar and great taste.",
+    siteName: "Tangent",
+    images: [
+      {
+        url: "/all4bg.png",
+        width: 1200,
+        height: 630,
+        alt: "Tangent Variety Pack",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tangent | Daily Vitamins. Zero Crash.",
+    description: "Tangent is a vitamin-infused functional drink that supports everyday energy, hydration, and wellness with zero sugar and great taste.",
+    images: ["/all4bg.png"],
+  },
   icons: {
     icon: "/tangent-logo.avif",
-  }
+    apple: "/tangent-logo.avif",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({

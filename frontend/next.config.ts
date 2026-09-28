@@ -12,6 +12,30 @@ const nextConfig: NextConfig = {
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  async redirects() {
+    return [
+      {
+        source: '/pages/contact',
+        destination: '/contact-us',
+        permanent: true,
+      },
+      {
+        source: '/blogs/news',
+        destination: '/blog',
+        permanent: true,
+      },
+      {
+        source: '/collections/all',
+        destination: '/shop',
+        permanent: true,
+      },
+      {
+        source: '/pages/accessibility',
+        destination: '/shop',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

@@ -189,7 +189,7 @@ export function Scene() {
       const vh = window.innerHeight;
       const isShortScreen = vh < 700; // iPhone SE, older iPhones
       const mobileScale = isShortScreen ? 0.30 : 0.38;
-      const mobileCanY = isShortScreen ? 0.1 : -0.22;
+      const mobileCanY = isShortScreen ? 0.55 : -0.22;
       const mobileScrollEndY = isShortScreen ? 1.4 : 1.1;
       const mobileScrollScale = isShortScreen ? 0.26 : 0.32;
 
