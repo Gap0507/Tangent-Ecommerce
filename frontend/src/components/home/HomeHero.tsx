@@ -123,22 +123,14 @@ export default function HomeHero() {
 
               {/* Bottom Button Group */}
               <div className="pb-1 mt-auto mb-24 sm:mb-36 md:pb-0 md:mt-8 md:mb-0 flex flex-col items-center">
-                <Link
-                  href="/shop"
-                  className="hero-button bg-sand text-navy hover:bg-sand-deep text-lg sm:text-xl font-bold py-3.5 px-8 sm:py-4 sm:px-10 rounded-full transition-colors duration-300 pointer-events-auto shadow-xl flex items-center gap-2"
-                >
-                  <span>SHOP NOW</span>
-                  <span className="text-xl">→</span>
-                </Link>
-
                 <div className="flex gap-2 mt-4 flex-wrap justify-center pointer-events-auto">
-                  <div className="hero-button text-[12px] font-semibold tracking-[.03em] border border-cream/40 py-1.5 px-3.5 rounded-full text-cream/90">
+                  <div className="hero-button text-[12px] font-semibold tracking-[.03em] bg-cream text-navy py-1.5 px-3.5 rounded-full">
                     Vitamin Infused
                   </div>
-                  <div className="hero-button text-[12px] font-semibold tracking-[.03em] border border-cream/40 py-1.5 px-3.5 rounded-full text-cream/90">
+                  <div className="hero-button text-[12px] font-semibold tracking-[.03em] bg-cream text-navy py-1.5 px-3.5 rounded-full">
                     Zero Sugar
                   </div>
-                  <div className="hero-button text-[12px] font-semibold tracking-[.03em] border border-cream/40 py-1.5 px-3.5 rounded-full text-cream/90">
+                  <div className="hero-button text-[12px] font-semibold tracking-[.03em] bg-cream text-navy py-1.5 px-3.5 rounded-full">
                     Vegan
                   </div>
                 </div>
@@ -190,43 +182,6 @@ export default function HomeHero() {
                   </div>
                 </div>
 
-                {/* Price */}
-                <div className="flex items-end gap-3 mb-2">
-                  <span className="font-fraunces font-black text-5xl text-orange-600 leading-none">₹{packPrice}</span>
-                  <span className="text-sky-800 text-sm font-semibold pb-1">/pack of 4</span>
-                </div>
-
-                {/* Free Shipping pill */}
-                <div className="flex items-center gap-2 text-sm text-sky-800 font-medium mb-6">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full shadow-sm" />
-                  Free shipping on all orders
-                </div>
-
-                {/* Buy Now Button */}
-                <button
-                  onClick={handleBuyNow}
-                  disabled={isOutOfStock || isAdded}
-                  className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2.5 transition-all shadow-xl pointer-events-auto ${isOutOfStock
-                      ? "bg-slate-300 text-slate-500 cursor-not-allowed"
-                      : isAdded
-                        ? "bg-emerald-500 text-white scale-[0.98]"
-                        : "bg-orange-500 text-white hover:bg-orange-600 hover:scale-[1.02] cursor-pointer"
-                    }`}
-                >
-                  {isOutOfStock ? (
-                    <span>OUT OF STOCK</span>
-                  ) : isAdded ? (
-                    <>
-                      <Check className="w-5 h-5" />
-                      <span>Added to Cart!</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag className="w-5 h-5" />
-                      <span>Buy Now — ₹{packPrice}</span>
-                    </>
-                  )}
-                </button>
               </div>
             </div>
           </section>

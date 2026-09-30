@@ -286,7 +286,7 @@ function buildReceiptHTML(order: OrderEmailData): string {
               </p>
               <p class="tx-cream-45" style="margin: 16px 0 0; font-family: ${fontStack}; font-size: 10px; letter-spacing: 2px; color: rgba(250, 247, 242, 0.45);">#${order.orderNumber}</p>
               <p class="tx-cream-35" style="margin: 14px 0 0; font-family: ${fontStack}; font-size: 10px; color: rgba(250, 247, 242, 0.35);">
-                &copy; ${new Date().getFullYear()} Tangent Energy Pvt Ltd. All rights reserved.
+                &copy; ${new Date().getFullYear()} Tangent Pvt Ltd. All rights reserved.
               </p>
             </td>
           </tr>

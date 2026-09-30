@@ -65,10 +65,9 @@ export function Navbar() {
             <Image
               src="/tangent-logo.avif"
               alt="Tangent Logo"
-              width={180}
-              height={46}
-              className="h-[46px] w-auto object-contain"
-              style={{ width: "auto", height: "auto" }}
+              width={200}
+              height={50}
+              className="h-[50px] w-auto object-contain"
               priority
             />
           </Link>
@@ -110,10 +109,9 @@ export function Navbar() {
             <Image
               src="/tangent-logo.avif"
               alt="Tangent Logo"
-              width={140}
-              height={36}
-              className="h-[36px] w-auto object-contain"
-              style={{ width: "auto", height: "auto" }}
+              width={180}
+              height={44}
+              className="h-[44px] w-auto object-contain"
             />
             <button
               className="p-2 rounded-full hover:bg-navy/5 transition-colors cursor-pointer"
@@ -127,7 +125,7 @@ export function Navbar() {
           <div className="flex flex-col gap-8 flex-grow">
             <Link
               href="/shop"
-              className="text-4xl font-black text-navy font-fraunces flex items-center justify-between group"
+              className="text-3xl font-black text-navy flex items-center justify-between group"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <span>Shop All</span>
@@ -137,7 +135,7 @@ export function Navbar() {
 
             <Link
               href="/track-order"
-              className="text-4xl font-black text-navy font-fraunces flex items-center justify-between group"
+              className="text-3xl font-black text-navy flex items-center justify-between group"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <span>Track Order</span>
@@ -147,7 +145,7 @@ export function Navbar() {
             
             <Link
               href="/contact-us"
-              className="text-4xl font-black text-navy font-fraunces flex items-center justify-between group"
+              className="text-3xl font-black text-navy flex items-center justify-between group"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <span>Contact Us</span>
@@ -157,7 +155,7 @@ export function Navbar() {
 
             <Link
               href="/blog"
-              className="text-4xl font-black text-navy font-fraunces flex items-center justify-between group"
+              className="text-3xl font-black text-navy flex items-center justify-between group"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <span>Blog</span>

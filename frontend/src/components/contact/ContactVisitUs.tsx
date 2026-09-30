@@ -66,9 +66,8 @@ export function ContactVisitUs() {
                 <MapPin className="w-[18px] h-[18px] text-coral" />
               </div>
               <div>
-                <p className="text-navy text-[14px] font-bold mb-1">Tangent Beverages Pvt. Ltd.</p>
+                <p className="text-navy text-[14px] font-bold mb-1">Dudhat Food and Beverages Pvt Ltd.</p>
                 <a href="https://maps.app.goo.gl/o6dzxNeU23BfYuhA6" target="_blank" rel="noopener noreferrer" className="text-ink/60 text-[13px] leading-[1.5] hover:text-coral transition-colors block">
-                  Dudhat Food and Beverages Pvt Ltd,<br />
                   Plot no 4802, phase IV, GICC, B/H Indo German Tool Room,<br />
                   Vatva, Ahmedabad-382445
                 </a>

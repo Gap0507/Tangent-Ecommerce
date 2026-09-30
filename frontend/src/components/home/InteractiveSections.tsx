@@ -15,10 +15,7 @@ const TasteOfWonder = dynamic(
   { ssr: false, loading: () => <div className="h-[500px] bg-cream animate-pulse" /> }
 );
 
-const FlavorPicker = dynamic(
-  () => import("@/components/home/FlavorPicker").then((m) => m.FlavorPicker),
-  { ssr: false, loading: () => <div className="min-h-[100vh] bg-[#FAF7F2] animate-pulse" /> }
-);
+
 
 const TangentStandard = dynamic(
   () => import("@/components/home/TangentStandard").then((m) => m.TangentStandard),
@@ -77,9 +74,7 @@ export function InteractiveSections() {
         <Juice3DShowcase />
       </LazySection>
 
-      <LazySection fallback={<div className="min-h-[100vh] bg-[#FAF7F2] animate-pulse" />}>
-        <FlavorPicker />
-      </LazySection>
+
 
       <MomentsSection />
 
