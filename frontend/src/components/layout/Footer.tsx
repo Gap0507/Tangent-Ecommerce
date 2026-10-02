@@ -31,6 +31,7 @@ export function Footer() {
           <Link href="/track-order" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Track Your Order</Link>
           <Link href="/contact-us" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Contact Us</Link>
           <Link href="/blog" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Our Blog</Link>
+          <Link href="/our-story" className="block text-[14.5px] text-cream/80 mb-[11px] hover:text-cream">Our Story</Link>
         </div>
 
         <div className="flex flex-col">
