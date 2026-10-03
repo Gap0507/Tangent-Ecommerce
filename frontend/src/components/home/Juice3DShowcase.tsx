@@ -145,15 +145,15 @@ export function Juice3DShowcase() {
       <div className="absolute inset-y-0 left-0 right-0 max-w-[1440px] mx-auto w-full h-full pointer-events-none z-10">
         <IceCubes
           containerWidth={isMobile ? 320 : 1220}
-          cubeCount={isMobile ? 4 : 8}
-          leafCount={isMobile ? 6 : 12}
+          cubeCount={isMobile ? 3 : 6}
+          leafCount={isMobile ? 3 : 8}
         />
       </div>
       <WaterWave
         dropRadius={isMobile ? 8 : 10}
-        perturbance={isMobile ? 0.006 : 0.01}
+        perturbance={isMobile ? 0.004 : 0.01}
         imageUrl="/assets/images/drop.png"
-        resolution={isMobile ? 256 : 512}
+        resolution={isMobile ? 128 : 256}
         style={{ width: "100%", height: "100%" }}
       >
         {() => (
@@ -236,17 +236,7 @@ export function Juice3DShowcase() {
                     ingredients.
                   </p>
 
-                  <div className="mt-1.5 sm:mt-4 flex items-center justify-between gap-2 sm:gap-3">
-                    <button className="paper-btn relative inline-flex items-center gap-1.5 sm:gap-2 rounded-full px-3 py-1.5 sm:px-6 sm:py-2.5 text-white text-[10px] sm:text-sm font-semibold cursor-pointer group">
-                      <span>Shop Now</span>
-                      <ChevronRight
-                        size={16}
-                        className="transition-transform duration-300 group-hover:translate-x-1"
-                      />
-                      <span className="paper-drop w-2.5 h-2.5 top-1 left-5" aria-hidden />
-                      <span className="paper-drop w-2 h-2 bottom-1 right-8" aria-hidden />
-                    </button>
-
+                  <div className="mt-1.5 sm:mt-4 flex items-center justify-end gap-2 sm:gap-3">
                     {/* Navigation Buttons inside paper card */}
                     <div className="flex items-center gap-1 sm:gap-2">
                       <button

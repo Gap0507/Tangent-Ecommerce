@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState, Suspense } from "react";
-import { useFrame, Canvas } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import {
   Environment,
   Lightformer,
@@ -166,12 +166,7 @@ export default function Can3DViewer({
 }: Can3DProps) {
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
-      <Canvas 
-        style={{ width: "100%", height: "100%" }}
-        shadows={false}
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-      >
+      <View className="w-full h-full absolute inset-0">
         <Suspense fallback={null}>
           <PerspectiveCamera 
             makeDefault 
@@ -205,7 +200,7 @@ export default function Can3DViewer({
             add hard glare.
           */}
           <Environment
-            resolution={isMobile ? 256 : 512}
+            resolution={isMobile ? 128 : 256}
             environmentIntensity={ENV_INTENSITY}
           >
             {/* even walls */}
@@ -220,7 +215,7 @@ export default function Can3DViewer({
             <Lightformer form="rect" intensity={1.1} position={[-7, 2, 6]} scale={[5, 16, 1]} />
           </Environment>
         </Suspense>
-      </Canvas>
+      </View>
     </div>
   );
 }

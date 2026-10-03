@@ -103,7 +103,7 @@ export default function HomeHero() {
           {/* Section 1: Hero */}
           <section className="relative flex flex-col items-center h-[100svh] pt-10 sm:pt-16 pb-4 md:grid md:place-items-center md:pt-20 md:pb-0 md:h-screen">
             <View className="absolute inset-0 z-0 pointer-events-none h-full w-full">
-              <Bubbles count={150} speed={2} repeat={true} />
+              <Bubbles count={60} speed={2} repeat={true} />
             </View>
             <div className="relative z-10 flex flex-col items-center text-center px-4 w-full h-full justify-end md:justify-center md:grid md:auto-rows-min md:place-items-center md:h-auto md:-mt-32">
               {/* Top Text Group */}

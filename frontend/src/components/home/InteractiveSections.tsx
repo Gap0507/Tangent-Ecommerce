@@ -2,8 +2,12 @@
 
 import { useRef, useState, useEffect, type ReactNode } from "react";
 import dynamic from "next/dynamic";
-import { MomentsSection } from "./MomentsSection";
 import { ProductShowcaseClient } from "./ProductShowcaseClient";
+
+const MomentsSection = dynamic(
+  () => import("@/components/home/MomentsSection").then((m) => m.MomentsSection),
+  { ssr: false, loading: () => <div className="min-h-[420px] bg-navy animate-pulse" /> }
+);
 
 const Juice3DShowcase = dynamic(
   () => import("@/components/home/Juice3DShowcase").then((m) => m.Juice3DShowcase),
@@ -66,8 +70,9 @@ function LazySection({
 export function InteractiveSections() {
   return (
     <>
-      {/* TasteOfWonder is light (just images + gsap), load eagerly */}
-      <TasteOfWonder />
+      <LazySection fallback={<div className="h-[500px] bg-cream animate-pulse" />}>
+        <TasteOfWonder />
+      </LazySection>
 
       {/* Heavy 3D section — only load when approaching viewport */}
       <LazySection fallback={<div className="h-[550px] sm:h-[calc(100vh-80px)] sm:min-h-[600px] sm:max-h-[750px] bg-[#82AF38]/20 animate-pulse" />}>
@@ -76,7 +81,9 @@ export function InteractiveSections() {
 
 
 
-      <MomentsSection />
+      <LazySection fallback={<div className="min-h-[420px] bg-navy animate-pulse" />}>
+        <MomentsSection />
+      </LazySection>
 
       <LazySection fallback={<div className="h-screen bg-cream animate-pulse" />}>
         <ProductShowcaseClient />

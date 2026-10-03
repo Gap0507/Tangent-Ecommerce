@@ -9,6 +9,9 @@ import { usePathname } from "next/navigation";
 export function GlobalCanvas() {
   const pathname = usePathname();
 
+  // Only mount the WebGL context on pages that use 3D Views
+  if (pathname !== "/") return null;
+
   return (
     <div
       style={{
@@ -26,7 +29,7 @@ export function GlobalCanvas() {
         eventSource={typeof document !== "undefined" ? document.body : undefined}
         eventPrefix="client"
         shadows={false}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
         gl={{
           toneMapping: THREE.NoToneMapping,
           outputColorSpace: THREE.SRGBColorSpace,

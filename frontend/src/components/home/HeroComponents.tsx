@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, forwardRef, ReactNode, Suspense } from "react";
+import React, { useRef, useEffect, useMemo, forwardRef, ReactNode, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Environment, Float, useGLTF, View, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
@@ -114,8 +114,13 @@ export function Bubbles({ count = 300, speed = 5, bubbleSize = 0.05, opacity = 0
   const minSpeed = speed * 0.001;
   const maxSpeed = speed * 0.005;
 
-  const geometry = new THREE.SphereGeometry(bubbleSize, 16, 16);
-  const material = new THREE.MeshBasicMaterial({ transparent: true, opacity });
+  // Memoize geometry & material so they aren't recreated every render
+  const geometry = useMemo(() => new THREE.SphereGeometry(bubbleSize, 8, 8), [bubbleSize]);
+  const material = useMemo(() => new THREE.MeshBasicMaterial({ transparent: true, opacity }), [opacity]);
+
+  // Cache color reads so we don't allocate a new THREE.Color 60×/sec
+  const cachedColor = useRef(new THREE.Color("#FDE046"));
+  const lastBgColor = useRef("");
 
   useEffect(() => {
     const mesh = meshRef.current;
@@ -136,7 +141,12 @@ export function Bubbles({ count = 300, speed = 5, bubbleSize = 0.05, opacity = 0
 
   useFrame(() => {
     if (!meshRef.current) return;
-    material.color = new THREE.Color(document.body.style.backgroundColor || "#FDE046");
+    const bgColor = document.body.style.backgroundColor || "#FDE046";
+    if (bgColor !== lastBgColor.current) {
+      cachedColor.current.set(bgColor);
+      lastBgColor.current = bgColor;
+      material.color.copy(cachedColor.current);
+    }
 
     for (let i = 0; i < count; i++) {
       meshRef.current.getMatrixAt(i, o.matrix);
@@ -269,7 +279,7 @@ export function Scene() {
       </group>
       <FloatingCan ref={can3Ref} modelPath="/assets/3d/can/Tangent_Watermelon_Mint.glb" floatSpeed={FLOAT_SPEED} />
       <FloatingCan ref={can4Ref} modelPath="/assets/3d/can/Tangent_Watermelon_Cranberry_v2_FINAL_4K.glb" floatSpeed={FLOAT_SPEED} />
-      <Environment resolution={512} environmentIntensity={0.8}>
+      <Environment resolution={256} environmentIntensity={0.8}>
         {/* even walls */}
         <Lightformer form="rect" intensity={0.9} position={[0, 0, 10]} scale={[30, 30, 1]} />
         <Lightformer form="rect" intensity={0.9} position={[-10, 0, 0]} scale={[30, 30, 1]} />
