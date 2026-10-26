@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDB from "@/lib/db";
 import { Settings } from "@/models/Settings";
+import { getShiprocketToken, clearShiprocketTokenCache } from "@/lib/shiprocket";
 
 export async function POST(request: Request) {
   try {
@@ -23,19 +24,10 @@ export async function POST(request: Request) {
 
       if (shiprocketEmail && shiprocketApiKey) {
         try {
-          // 1. Authenticate with Shiprocket API
-          const authRes = await fetch("https://apiv2.shiprocket.in/v1/external/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: shiprocketEmail,
-              password: shiprocketApiKey,
-            }),
-          });
-          const authData = await authRes.json();
+          // 1. Get cached Shiprocket API token (prevents IP rate limiting on pin calculations)
+          const token = await getShiprocketToken(shiprocketEmail, shiprocketApiKey);
 
-          if (authData.token) {
-            const token = authData.token;
+          if (token) {
             // Use the pickup pincode from Shiprocket (user's warehouse in Ahmedabad)
             const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || "382443";
             let totalWeight = 0;

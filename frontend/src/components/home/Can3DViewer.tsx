@@ -17,6 +17,7 @@ interface Can3DProps {
   isMobile: boolean;
   rotation?: number[];
   positionOffset?: [number, number, number];
+  scaleMultiplier?: number;
 }
 
 /* ------------------------------------------------------------------
@@ -56,6 +57,7 @@ function CanModel({
   isMobile,
   rotation,
   positionOffset = [0, 0, 0],
+  scaleMultiplier = 1,
 }: Can3DProps) {
   const { scene } = useGLTF(modelPath);
   const modelRef = useRef<THREE.Group>(null);
@@ -134,7 +136,7 @@ function CanModel({
     };
   }, [scene]);
 
-  const scale = isMobile ? 1.0 : 1.3; // can size: raise = bigger, lower = smaller
+  const scale = (isMobile ? 1.0 : 1.3) * scaleMultiplier; // can size: raise = bigger, lower = smaller
   const position: [number, number, number] = [
     0 + positionOffset[0],
     -0.01 + positionOffset[1],
@@ -163,6 +165,7 @@ export default function Can3DViewer({
   isMobile,
   rotation,
   positionOffset,
+  scaleMultiplier = 1,
 }: Can3DProps) {
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
@@ -190,6 +193,7 @@ export default function Can3DViewer({
               isMobile={isMobile}
               rotation={rotation}
               positionOffset={positionOffset}
+              scaleMultiplier={scaleMultiplier}
             />
           </PresentationControls>
 

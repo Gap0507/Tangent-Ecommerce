@@ -3,6 +3,7 @@ import connectToDB from "@/lib/db";
 import { Order, OrderStatus, PaymentStatus, ShipmentStatus } from "@/models/Order";
 import { Settings } from "@/models/Settings";
 import { getSession } from "@/lib/auth";
+import { getShiprocketToken } from "@/lib/shiprocket";
 
 export async function POST(request: Request) {
   try {
@@ -49,25 +50,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Authenticate with Shiprocket API
-    const authRes = await fetch("https://apiv2.shiprocket.in/v1/external/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: shiprocketEmail,
-        password: shiprocketApiKey,
-      }),
-    });
-    const authData = await authRes.json();
+    // 1. Authenticate with Shiprocket API (cached token prevents rate limits and reduces latency)
+    const token = await getShiprocketToken(shiprocketEmail, shiprocketApiKey);
 
-    if (!authData.token) {
+    if (!token) {
       return NextResponse.json(
         { success: false, error: "Shiprocket authentication failed. Check your credentials in Settings." },
         { status: 400 }
       );
     }
-
-    const token = authData.token;
 
     // 2. Check Shiprocket wallet balance BEFORE creating the order
     let walletBalance = 0;

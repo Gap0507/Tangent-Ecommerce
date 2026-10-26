@@ -9,8 +9,9 @@ import { usePathname } from "next/navigation";
 export function GlobalCanvas() {
   const pathname = usePathname();
 
-  // Only mount the WebGL context on pages that use 3D Views
-  if (pathname !== "/") return null;
+  // Mount WebGL context on pages that use 3D Views (Homepage and Shop All)
+  const is3DPage = pathname === "/" || pathname === "/shop" || pathname?.startsWith("/shop");
+  if (!is3DPage) return null;
 
   return (
     <div

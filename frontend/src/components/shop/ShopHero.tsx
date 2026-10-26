@@ -25,7 +25,7 @@ const FLAVORS = [
     modelPath: "/assets/3d/can/Tangent_Watermelon_Mint.glb",
     price: "₹520",
     packLabel: "1000 ml (Pack of 4)",
-    offset: [0, -0.04, 0] as [number, number, number],
+    offset: [0, 0, 0] as [number, number, number],
   },
   {
     id: "watermelon-cranberry",
@@ -35,7 +35,7 @@ const FLAVORS = [
     modelPath: "/assets/3d/can/Tangent_Watermelon_Cranberry_v2_FINAL_4K.glb",
     price: "₹320",
     packLabel: "1000 ml (Pack of 4)",
-    offset: [0, -0.04, 0] as [number, number, number],
+    offset: [0, 0, 0] as [number, number, number],
   },
   {
     id: "yuzu-mint",
@@ -45,7 +45,7 @@ const FLAVORS = [
     modelPath: "/assets/3d/can/Tangent_Yuzu_Mint_FINAL_4K.glb",
     price: "₹480",
     packLabel: "1000 ml (Pack of 4)",
-    offset: [0, -0.04, 0] as [number, number, number],
+    offset: [0, 0, 0] as [number, number, number],
   },
   {
     id: "guava-chilli",
@@ -55,7 +55,7 @@ const FLAVORS = [
     modelPath: "/assets/3d/can/Tangent_Guava_Chilli_FINAL_4K.glb",
     price: "₹400",
     packLabel: "1000 ml (Pack of 4)",
-    offset: [0, -0.04, 0] as [number, number, number],
+    offset: [0, 0, 0] as [number, number, number],
   },
 ];
 
@@ -201,7 +201,7 @@ export function ShopHero() {
                   </h1>
                 </div>
 
-                {/* 3D Can — Large and Centered */}
+                {/* 3D Can — Proportionate & Centered */}
                 <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-auto">
                   <AnimatePresence mode="wait">
                     <motion.div
@@ -210,13 +210,14 @@ export function ShopHero() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.85 }}
                       transition={{ duration: 0.5 }}
-                      className="w-[380px] md:w-[550px] lg:w-[620px] h-[520px] md:h-[700px] lg:h-[750px] -translate-y-12"
+                      className="w-[320px] sm:w-[400px] md:w-[460px] lg:w-[500px] h-[420px] md:h-[540px] lg:h-[580px] -translate-y-8 sm:-translate-y-10"
                     >
                       <Can3DViewer
                         modelPath={activeFlavor.modelPath}
                         isMobile={isMobile}
                         rotation={[0, Math.PI / 1.8, 0]}
                         positionOffset={activeFlavor.offset}
+                        scaleMultiplier={0.9}
                       />
                     </motion.div>
                   </AnimatePresence>

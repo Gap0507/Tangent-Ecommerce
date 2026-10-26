@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { State, City } from "country-state-city";
+import { parsePhoneNumberFromString, isValidPhoneNumber } from "libphonenumber-js";
 
 declare global {
   interface Window {
@@ -41,6 +42,47 @@ export default function CheckoutPage() {
   const [city, setCity] = useState("");
   const [pincode, setPincode] = useState("");
   const [landmark, setLandmark] = useState("");
+
+  // Validation states
+  const [emailError, setEmailError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState(false);
+
+  // Email validation – RFC-compliant pattern
+  const validateEmail = useCallback((value: string): string => {
+    if (!value.trim()) return "Email address is required";
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(value)) return "Please enter a valid email address";
+    return "";
+  }, []);
+
+  // Phone validation – uses libphonenumber-js with default country India (IN)
+  const validatePhone = useCallback((value: string): string => {
+    if (!value.trim()) return "Phone number is required";
+    // Auto-prepend +91 if user enters a raw 10-digit number
+    let phoneInput = value.trim();
+    if (/^\d{10}$/.test(phoneInput)) {
+      phoneInput = "+91" + phoneInput;
+    }
+    try {
+      const phoneNumber = parsePhoneNumberFromString(phoneInput, "IN");
+      if (!phoneNumber) return "Please enter a valid phone number (e.g., 9876543210)";
+      if (!phoneNumber.isValid()) return "Invalid phone number for " + (phoneNumber.country || "India");
+      return "";
+    } catch {
+      return "Please enter a valid phone number";
+    }
+  }, []);
+
+  // Real-time validation on change (only after first blur / touch)
+  useEffect(() => {
+    if (emailTouched) setEmailError(validateEmail(email));
+  }, [email, emailTouched, validateEmail]);
+
+  useEffect(() => {
+    if (phoneTouched) setPhoneError(validatePhone(phone));
+  }, [phone, phoneTouched, validatePhone]);
 
   const indianStates = State.getStatesOfCountry("IN");
   const citiesOfSelectedState = City.getCitiesOfState("IN", selectedStateCode);
@@ -154,6 +196,18 @@ export default function CheckoutPage() {
 
     if (!fullName || !email || !phone || !address || !city || !stateName || !pincode) {
       setErrorMsg("Please fill in all required shipping address fields.");
+      return;
+    }
+
+    // Validate email & phone before proceeding
+    const emailErr = validateEmail(email);
+    const phoneErr = validatePhone(phone);
+    setEmailTouched(true);
+    setPhoneTouched(true);
+    setEmailError(emailErr);
+    setPhoneError(phoneErr);
+    if (emailErr || phoneErr) {
+      setErrorMsg(emailErr || phoneErr);
       return;
     }
 
@@ -279,9 +333,22 @@ export default function CheckoutPage() {
         });
         rzp.open();
       } else {
-        // Mock fallback mode if script fails or in dev sandbox
-        await completeVerification();
-        setIsSubmitting(false);
+        // Check if this is a live/production order vs offline sandbox test
+        const isLiveOrder = Boolean(
+          (razorpayOrderId && razorpayOrderId.startsWith("order_")) ||
+          (razorpayKeyId && !razorpayKeyId.includes("mockkey"))
+        );
+
+        if (isLiveOrder) {
+          setErrorMsg(
+            "Secure payment gateway (Razorpay) failed to load. If you are using an ad-blocker or content shield, please allow checkout.razorpay.com and refresh the page to complete your payment."
+          );
+          setIsSubmitting(false);
+        } else {
+          // Offline developer sandbox fallback when running without Razorpay credentials
+          await completeVerification();
+          setIsSubmitting(false);
+        }
       }
     } catch (err: any) {
       setErrorMsg(err.message || "Something went wrong creating your order.");
@@ -396,21 +463,61 @@ export default function CheckoutPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => setEmailTouched(true)}
                     placeholder="your.email@domain.com"
                     required
-                    className="w-full bg-transparent border border-navy/20 rounded-xl px-4 py-3 text-[14px] text-navy focus:outline-none focus:border-navy transition-colors"
+                    className={`w-full bg-transparent border rounded-xl px-4 py-3 text-[14px] text-navy focus:outline-none transition-colors ${
+                      emailTouched && emailError
+                        ? "border-red-400 focus:border-red-500"
+                        : emailTouched && !emailError && email
+                        ? "border-green-400 focus:border-green-500"
+                        : "border-navy/20 focus:border-navy"
+                    }`}
                   />
+                  {emailTouched && emailError && (
+                    <p className="text-[12px] text-red-500 font-semibold mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      {emailError}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-[13px] font-bold text-navy mb-1.5">Phone Number *</label>
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+9724565952"
-                    required
-                    className="w-full bg-transparent border border-navy/20 rounded-xl px-4 py-3 text-[14px] text-navy focus:outline-none focus:border-navy transition-colors"
-                  />
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[14px] text-navy/50 font-bold select-none pointer-events-none">🇮🇳 +91</span>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => {
+                        // Only digits, hard cap at 10
+                        const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                        setPhone(digits);
+                      }}
+                      onBlur={() => setPhoneTouched(true)}
+                      placeholder="9876543210"
+                      required
+                      maxLength={10}
+                      className={`w-full bg-transparent border rounded-xl pl-[5.5rem] pr-4 py-3 text-[14px] text-navy focus:outline-none transition-colors ${
+                        phoneTouched && phoneError
+                          ? "border-red-400 focus:border-red-500"
+                          : phoneTouched && !phoneError && phone
+                          ? "border-green-400 focus:border-green-500"
+                          : "border-navy/20 focus:border-navy"
+                      }`}
+                    />
+                  </div>
+                  {phoneTouched && phoneError && (
+                    <p className="text-[12px] text-red-500 font-semibold mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      {phoneError}
+                    </p>
+                  )}
+                  {phoneTouched && !phoneError && phone && (
+                    <p className="text-[12px] text-green-600 font-semibold mt-1 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                      Valid phone number
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

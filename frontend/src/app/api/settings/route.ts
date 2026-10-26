@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDB from "@/lib/db";
 import { Settings } from "@/models/Settings";
+import { getSession } from "@/lib/auth";
 
 export async function GET() {
   try {
@@ -33,6 +34,32 @@ export async function GET() {
       });
     }
 
+    const session = await getSession();
+    if (!session) {
+      // For public / customer requests (e.g. checkout), only expose safe store settings
+      const publicSettings = {
+        useRealTimeRates: settings.useRealTimeRates,
+        flatShippingRate: settings.flatShippingRate,
+        storeEmail: settings.storeEmail,
+        storePhone: settings.storePhone,
+        storeName: settings.storeName,
+        pack4Weight: settings.pack4Weight,
+        pack4Length: settings.pack4Length,
+        pack4Breadth: settings.pack4Breadth,
+        pack4Height: settings.pack4Height,
+        pack8Weight: settings.pack8Weight,
+        pack8Length: settings.pack8Length,
+        pack8Breadth: settings.pack8Breadth,
+        pack8Height: settings.pack8Height,
+        pack24Weight: settings.pack24Weight,
+        pack24Length: settings.pack24Length,
+        pack24Breadth: settings.pack24Breadth,
+        pack24Height: settings.pack24Height,
+      };
+      return NextResponse.json({ success: true, data: publicSettings });
+    }
+
+    // Authenticated admin gets full settings including credentials
     return NextResponse.json({ success: true, data: settings });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -41,6 +68,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
     await connectToDB();
     const body = await request.json();
 
