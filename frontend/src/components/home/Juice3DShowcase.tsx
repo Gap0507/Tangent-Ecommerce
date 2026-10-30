@@ -43,7 +43,7 @@ const CANS = [
     id: 3,
     name: "Guava Chilli",
     image: "/can1.png",
-    color: "#E8706B",
+    color: "#5B8E3D",
     model: "/assets/3d/can/Tangent_Guava_Chilli_FINAL_4K.glb",
     rotation: [0, Math.PI / 1.85, 0],
     offset: [0, 0, 0] as [number, number, number],

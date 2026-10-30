@@ -51,7 +51,7 @@ const FLAVORS = [
     id: "guava-chilli",
     name: "Guava Chilli",
     tagline: "Sweet Tropical Heat",
-    color: "#E8706B",
+    color: "#5B8E3D",
     modelPath: "/assets/3d/can/Tangent_Guava_Chilli_FINAL_4K.glb",
     price: "₹400",
     packLabel: "1000 ml (Pack of 4)",
