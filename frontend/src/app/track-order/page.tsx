@@ -61,17 +61,21 @@ interface OrderData {
 function TrackOrderContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("query") || "";
+  const initialContact = searchParams.get("contact") || searchParams.get("phone") || searchParams.get("email") || "";
 
   const [searchInput, setSearchInput] = useState(initialQuery);
+  const [contactInput, setContactInput] = useState(initialContact);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [orders, setOrders] = useState<OrderData[]>([]);
 
-  const handleSearch = async (queryToSearch?: string) => {
+  const handleSearch = async (queryToSearch?: string, contactToSearch?: string) => {
     const q = (queryToSearch !== undefined ? queryToSearch : searchInput).trim();
+    const c = (contactToSearch !== undefined ? contactToSearch : contactInput).trim();
+
     if (!q) {
-      setErrorMsg("Please enter your Order Number.");
+      setErrorMsg("Please enter your Order Number (e.g. TAN-123456).");
       return;
     }
 
@@ -80,7 +84,8 @@ function TrackOrderContent() {
     setSearched(true);
 
     try {
-      const res = await fetch(`/api/track-order?query=${encodeURIComponent(q)}`);
+      const url = `/api/track-order?query=${encodeURIComponent(q)}${c ? `&contact=${encodeURIComponent(c)}` : ""}`;
+      const res = await fetch(url);
       const data = await res.json();
 
       if (data.success && data.orders) {
@@ -99,9 +104,9 @@ function TrackOrderContent() {
 
   useEffect(() => {
     if (initialQuery) {
-      handleSearch(initialQuery);
+      handleSearch(initialQuery, initialContact);
     }
-  }, [initialQuery]);
+  }, [initialQuery, initialContact]);
 
   const getStepProgress = (orderStatus: string, shipmentStatus: string) => {
     const status = orderStatus.toUpperCase();
@@ -152,8 +157,17 @@ function TrackOrderContent() {
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Enter Order Number (e.g. TAN-123456)"
-                className="w-full pl-12 pr-4 py-3.5 text-navy text-sm font-semibold rounded-xl bg-transparent focus:outline-none placeholder:text-navy/40"
+                placeholder="Order Number (e.g. TAN-123456)"
+                className="w-full pl-12 pr-4 py-3.5 text-navy text-sm font-semibold rounded-xl bg-transparent focus:outline-none placeholder:text-navy/40 uppercase"
+              />
+            </div>
+            <div className="relative sm:w-56 flex items-center border-t sm:border-t-0 sm:border-l border-navy/10">
+              <input
+                type="text"
+                value={contactInput}
+                onChange={(e) => setContactInput(e.target.value)}
+                placeholder="Phone or Email (optional)"
+                className="w-full px-4 py-3.5 text-navy text-sm font-medium rounded-xl bg-transparent focus:outline-none placeholder:text-navy/40"
               />
             </div>
             <button

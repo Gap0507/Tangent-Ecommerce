@@ -2,17 +2,22 @@ import { NextResponse } from "next/server";
 import { createToken } from "@/lib/auth";
 import { cookies } from "next/headers";
 
-// Basic admin credentials for now. In a real scenario, you could use a DB Admin model or Env vars.
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@tangentdrinks.com";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
+    const cleanEmail = (email || "").trim().toLowerCase();
 
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    if (
+      ADMIN_EMAIL &&
+      ADMIN_PASSWORD &&
+      cleanEmail === ADMIN_EMAIL &&
+      password === ADMIN_PASSWORD
+    ) {
       // Create JWT token
-      const token = await createToken({ email, role: "admin" });
+      const token = await createToken({ email: cleanEmail, role: "admin" });
 
       // Set HTTP-only cookie
       const cookieStore = await cookies();
@@ -21,7 +26,7 @@ export async function POST(request: Request) {
         value: token,
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: 60 * 60 * 24, // 1 day
         path: "/",
       });

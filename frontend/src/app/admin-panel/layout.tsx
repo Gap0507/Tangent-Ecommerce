@@ -41,33 +41,55 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem("admin_token");
-    if (token === "dummy-jwt-token-for-admin") {
-      setIsLoggedIn(true);
-      document.cookie = "admin_session=valid_admin_session_token; path=/; max-age=86400";
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          setIsLoggedIn(Boolean(data.authenticated));
+        } else {
+          setIsLoggedIn(false);
+        }
+      } catch {
+        setIsLoggedIn(false);
+      } finally {
+        setIsCheckingAuth(false);
+      }
     }
-    setIsCheckingAuth(false);
+    checkAuth();
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      (email.trim() === "admin@tangentdrinks.com" || email.trim() === "admin") &&
-      (password === "admin123" || password === "admin")
-    ) {
-      setIsLoggedIn(true);
-      setError("");
-      localStorage.setItem("admin_token", "dummy-jwt-token-for-admin");
-      document.cookie = "admin_session=valid_admin_session_token; path=/; max-age=86400";
-    } else {
-      setError("Invalid admin email or password.");
+    setError("");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsLoggedIn(true);
+        setError("");
+      } else {
+        setError(data.message || "Invalid admin credentials.");
+      }
+    } catch {
+      setError("Failed to connect to authentication server.");
     }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem("admin_token");
-    document.cookie = "admin_session=; path=/; max-age=0";
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      setIsLoggedIn(false);
+      localStorage.removeItem("admin_token");
+      window.location.href = "/admin-panel";
+    }
   };
 
   if (isCheckingAuth) {

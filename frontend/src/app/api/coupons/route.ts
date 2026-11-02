@@ -5,10 +5,10 @@ import { getSession } from "@/lib/auth";
 
 export async function GET(request: Request) {
   try {
-    // const session = await getSession();
-    // if (!session) {
-    //   return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    // }
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
 
     await connectToDB();
     const coupons = await Coupon.find({}).sort({ createdAt: -1 });
@@ -21,10 +21,10 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    // const session = await getSession();
-    // if (!session) {
-    //   return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    // }
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
 
     await connectToDB();
     const data = await request.json();
