@@ -183,7 +183,7 @@ export async function POST(request: Request) {
         billing_state: order.shippingAddress.state,
         billing_country: "India",
         billing_email: order.customerEmail,
-        billing_phone: order.customerPhone,
+        billing_phone: (order.customerPhone || "").replace(/[^0-9]/g, "").slice(-10) || order.customerPhone,
         shipping_is_billing: true,
         order_items: order.items.map((item: any) => ({
           name: item.name,
@@ -215,26 +215,93 @@ export async function POST(request: Request) {
       );
     }
 
-    // 6. Order created successfully — update our database
     const shiprocketOrderId = String(srOrderData.order_id);
-    const awbCode = srOrderData.awb_code || "";
-    const courierName = srOrderData.courier_name || "Pending Assignment";
+    const shipmentId = srOrderData.shipment_id ? String(srOrderData.shipment_id) : "";
+    let awbCode = srOrderData.awb_code || "";
+    let courierName = srOrderData.courier_name || "";
 
+    // 6. Step 2: Assign Courier & Generate Live AWB
+    if (shipmentId && !awbCode) {
+      try {
+        const awbRes = await fetch("https://apiv2.shiprocket.in/v1/external/courier/assign/awb", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            shipment_id: shipmentId,
+          }),
+        });
+
+        const awbData = await awbRes.json();
+        if (awbData && (awbData.awb_assign_status === 1 || awbData.response?.data?.awb_code)) {
+          const resData = awbData.response?.data || {};
+          awbCode = resData.awb_code || awbCode;
+          courierName = resData.courier_name || courierName;
+        } else {
+          console.warn("Shiprocket AWB auto-assign response:", awbData);
+        }
+      } catch (awbErr) {
+        console.error("Failed to auto-assign AWB in Shiprocket:", awbErr);
+      }
+    }
+
+    // 7. Step 3: Request & Schedule Courier Pickup
+    let pickupScheduled = false;
+    let pickupDate = "";
+    if (shipmentId) {
+      try {
+        const pickupRes = await fetch("https://apiv2.shiprocket.in/v1/external/courier/generate/pickup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            shipment_id: [Number(shipmentId) || shipmentId],
+          }),
+        });
+
+        const pickupData = await pickupRes.json();
+        if (pickupData && (pickupData.pickup_status === 1 || pickupData.response?.status === 1 || pickupData.status === 200)) {
+          pickupScheduled = true;
+          pickupDate = pickupData.response?.pickup_scheduled_date || "";
+        } else {
+          console.warn("Shiprocket pickup generate response:", pickupData);
+        }
+      } catch (pickupErr) {
+        console.error("Failed to schedule pickup in Shiprocket:", pickupErr);
+      }
+    }
+
+    // 8. Order created and dispatched successfully — update our database
     order.shipmentStatus = ShipmentStatus.CREATED;
     order.orderStatus = OrderStatus.SHIPPED;
     order.shiprocketOrderId = shiprocketOrderId;
+    if (shipmentId) {
+      order.shiprocketShipmentId = shipmentId;
+    }
     order.awbCode = awbCode;
-    order.courierName = courierName;
+    order.courierName = courierName || (awbCode ? "Shiprocket Express" : "Pending Assignment");
 
     await order.save();
 
+    let successMessage = "";
+    if (awbCode) {
+      successMessage = `Shipment created with ${order.courierName}! AWB: ${awbCode}.${pickupScheduled ? ` Pickup scheduled${pickupDate ? ` for ${pickupDate}` : ""}.` : ""}`;
+    } else {
+      successMessage = `Order pushed to Shiprocket (ID: ${shiprocketOrderId}). AWB pending assignment in Shiprocket dashboard.`;
+    }
+
     return NextResponse.json({
       success: true,
-      message: awbCode
-        ? `Shipment created! AWB: ${awbCode}`
-        : `Order pushed to Shiprocket (ID: ${shiprocketOrderId}). AWB will be assigned after courier pickup.`,
+      message: successMessage,
       data: order,
       walletBalance,
+      awbCode,
+      courierName: order.courierName,
+      pickupScheduled,
     });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
