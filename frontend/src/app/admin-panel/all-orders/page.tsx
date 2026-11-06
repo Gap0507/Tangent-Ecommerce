@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Search, Filter, Download, Eye, Loader2 } from "lucide-react";
+import { Search, Filter, Download, Eye, Loader2, Truck, ExternalLink } from "lucide-react";
 
 interface OrderItem {
   productId: string;
@@ -87,6 +87,10 @@ interface Order {
     state: string;
     pincode: string;
   };
+  shiprocketOrderId?: string;
+  shiprocketShipmentId?: string;
+  awbCode?: string;
+  courierName?: string;
 }
 
 export default function AllOrdersPage() {
@@ -323,7 +327,7 @@ export default function AllOrdersPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[13px] mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[13px] mb-4">
               <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-black/5">
                 <h4 className="font-bold text-navy mb-1 uppercase tracking-wider text-[11px]">Customer Details</h4>
                 <p className="font-bold text-[14px] text-navy">{selectedOrderModal.customerName}</p>
@@ -336,6 +340,76 @@ export default function AllOrdersPage() {
                 <p className="text-navy font-medium">{selectedOrderModal.shippingAddress?.street}</p>
                 <p className="text-navy font-medium">{selectedOrderModal.shippingAddress?.city}, {selectedOrderModal.shippingAddress?.state} {selectedOrderModal.shippingAddress?.pincode}</p>
               </div>
+            </div>
+
+            {/* Shiprocket Logistics Details */}
+            <div className="bg-[#F0FDF4] border border-[#166534]/20 p-4 rounded-2xl mb-6">
+              <div className="flex items-center justify-between mb-3 border-b border-[#166534]/15 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-[#166534] text-white flex items-center justify-center">
+                    <Truck className="w-4 h-4" />
+                  </div>
+                  <h4 className="font-bold text-[#166534] text-[12px] uppercase tracking-wider">
+                    Shiprocket Logistics
+                  </h4>
+                </div>
+                <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                  selectedOrderModal.awbCode
+                    ? "bg-[#DCFCE7] text-[#166534] border border-[#166534]/20"
+                    : "bg-amber-50 text-amber-800 border border-amber-200"
+                }`}>
+                  {selectedOrderModal.shipmentStatus || "NOT_CREATED"}
+                </span>
+              </div>
+
+              {selectedOrderModal.awbCode || selectedOrderModal.shiprocketOrderId ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[12.5px]">
+                  <div>
+                    <span className="text-ink/60 font-semibold block text-[10.5px] uppercase">Carrier</span>
+                    <span className="font-extrabold text-navy text-[13.5px]">
+                      {selectedOrderModal.courierName || "Shiprocket Express"}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-ink/60 font-semibold block text-[10.5px] uppercase">AWB Tracking Number</span>
+                    {selectedOrderModal.awbCode ? (
+                      <a
+                        href={`https://shiprocket.co/tracking/${selectedOrderModal.awbCode}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 font-black text-[#166534] hover:underline text-[13.5px]"
+                      >
+                        <span>{selectedOrderModal.awbCode}</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    ) : (
+                      <span className="text-ink/50 italic">Pending Assignment</span>
+                    )}
+                  </div>
+
+                  {selectedOrderModal.shiprocketOrderId && (
+                    <div>
+                      <span className="text-ink/60 font-semibold block text-[10.5px] uppercase">Shiprocket Order ID</span>
+                      <span className="font-bold text-navy">{selectedOrderModal.shiprocketOrderId}</span>
+                    </div>
+                  )}
+
+                  {selectedOrderModal.shiprocketShipmentId && (
+                    <div>
+                      <span className="text-ink/60 font-semibold block text-[10.5px] uppercase">Shipment ID</span>
+                      <span className="font-bold text-navy">{selectedOrderModal.shiprocketShipmentId}</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-[12px] text-ink/60 flex items-center justify-between">
+                  <span>Shipment has not been pushed to Shiprocket yet.</span>
+                  <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-[11px]">
+                    Pending Dispatch
+                  </span>
+                </div>
+              )}
             </div>
 
             <h4 className="font-bold text-navy mb-3 uppercase tracking-wider text-[11px]">Order Items</h4>

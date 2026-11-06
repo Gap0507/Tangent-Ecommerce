@@ -155,9 +155,15 @@ export default function CheckoutPage() {
         .then((res) => res.json())
         .then((data) => {
           console.log("Shiprocket Calculate Response:", data);
-          if (data.success && typeof data.data.shippingCost === "number") {
+          if (data.success && typeof data.data?.shippingCost === "number") {
             setShippingFee(data.data.shippingCost);
             setEtd(data.data.etd || "");
+          } else {
+            setShippingFee(null);
+            setEtd("");
+            if (data.error) {
+              setErrorMsg(data.error);
+            }
           }
         })
         .catch((err) => console.error("Error fetching shipping rates:", err))

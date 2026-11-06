@@ -1,7 +1,11 @@
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const rawSecret = process.env.JWT_SECRET;
+if (!rawSecret && process.env.NODE_ENV === "production") {
+  throw new Error("FATAL: JWT_SECRET environment variable is required in production mode.");
+}
+const JWT_SECRET = rawSecret || (process.env.NODE_ENV === "production" ? "" : "tangent_super_secret_jwt_key_development_32chars_min");
 const encodedSecret = new TextEncoder().encode(JWT_SECRET);
 
 export async function createToken(payload: Record<string, any>) {

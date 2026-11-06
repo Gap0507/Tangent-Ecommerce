@@ -86,3 +86,41 @@ export function clearShiprocketTokenCache(): void {
   tokenExpiresAt = 0;
   pendingAuthPromise = null;
 }
+
+/**
+ * Executes a fetch request with automatic token injection and single 401-retry.
+ * If Shiprocket returns 401 (token invalidated on their side), it clears cache,
+ * re-authenticates fresh, and repeats the request.
+ */
+export async function shiprocketAuthenticatedFetch(
+  url: string,
+  options: RequestInit,
+  email: string,
+  apiKey: string
+): Promise<Response> {
+  let token = await getShiprocketToken(email, apiKey);
+  if (!token) {
+    throw new Error("Shiprocket authentication failed: credentials missing or invalid.");
+  }
+
+  const headers = new Headers(options.headers || {});
+  headers.set("Authorization", `Bearer ${token}`);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  let res = await fetch(url, { ...options, headers });
+
+  // If 401 Unauthorized, token was invalidated remotely: invalidate cache & retry once
+  if (res.status === 401) {
+    console.warn("[Shiprocket] Token rejected with 401. Clearing cache and re-authenticating...");
+    clearShiprocketTokenCache();
+    token = await getShiprocketToken(email, apiKey);
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+      res = await fetch(url, { ...options, headers });
+    }
+  }
+
+  return res;
+}

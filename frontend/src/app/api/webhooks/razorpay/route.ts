@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import connectToDB from "@/lib/db";
+import { Order, PaymentStatus } from "@/models/Order";
 import { fulfillOrder } from "@/lib/order-fulfillment";
 
 const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || (process.env.NODE_ENV === "production" ? "" : "fallback_secret");
@@ -46,6 +48,17 @@ export async function POST(request: Request) {
         razorpayOrderId,
         razorpayPaymentId: razorpayPaymentId || `pay_wh_${Date.now()}`,
       });
+    } else if (payload.event === "payment.failed") {
+      const paymentEntity = payload.payload?.payment?.entity;
+      const razorpayOrderId = paymentEntity?.order_id;
+      if (razorpayOrderId) {
+        await connectToDB();
+        await Order.updateOne(
+          { razorpayOrderId, paymentStatus: { $ne: PaymentStatus.PAID } },
+          { $set: { paymentStatus: PaymentStatus.FAILED } }
+        );
+        console.log(`[Webhook] Marked Order with Razorpay ID ${razorpayOrderId} as FAILED`);
+      }
     }
 
     return NextResponse.json({ success: true });

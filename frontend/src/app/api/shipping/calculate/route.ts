@@ -35,21 +35,22 @@ export async function POST(request: Request) {
             if (items.length > 0) {
               items.forEach((item: any) => {
                 let w = 1.5, l = 25, b = 18, h = 12;
-                if (item.size === "Pack of 4") {
-                  w = settings.pack4Weight ?? 1.5;
-                  l = settings.pack4Length ?? 25;
-                  b = settings.pack4Breadth ?? 18;
-                  h = settings.pack4Height ?? 12;
-                } else if (item.size === "Pack of 8") {
-                  w = settings.pack8Weight ?? 3.0;
-                  l = settings.pack8Length ?? 30;
-                  b = settings.pack8Breadth ?? 22;
-                  h = settings.pack8Height ?? 15;
-                } else if (item.size === "Pack of 24") {
+                const sizeStr = (item.size || "").toLowerCase();
+                if (sizeStr.includes("24")) {
                   w = settings.pack24Weight ?? 9.0;
                   l = settings.pack24Length ?? 45;
                   b = settings.pack24Breadth ?? 30;
                   h = settings.pack24Height ?? 25;
+                } else if (sizeStr.includes("8")) {
+                  w = settings.pack8Weight ?? 3.0;
+                  l = settings.pack8Length ?? 30;
+                  b = settings.pack8Breadth ?? 22;
+                  h = settings.pack8Height ?? 15;
+                } else {
+                  w = settings.pack4Weight ?? 1.5;
+                  l = settings.pack4Length ?? 25;
+                  b = settings.pack4Breadth ?? 18;
+                  h = settings.pack4Height ?? 12;
                 }
                 totalWeight += w * (item.quantity || 1);
                 if (l > maxLength) maxLength = l;
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
                 if (h > maxHeight) maxHeight = h;
               });
             }
-            const weight = totalWeight > 0 ? totalWeight : 0.5;
+            const weight = totalWeight > 0 ? totalWeight : 1.5;
 
             // 2. Fetch live rates using Courier Serviceability API (with dimensions + declared_value + insurance to match Shiprocket dashboard)
             const rateRes = await fetch(`https://apiv2.shiprocket.in/v1/external/courier/serviceability/?pickup_postcode=${pickupPincode}&delivery_postcode=${pincode}&weight=${weight}&cod=0&declared_value=${subtotal}&length=${maxLength}&breadth=${maxBreadth}&height=${maxHeight}&is_insured=1`, {
@@ -89,9 +90,21 @@ export async function POST(request: Request) {
                   }
                 }
                 finalRate = Math.round(minTotal);
+              } else {
+                return NextResponse.json({
+                  success: false,
+                  error: `Delivery to PIN code ${pincode} is currently unavailable by our courier partners.`,
+                  isServiceable: false,
+                }, { status: 400 });
               }
+            } else if (rateData.status === 404 || rateData.message?.toLowerCase().includes("not serviceable")) {
+              return NextResponse.json({
+                success: false,
+                error: `PIN code ${pincode} is not serviceable. Please check your PIN code or try another delivery address.`,
+                isServiceable: false,
+              }, { status: 400 });
             } else {
-              // Fallback if pincode is unserviceable or error
+              // Fallback only if Shiprocket API had an unexpected network/rate format response
               finalRate = settings.flatShippingRate || 49;
             }
           }

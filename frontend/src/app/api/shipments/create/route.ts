@@ -90,22 +90,23 @@ export async function POST(request: Request) {
     if (order.items && order.items.length > 0) {
       order.items.forEach((item: any) => {
         let w = 1.5, l = 25, b = 18, h = 12;
+        const s = (item.size || "").toLowerCase();
 
-        if (item.size === "Pack of 4") {
-          w = settings?.pack4Weight ?? 1.5;
-          l = settings?.pack4Length ?? 25;
-          b = settings?.pack4Breadth ?? 18;
-          h = settings?.pack4Height ?? 12;
-        } else if (item.size === "Pack of 8") {
-          w = settings?.pack8Weight ?? 3.0;
-          l = settings?.pack8Length ?? 30;
-          b = settings?.pack8Breadth ?? 22;
-          h = settings?.pack8Height ?? 15;
-        } else if (item.size === "Pack of 24") {
+        if (s.includes("24")) {
           w = settings?.pack24Weight ?? 9.0;
           l = settings?.pack24Length ?? 45;
           b = settings?.pack24Breadth ?? 30;
           h = settings?.pack24Height ?? 25;
+        } else if (s.includes("8")) {
+          w = settings?.pack8Weight ?? 3.0;
+          l = settings?.pack8Length ?? 30;
+          b = settings?.pack8Breadth ?? 22;
+          h = settings?.pack8Height ?? 15;
+        } else {
+          w = settings?.pack4Weight ?? 1.5;
+          l = settings?.pack4Length ?? 25;
+          b = settings?.pack4Breadth ?? 18;
+          h = settings?.pack4Height ?? 12;
         }
 
         totalWeight += w * (item.quantity || 1);
@@ -275,24 +276,34 @@ export async function POST(request: Request) {
       }
     }
 
-    // 8. Order created and dispatched successfully — update our database
-    order.shipmentStatus = ShipmentStatus.CREATED;
-    order.orderStatus = OrderStatus.SHIPPED;
+    // 8. Update database with Shiprocket Order and Shipment details
     order.shiprocketOrderId = shiprocketOrderId;
     if (shipmentId) {
       order.shiprocketShipmentId = shipmentId;
     }
+
+    if (!awbCode) {
+      // Save order reference so it is tracked, but do NOT mark as SHIPPED until AWB exists
+      await order.save();
+      return NextResponse.json({
+        success: false,
+        error: `Order pushed to Shiprocket (#${shiprocketOrderId}), but courier AWB generation failed or is pending courier assignment. Please check Shiprocket dashboard.`,
+        errorType: "AWB_PENDING",
+        data: order,
+        shiprocketOrderId,
+        shipmentId,
+      }, { status: 400 });
+    }
+
+    // Step 2 & 3 succeeded with real AWB
+    order.shipmentStatus = ShipmentStatus.CREATED;
+    order.orderStatus = OrderStatus.SHIPPED;
     order.awbCode = awbCode;
-    order.courierName = courierName || (awbCode ? "Shiprocket Express" : "Pending Assignment");
+    order.courierName = courierName || "Shiprocket Express";
 
     await order.save();
 
-    let successMessage = "";
-    if (awbCode) {
-      successMessage = `Shipment created with ${order.courierName}! AWB: ${awbCode}.${pickupScheduled ? ` Pickup scheduled${pickupDate ? ` for ${pickupDate}` : ""}.` : ""}`;
-    } else {
-      successMessage = `Order pushed to Shiprocket (ID: ${shiprocketOrderId}). AWB pending assignment in Shiprocket dashboard.`;
-    }
+    const successMessage = `Shipment created with ${order.courierName}! AWB: ${awbCode}.${pickupScheduled ? ` Pickup scheduled${pickupDate ? ` for ${pickupDate}` : ""}.` : ""}`;
 
     return NextResponse.json({
       success: true,

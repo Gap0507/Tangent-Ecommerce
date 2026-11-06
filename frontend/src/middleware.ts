@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const JWT_SECRET = process.env.JWT_SECRET || "tangent_super_secret_jwt_key_development_32chars_min";
+const rawSecret = process.env.JWT_SECRET;
+if (!rawSecret && process.env.NODE_ENV === "production") {
+  console.error("FATAL: JWT_SECRET environment variable is missing in production.");
+}
+const JWT_SECRET = rawSecret || (process.env.NODE_ENV === "production" ? "" : "tangent_super_secret_jwt_key_development_32chars_min");
 const encodedSecret = new TextEncoder().encode(JWT_SECRET);
 
 async function isValidAdminSession(request: NextRequest): Promise<boolean> {

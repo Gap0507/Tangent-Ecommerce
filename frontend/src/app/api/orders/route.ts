@@ -6,50 +6,69 @@ import { Settings } from "@/models/Settings";
 import { Coupon } from "@/models/Coupon";
 import { getSession } from "@/lib/auth";
 import { findMatchingProduct } from "@/lib/inventory";
+import { getShiprocketToken } from "@/lib/shiprocket";
+
+const VALID_PACK_SIZES = [4, 8, 24];
 
 function computeServerItemPrice(item: any, dbProducts: any[]): number {
-  const itemSize = item.size || "";
+  const itemSize = (item.size || "").trim();
   const itemName = (item.name || "").toLowerCase();
 
-  // Case 1: Custom Variety Pack or item containing flavor breakdown
+  // Case 1: Variety Pack with flavor breakdown (e.g. "4 Cans: 1 x Watermelon Mint, 2 x Guava, 1 x Cranberry")
   if (
     itemSize.includes("Cans:") ||
-    itemName.includes("variety pack") ||
     (itemSize.includes("x ") && !itemSize.startsWith("Pack of"))
   ) {
     const breakdownPart = itemSize.includes("Cans:") ? itemSize.split("Cans:")[1] : itemSize;
     const regex = /(\d+)\s*x\s*([^,()]+)/gi;
     let match;
     let calculatedPackPrice = 0;
-    let foundFlavors = false;
+    let totalCansInBreakdown = 0;
 
     while ((match = regex.exec(breakdownPart)) !== null) {
-      foundFlavors = true;
       const cansQty = parseInt(match[1], 10);
+      if (isNaN(cansQty) || cansQty <= 0) {
+        throw new Error("Invalid can quantity in variety pack breakdown");
+      }
+      totalCansInBreakdown += cansQty;
       const flavorName = match[2].trim();
       const matchedProd = findMatchingProduct(flavorName, dbProducts);
       const unitPrice = matchedProd?.price && matchedProd.price > 0 ? matchedProd.price : 149;
       calculatedPackPrice += unitPrice * cansQty;
     }
 
-    if (foundFlavors && calculatedPackPrice > 0) {
+    if (totalCansInBreakdown > 0 && calculatedPackPrice > 0) {
       return calculatedPackPrice;
     }
-
-    // Default Tangent Variety Pack (1 of each 4 flavors)
-    if (itemName.includes("variety pack")) {
-      const sumAll = dbProducts.reduce((sum: number, p: any) => sum + (p.price || 149), 0);
-      return sumAll > 0 ? sumAll : 596;
-    }
   }
 
-  // Case 2: Standard Single-Flavor Pack (Pack of 4, Pack of 8, Pack of 24)
-  let cansPerPack = 1;
-  const packMatch = itemSize.match(/Pack of (\d+)/i) || itemSize.match(/(\d+)\s*cans?/i);
+  // Determine cans count from size string (e.g. "Pack of 4", "Pack of 8", "Pack of 24", "4 Cans", "24 Cans")
+  let cansPerPack = 0;
+  const packMatch = itemSize.match(/Pack of (\d+)/i) || itemSize.match(/^(\d+)\s*cans?/i);
   if (packMatch && packMatch[1]) {
     cansPerPack = parseInt(packMatch[1], 10);
+  } else if (itemSize.includes("24")) {
+    cansPerPack = 24;
+  } else if (itemSize.includes("8")) {
+    cansPerPack = 8;
+  } else if (itemSize.includes("4")) {
+    cansPerPack = 4;
   }
 
+  // Reject zero, negative, or unapproved pack sizes
+  if (!VALID_PACK_SIZES.includes(cansPerPack)) {
+    throw new Error(`Invalid pack size "${itemSize}". Permitted pack sizes are: Pack of 4, Pack of 8, Pack of 24.`);
+  }
+
+  // Case 2: Standard Variety Pack without breakdown
+  if (itemName.includes("variety pack")) {
+    const avgUnitPrice = dbProducts.length > 0
+      ? dbProducts.reduce((sum: number, p: any) => sum + (p.price || 149), 0) / dbProducts.length
+      : 149;
+    return Math.round(avgUnitPrice * cansPerPack);
+  }
+
+  // Case 3: Standard Single-Flavor Pack
   const matchedProd = findMatchingProduct(item.name || item.sku || String(item.productId), dbProducts);
   const unitPrice = matchedProd?.price && matchedProd.price > 0 ? matchedProd.price : 149;
   return unitPrice * cansPerPack;
@@ -91,6 +110,46 @@ export async function POST(request: Request) {
 
     if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
       return NextResponse.json({ success: false, error: "Cart is empty" }, { status: 400 });
+    }
+
+    // Strict Server-Side Customer Contact & Address Validation
+    const customerName = (data.customerName || "").trim();
+    if (!customerName || customerName.length < 2) {
+      return NextResponse.json({ success: false, error: "Please provide a valid full name." }, { status: 400 });
+    }
+
+    const customerEmail = (data.customerEmail || "").trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!customerEmail || !emailRegex.test(customerEmail)) {
+      return NextResponse.json({ success: false, error: "Please provide a valid email address." }, { status: 400 });
+    }
+
+    const rawPhone = (data.customerPhone || "").replace(/[^0-9]/g, "");
+    const cleanPhone = rawPhone.length > 10 ? rawPhone.slice(-10) : rawPhone;
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      return NextResponse.json(
+        { success: false, error: "Please provide a valid 10-digit Indian phone number starting with 6, 7, 8, or 9." },
+        { status: 400 }
+      );
+    }
+
+    const shippingAddress = data.shippingAddress || {};
+    const street = (shippingAddress.street || "").trim();
+    const city = (shippingAddress.city || "").trim();
+    const state = (shippingAddress.state || "").trim();
+    const pincode = (shippingAddress.pincode || "").trim();
+
+    if (!street || street.length < 3) {
+      return NextResponse.json({ success: false, error: "Please provide a complete street delivery address." }, { status: 400 });
+    }
+    if (!city || city.length < 2) {
+      return NextResponse.json({ success: false, error: "Please provide a valid delivery city." }, { status: 400 });
+    }
+    if (!state || state.length < 2) {
+      return NextResponse.json({ success: false, error: "Please select a valid state." }, { status: 400 });
+    }
+    if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+      return NextResponse.json({ success: false, error: "Please provide a valid 6-digit Indian PIN code." }, { status: 400 });
     }
 
     const settings = await Settings.findOne();
@@ -238,13 +297,80 @@ export async function POST(request: Request) {
 
     if (hasFreeShippingPromise) {
       serverShipping = 0;
-    } else {
-      const minShipping = settings?.flatShippingRate ?? 49;
-      if (typeof data.pricing?.shipping === "number" && data.pricing.shipping >= minShipping) {
-        serverShipping = data.pricing.shipping;
+    } else if (settings?.useRealTimeRates) {
+      const shiprocketEmail = settings.shiprocketEmail || process.env.SHIPROCKET_EMAIL;
+      const shiprocketApiKey = settings.shiprocketApiKey || process.env.SHIPROCKET_PASSWORD;
+
+      if (shiprocketEmail && shiprocketApiKey) {
+        try {
+          const token = await getShiprocketToken(shiprocketEmail, shiprocketApiKey);
+          if (token) {
+            const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || "382443";
+            let totalWeight = 0;
+            let maxLength = 25, maxBreadth = 18, maxHeight = 12;
+
+            parsedItems.forEach((item: any) => {
+              let w = 1.5, l = 25, b = 18, h = 12;
+              const s = (item.size || "").toLowerCase();
+              if (s.includes("24")) {
+                w = settings.pack24Weight ?? 9.0;
+                l = settings.pack24Length ?? 45;
+                b = settings.pack24Breadth ?? 30;
+                h = settings.pack24Height ?? 25;
+              } else if (s.includes("8")) {
+                w = settings.pack8Weight ?? 3.0;
+                l = settings.pack8Length ?? 30;
+                b = settings.pack8Breadth ?? 22;
+                h = settings.pack8Height ?? 15;
+              } else {
+                w = settings.pack4Weight ?? 1.5;
+                l = settings.pack4Length ?? 25;
+                b = settings.pack4Breadth ?? 18;
+                h = settings.pack4Height ?? 12;
+              }
+              totalWeight += w * (item.quantity || 1);
+              if (l > maxLength) maxLength = l;
+              if (b > maxBreadth) maxBreadth = b;
+              if (h > maxHeight) maxHeight = h;
+            });
+
+            const finalWeight = totalWeight > 0 ? totalWeight : 1.5;
+            const rateRes = await fetch(
+              `https://apiv2.shiprocket.in/v1/external/courier/serviceability/?pickup_postcode=${pickupPincode}&delivery_postcode=${pincode}&weight=${finalWeight}&cod=0&declared_value=${serverSubtotal}&length=${maxLength}&breadth=${maxBreadth}&height=${maxHeight}&is_insured=1`,
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            const rateData = await rateRes.json();
+            if (rateData.status === 200 && rateData.data?.available_courier_companies?.length > 0) {
+              const couriers = rateData.data.available_courier_companies;
+              let minTotal = Infinity;
+              for (const c of couriers) {
+                const total = (c.freight_charge || c.rate || 0) + (c.coverage_charges || 0) + (c.whatsapp_charges || 0);
+                if (total < minTotal) minTotal = total;
+              }
+              serverShipping = Math.round(minTotal);
+            } else {
+              return NextResponse.json({
+                success: false,
+                error: `Delivery to PIN code ${pincode} is currently unavailable by our courier partners. Please try another delivery address.`,
+              }, { status: 400 });
+            }
+          } else {
+            serverShipping = settings.flatShippingRate ?? 49;
+          }
+        } catch {
+          serverShipping = settings.flatShippingRate ?? 49;
+        }
       } else {
-        serverShipping = minShipping;
+        serverShipping = settings.flatShippingRate ?? 49;
       }
+    } else {
+      serverShipping = settings?.flatShippingRate ?? 49;
     }
 
     // 6. Compute final server Total (guarantees customer cannot pay ₹1 for a ₹1000 pack)
@@ -302,10 +428,16 @@ export async function POST(request: Request) {
 
     const orderData = {
       orderNumber,
-      customerName: data.customerName,
-      customerEmail: data.customerEmail,
-      customerPhone: data.customerPhone,
-      shippingAddress: data.shippingAddress,
+      customerName,
+      customerEmail,
+      customerPhone: cleanPhone,
+      shippingAddress: {
+        street,
+        city,
+        state,
+        pincode,
+        country: shippingAddress.country || "India",
+      },
       items: parsedItems,
       couponCode: validatedCouponCode,
       pricing: {
