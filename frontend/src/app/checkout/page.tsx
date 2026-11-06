@@ -92,6 +92,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [couponCode, setCouponCode] = useState("");
   const [couponDiscount, setCouponDiscount] = useState(0);
+  const [isFreeShippingCoupon, setIsFreeShippingCoupon] = useState(false);
   const [couponMessage, setCouponMessage] = useState<{ text: string; isError: boolean } | null>(null);
 
   const [shippingFee, setShippingFee] = useState<number | null>(null);
@@ -132,6 +133,12 @@ export default function CheckoutPage() {
 
   // Update shipping when pincode or settings change
   useEffect(() => {
+    if (isFreeShippingCoupon) {
+      setShippingFee(0);
+      setEtd("Free Express Shipping (Coupon Applied)");
+      return;
+    }
+
     if (storeSettings && !storeSettings.useRealTimeRates) {
       setShippingFee(storeSettings.flatShippingRate ?? 49);
       setEtd("");
@@ -159,7 +166,7 @@ export default function CheckoutPage() {
       setShippingFee(null);
       setEtd("");
     }
-  }, [pincode, subtotal, items, storeSettings]);
+  }, [pincode, subtotal, items, storeSettings, isFreeShippingCoupon]);
 
   // Apply Coupon
   const handleApplyCoupon = async () => {
@@ -174,9 +181,17 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (data.success) {
         setCouponDiscount(data.data.discountAmount);
-        setCouponMessage({ text: `Coupon '${couponCode.toUpperCase()}' applied! Saved ₹${data.data.discountAmount}`, isError: false });
+        if (data.data.isFreeShipping) {
+          setIsFreeShippingCoupon(true);
+          setShippingFee(0);
+          setCouponMessage({ text: `Coupon '${couponCode.toUpperCase()}' applied! FREE SHIPPING unlocked!`, isError: false });
+        } else {
+          setIsFreeShippingCoupon(false);
+          setCouponMessage({ text: `Coupon '${couponCode.toUpperCase()}' applied! Saved ₹${data.data.discountAmount}`, isError: false });
+        }
       } else {
         setCouponDiscount(0);
+        setIsFreeShippingCoupon(false);
         setCouponMessage({ text: data.error || "Invalid coupon code", isError: true });
       }
     } catch {
@@ -211,7 +226,7 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (shippingFee === null && subtotal < 1999) {
+    if (shippingFee === null && !isFreeShippingCoupon) {
       setErrorMsg("Please enter a valid PIN code to calculate shipping before placing your order.");
       return;
     }
@@ -226,12 +241,13 @@ export default function CheckoutPage() {
         customerEmail: email,
         customerPhone: phone,
         shippingAddress: {
-          street: `${address}${apartment ? `, ${apartment}` : ""}`,
+          street: `${address}${apartment ? `, ${apartment}` : ""}${landmark ? ` (Landmark: ${landmark})` : ""}`,
           city,
           state: stateName,
           pincode,
           country: "India",
         },
+        couponCode: couponCode.trim().toUpperCase() || undefined,
         items: items.map((i) => ({
           productId: i.productId,
           sku: i.productId,
@@ -394,6 +410,12 @@ export default function CheckoutPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
+            <Link
+              href={`/track-order?query=${completedOrder.orderNumber}`}
+              className="flex-1 bg-[#166534] hover:bg-[#14532d] text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-md text-center text-[14px]"
+            >
+              Track Your Order
+            </Link>
             <Link
               href="/shop"
               className="flex-1 bg-[#091E33] hover:bg-navy text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-md text-center text-[14px]"

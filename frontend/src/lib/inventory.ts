@@ -56,11 +56,15 @@ export async function deductInventoryForOrder(items: any[]) {
 
           const matchedProd = findMatchingProduct(flavorName, allProducts);
           if (matchedProd) {
-            const currentStock = typeof matchedProd.stock === "number" ? matchedProd.stock : 0;
-            const newStock = Math.max(0, currentStock - totalCansToDeduct);
-            await Product.findByIdAndUpdate(matchedProd._id, { stock: newStock });
-            matchedProd.stock = newStock;
-            console.log(`[Inventory] Deducted ${totalCansToDeduct} cans from ${matchedProd.name}. New stock: ${newStock}`);
+            const updatedProd = await Product.findOneAndUpdate(
+              { _id: matchedProd._id },
+              { $inc: { stock: -totalCansToDeduct } },
+              { new: true }
+            );
+            if (updatedProd && updatedProd.stock < 0) {
+              await Product.updateOne({ _id: matchedProd._id }, { stock: 0 });
+            }
+            console.log(`[Inventory] Deducted ${totalCansToDeduct} cans from ${matchedProd.name}. New stock: ${updatedProd?.stock ?? 0}`);
           } else {
             console.error(`[Inventory] Variety pack flavor match not found for: "${flavorName}"`);
           }
@@ -94,11 +98,15 @@ export async function deductInventoryForOrder(items: any[]) {
       }
 
       if (matchedProd) {
-        const currentStock = typeof matchedProd.stock === "number" ? matchedProd.stock : 0;
-        const newStock = Math.max(0, currentStock - totalCansToDeduct);
-        await Product.findByIdAndUpdate(matchedProd._id, { stock: newStock });
-        matchedProd.stock = newStock;
-        console.log(`[Inventory] Deducted ${totalCansToDeduct} cans from ${matchedProd.name}. New stock: ${newStock}`);
+        const updatedProd = await Product.findOneAndUpdate(
+          { _id: matchedProd._id },
+          { $inc: { stock: -totalCansToDeduct } },
+          { new: true }
+        );
+        if (updatedProd && updatedProd.stock < 0) {
+          await Product.updateOne({ _id: matchedProd._id }, { stock: 0 });
+        }
+        console.log(`[Inventory] Deducted ${totalCansToDeduct} cans from ${matchedProd.name}. New stock: ${updatedProd?.stock ?? 0}`);
       } else {
         console.error(`[Inventory] Product not found for inventory deduction: ${item.name} (${item.sku})`);
       }

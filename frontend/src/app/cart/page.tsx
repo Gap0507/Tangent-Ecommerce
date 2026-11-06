@@ -6,7 +6,6 @@ import Link from "next/link";
 import { ChevronRight, ArrowLeft, Trash2, Plus, Minus, Lock, RotateCcw, Leaf, Tag, ShoppingBag, Truck, Check } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
-const FREE_SHIPPING_THRESHOLD = 1999.0;
 
 const RECOMMENDATIONS = [
   {

@@ -23,7 +23,7 @@ const TasteOfWonder = dynamic(
 
 const TangentStandard = dynamic(
   () => import("@/components/home/TangentStandard").then((m) => m.TangentStandard),
-  { ssr: false, loading: () => <div className="h-[400px] bg-[#0A2540] animate-pulse" /> }
+  { ssr: false, loading: () => <div className="min-h-[700px] bg-[#0A2540] animate-pulse" /> }
 );
 
 const RealRefreshment = dynamic(

@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import connectToDB from "@/lib/db";
-import { Order, PaymentStatus } from "@/models/Order";
-import { deductInventoryForOrder } from "@/lib/inventory";
+import { fulfillOrder } from "@/lib/order-fulfillment";
 
-const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || "fallback_secret";
+const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || (process.env.NODE_ENV === "production" ? "" : "fallback_secret");
 
 export async function POST(request: Request) {
   try {
@@ -13,6 +11,11 @@ export async function POST(request: Request) {
 
     if (!signature) {
       return NextResponse.json({ success: false, error: "Missing signature" }, { status: 400 });
+    }
+
+    if (!RAZORPAY_WEBHOOK_SECRET) {
+      console.error("[Webhook] RAZORPAY_WEBHOOK_SECRET is not configured on server.");
+      return NextResponse.json({ success: false, error: "Server webhook configuration error" }, { status: 500 });
     }
 
     // 1. Verify Signature
@@ -28,36 +31,26 @@ export async function POST(request: Request) {
     const payload = JSON.parse(bodyText);
 
     // 2. Handle specific events
-    if (payload.event === "payment.captured") {
-      const paymentEntity = payload.payload.payment.entity;
-      const razorpayOrderId = paymentEntity.order_id;
-      const razorpayPaymentId = paymentEntity.id;
+    if (payload.event === "payment.captured" || payload.event === "order.paid") {
+      const paymentEntity = payload.payload?.payment?.entity;
+      const orderEntity = payload.payload?.order?.entity;
+      const razorpayOrderId = paymentEntity?.order_id || orderEntity?.id;
+      const razorpayPaymentId = paymentEntity?.id || (orderEntity ? `pay_${orderEntity.id}` : "");
 
-      await connectToDB();
-
-      // Find the order
-      const order = await Order.findOne({ razorpayOrderId });
-      if (!order) {
-        return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
+      if (!razorpayOrderId) {
+        return NextResponse.json({ success: false, error: "Invalid payment payload: missing order ID" }, { status: 400 });
       }
 
-      // Idempotency check: if already PAID, ignore to prevent double inventory reduction
-      if (order.paymentStatus === PaymentStatus.PAID) {
-        return NextResponse.json({ success: true, message: "Order already marked as PAID." });
-      }
-
-      // Update Order Status
-      order.paymentStatus = PaymentStatus.PAID;
-      order.razorpayPaymentId = razorpayPaymentId;
-
-      // 3. Securely Reduce Inventory Stock
-      await deductInventoryForOrder(order.items);
-
-      await order.save();
+      // Atomic fulfillment: Updates status to PAID & CONFIRMED, deducts stock, increments coupon, updates CRM & sends email
+      await fulfillOrder({
+        razorpayOrderId,
+        razorpayPaymentId: razorpayPaymentId || `pay_wh_${Date.now()}`,
+      });
     }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
+    console.error("[Webhook] Error processing Razorpay webhook:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -9,52 +8,15 @@ import { ArrowRight } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-
-
 export function TasteOfWonder() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const leftCanRef = useRef<HTMLDivElement>(null);
-  const rightCanRef = useRef<HTMLDivElement>(null);
   const centerTextRef = useRef<HTMLDivElement>(null);
-
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
     const ctx = gsap.context(() => {
-      // Left can entrance
-      if (leftCanRef.current) {
-        gsap.fromTo(
-          leftCanRef.current,
-          { x: -60, opacity: 0, scale: 0.95 },
-          {
-            scrollTrigger: { trigger: section, start: "top 75%" },
-            x: 0,
-            opacity: 1,
-            scale: 1,
-            duration: 1,
-            ease: "power3.out",
-          }
-        );
-      }
-
-      // Right can entrance
-      if (rightCanRef.current) {
-        gsap.fromTo(
-          rightCanRef.current,
-          { x: 60, opacity: 0, scale: 0.95 },
-          {
-            scrollTrigger: { trigger: section, start: "top 75%" },
-            x: 0,
-            opacity: 1,
-            scale: 1,
-            duration: 1,
-            ease: "power3.out",
-          }
-        );
-      }
-
       // Center text entrance
       if (centerTextRef.current) {
         gsap.fromTo(
@@ -70,62 +32,16 @@ export function TasteOfWonder() {
           }
         );
       }
-
-
     }, section);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative bg-cream overflow-hidden py-44 md:py-24 px-6 md:px-12">
-
-      {/* LEFT CAN - top-left corner of section, partially clipped */}
-      <div
-        ref={leftCanRef}
-        className="absolute top-[-20px] left-[-50px] md:hidden w-[260px] h-[320px] z-10 pointer-events-none"
-      >
-        <Image
-          src="/leftcansection.png"
-          alt="Tangent Ginger Ale Refreshment"
-          fill
-          className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
-          sizes="260px"
-        />
-      </div>
-
-      {/* RIGHT CAN - bottom-right corner of section, partially clipped */}
-      <div
-        ref={rightCanRef}
-        className="absolute bottom-[-20px] right-[-50px] md:hidden w-[260px] h-[320px] z-10 pointer-events-none"
-      >
-        <Image
-          src="/rightcansection.png"
-          alt="Tangent Tonic Water Refreshment"
-          fill
-          className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
-          sizes="260px"
-        />
-      </div>
-
-      {/* ── TOP SECTION: LEFT CAN + CENTER TEXT + RIGHT CAN ── */}
-      <div className="max-w-[1380px] mx-auto relative min-h-[500px] flex items-center justify-center mb-16 md:mb-20">
-
-        {/* LEFT CAN - desktop only */}
-        <div
-          className="absolute left-[-80px] lg:left-[-40px] xl:left-[-10px] top-1/2 -translate-y-1/2 w-[380px] lg:w-[440px] h-[460px] z-10 pointer-events-none hidden md:block"
-        >
-          <Image
-            src="/leftcansection.png"
-            alt="Tangent Ginger Ale Refreshment"
-            fill
-            className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
-            sizes="(max-width: 1024px) 380px, 440px"
-          />
-        </div>
-
+    <section ref={sectionRef} className="relative bg-cream overflow-hidden py-20 md:py-28 px-6 md:px-12">
+      <div className="max-w-[1380px] mx-auto relative flex items-center justify-center">
         {/* CENTER CONTENT */}
-        <div ref={centerTextRef} className="relative z-20 text-center max-w-[540px] mx-auto px-4 py-8 md:py-4">
+        <div ref={centerTextRef} className="relative z-20 text-center max-w-[580px] mx-auto px-4">
           <p className="text-[12px] font-bold tracking-[.22em] uppercase text-[#4A6038] mb-3">
             THE TANGENT DIFFERENCE
           </p>
@@ -154,26 +70,7 @@ export function TasteOfWonder() {
             </Link>
           </div>
         </div>
-
-        {/* RIGHT CAN - desktop only */}
-        <div
-          className="absolute right-[-80px] lg:right-[-40px] xl:right-[-10px] top-1/2 -translate-y-1/2 w-[380px] lg:w-[440px] h-[460px] z-10 pointer-events-none hidden md:block"
-        >
-          <Image
-            src="/rightcansection.png"
-            alt="Tangent Tonic Water Refreshment"
-            fill
-            className="object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.12)]"
-            sizes="(max-width: 1024px) 380px, 440px"
-          />
-        </div>
-
       </div>
-
-
-
     </section>
   );
 }
-
-

@@ -58,6 +58,7 @@ export interface IOrder extends Document {
   shipmentStatus: ShipmentStatus;
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
+  couponCode?: string;
   shiprocketOrderId?: string;
   shiprocketShipmentId?: string;
   awbCode?: string;
@@ -113,6 +114,7 @@ const orderSchema = new Schema<IOrder>(
     },
     razorpayOrderId: { type: String },
     razorpayPaymentId: { type: String },
+    couponCode: { type: String, uppercase: true },
     shiprocketOrderId: { type: String },
     shiprocketShipmentId: { type: String },
     awbCode: { type: String },

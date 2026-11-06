@@ -36,11 +36,13 @@ export async function POST(request: Request) {
       }
 
       let discountAmount = 0;
+      let isFreeShipping = false;
       if (coupon.discountType === "FLAT") {
         discountAmount = coupon.discountValue;
       } else if (coupon.discountType === "PERCENTAGE") {
         discountAmount = (numericOrderValue * coupon.discountValue) / 100;
       } else if (coupon.discountType === "FREE_SHIPPING") {
+        isFreeShipping = true;
         discountAmount = 0;
       }
 
@@ -50,27 +52,66 @@ export async function POST(request: Request) {
           code: coupon.code,
           discountType: coupon.discountType,
           discountAmount: Math.min(discountAmount, numericOrderValue),
+          isFreeShipping,
         },
       });
     }
 
-    // Default fallback promo codes if not in DB yet
+    // Default fallback promo codes: Seed into database so they are manageable and tracked
     if (cleanCode === "TANGENT10") {
+      const seeded = await Coupon.findOneAndUpdate(
+        { code: "TANGENT10" },
+        {
+          $setOnInsert: {
+            code: "TANGENT10",
+            discountType: "PERCENTAGE",
+            discountValue: 10,
+            minOrderValue: 499,
+            usageCount: 0,
+            maxUsageLimit: 0,
+            validFrom: new Date(),
+            validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            isActive: true,
+          },
+        },
+        { upsert: true, new: true }
+      );
       return NextResponse.json({
         success: true,
         data: {
-          code: "TANGENT10",
+          code: seeded.code,
+          discountType: seeded.discountType,
           discountAmount: Math.round(numericOrderValue * 0.1),
+          isFreeShipping: false,
         },
       });
     }
 
     if (cleanCode === "WELCOME50") {
+      const seeded = await Coupon.findOneAndUpdate(
+        { code: "WELCOME50" },
+        {
+          $setOnInsert: {
+            code: "WELCOME50",
+            discountType: "FLAT",
+            discountValue: 50,
+            minOrderValue: 299,
+            usageCount: 0,
+            maxUsageLimit: 0,
+            validFrom: new Date(),
+            validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            isActive: true,
+          },
+        },
+        { upsert: true, new: true }
+      );
       return NextResponse.json({
         success: true,
         data: {
-          code: "WELCOME50",
+          code: seeded.code,
+          discountType: seeded.discountType,
           discountAmount: Math.min(50, numericOrderValue),
+          isFreeShipping: false,
         },
       });
     }
