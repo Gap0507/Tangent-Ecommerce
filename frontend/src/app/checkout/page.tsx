@@ -100,7 +100,7 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [completedOrder, setCompletedOrder] = useState<any>(null);
-  
+
   const [storeSettings, setStoreSettings] = useState<any>(null);
 
   // Fetch store settings on mount
@@ -313,7 +313,7 @@ export default function CheckoutPage() {
       if (typeof window !== "undefined" && window.Razorpay) {
         const options: any = {
           key: razorpayKeyId,
-          amount: Math.round(finalTotal * 100),
+          amount: Math.round((createdOrder.pricing?.total ?? finalTotal) * 100),
           currency: "INR",
           name: "Tangent Drinks",
           description: `Order #${createdOrder.orderNumber}`,
@@ -494,13 +494,12 @@ export default function CheckoutPage() {
                     onBlur={() => setEmailTouched(true)}
                     placeholder="your.email@domain.com"
                     required
-                    className={`w-full bg-transparent border rounded-xl px-4 py-3 text-[14px] text-navy focus:outline-none transition-colors ${
-                      emailTouched && emailError
-                        ? "border-red-400 focus:border-red-500"
-                        : emailTouched && !emailError && email
+                    className={`w-full bg-transparent border rounded-xl px-4 py-3 text-[14px] text-navy focus:outline-none transition-colors ${emailTouched && emailError
+                      ? "border-red-400 focus:border-red-500"
+                      : emailTouched && !emailError && email
                         ? "border-green-400 focus:border-green-500"
                         : "border-navy/20 focus:border-navy"
-                    }`}
+                      }`}
                   />
                   {emailTouched && emailError && (
                     <p className="text-[12px] text-red-500 font-semibold mt-1 flex items-center gap-1">
@@ -525,13 +524,12 @@ export default function CheckoutPage() {
                       placeholder="9876543210"
                       required
                       maxLength={10}
-                      className={`w-full bg-transparent border rounded-xl pl-[5.5rem] pr-4 py-3 text-[14px] text-navy focus:outline-none transition-colors ${
-                        phoneTouched && phoneError
-                          ? "border-red-400 focus:border-red-500"
-                          : phoneTouched && !phoneError && phone
+                      className={`w-full bg-transparent border rounded-xl pl-[5.5rem] pr-4 py-3 text-[14px] text-navy focus:outline-none transition-colors ${phoneTouched && phoneError
+                        ? "border-red-400 focus:border-red-500"
+                        : phoneTouched && !phoneError && phone
                           ? "border-green-400 focus:border-green-500"
                           : "border-navy/20 focus:border-navy"
-                      }`}
+                        }`}
                     />
                   </div>
                   {phoneTouched && phoneError && (
