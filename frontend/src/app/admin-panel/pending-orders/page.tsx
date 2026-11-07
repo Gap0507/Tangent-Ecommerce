@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Search, Filter, Eye, Send, Clock, Truck, Wallet, Loader2, AlertTriangle, CheckCircle2, X, ExternalLink } from "lucide-react";
+import { Search, Filter, Eye, Send, Clock, Truck, Wallet, Loader2, AlertTriangle, CheckCircle2, X, ExternalLink, RefreshCw } from "lucide-react";
 
 interface OrderItem {
   productId: string;
@@ -100,6 +100,31 @@ export default function PendingOrdersPage() {
   const [selectedOrderModal, setSelectedOrderModal] = useState<Order | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "wallet" } | null>(null);
+  const [syncingId, setSyncingId] = useState<string | null>(null);
+
+  const handleSyncShipment = async (orderId: string) => {
+    setSyncingId(orderId);
+    try {
+      const res = await fetch("/api/shipments/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setOrders((prev) => prev.map((o) => (o._id === orderId ? data.data : o)));
+        if (selectedOrderModal && selectedOrderModal._id === orderId) {
+          setSelectedOrderModal(data.data);
+        }
+        setToast({ type: "success", message: data.message || "Live status synced from Shiprocket" });
+        fetchPendingOrders();
+      }
+    } catch (err) {
+      console.error("Sync error:", err);
+    } finally {
+      setSyncingId(null);
+    }
+  };
 
   useEffect(() => {
     fetchPendingOrders();
@@ -456,13 +481,26 @@ export default function PendingOrdersPage() {
                     Shiprocket Logistics
                   </h4>
                 </div>
-                <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full ${
-                  selectedOrderModal.awbCode
-                    ? "bg-[#DCFCE7] text-[#166534] border border-[#166534]/20"
-                    : "bg-amber-50 text-amber-800 border border-amber-200"
-                }`}>
-                  {selectedOrderModal.shipmentStatus || "NOT_CREATED"}
-                </span>
+                <div className="flex items-center gap-2">
+                  {selectedOrderModal.awbCode && (
+                    <button
+                      onClick={() => handleSyncShipment(selectedOrderModal._id)}
+                      disabled={syncingId === selectedOrderModal._id}
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#166534] bg-white px-2.5 py-1 rounded-lg border border-[#166534]/25 hover:bg-[#DCFCE7] transition-colors shadow-2xs"
+                      title="Sync live status from Shiprocket"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${syncingId === selectedOrderModal._id ? "animate-spin" : ""}`} />
+                      <span>{syncingId === selectedOrderModal._id ? "Syncing..." : "Sync Live Status"}</span>
+                    </button>
+                  )}
+                  <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                    selectedOrderModal.awbCode
+                      ? "bg-[#DCFCE7] text-[#166534] border border-[#166534]/20"
+                      : "bg-amber-50 text-amber-800 border border-amber-200"
+                  }`}>
+                    {selectedOrderModal.shipmentStatus || "NOT_CREATED"}
+                  </span>
+                </div>
               </div>
 
               {selectedOrderModal.awbCode || selectedOrderModal.shiprocketOrderId ? (

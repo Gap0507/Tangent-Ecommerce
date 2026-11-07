@@ -118,6 +118,7 @@ export async function POST(request: Request) {
     const finalWeight = totalWeight > 0 ? totalWeight : 0.5;
 
     // Get estimated shipping cost via serviceability check
+    let cheapestCourierId: number | null = null;
     try {
       const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || "382445";
       const deliveryPincode = order.shippingAddress?.pincode || "000000";
@@ -142,6 +143,7 @@ export async function POST(request: Request) {
           const total = (c.freight_charge || c.rate || 0) + (c.coverage_charges || 0) + (c.whatsapp_charges || 0);
           if (total < minTotal) {
             minTotal = total;
+            cheapestCourierId = c.courier_company_id || c.courier_id || null;
           }
         }
         estimatedShippingCost = Math.round(minTotal);
@@ -194,6 +196,8 @@ export async function POST(request: Request) {
         })),
         payment_method: "Prepaid",
         sub_total: order.pricing.subtotal,
+        shipping_charges: order.pricing?.shipping || 0,
+        total_discount: order.pricing?.discount || 0,
         length: maxLen,
         breadth: maxBreadth,
         height: maxHeight,
@@ -224,24 +228,44 @@ export async function POST(request: Request) {
     // 6. Step 2: Assign Courier & Generate Live AWB
     if (shipmentId && !awbCode) {
       try {
-        const awbRes = await fetch("https://apiv2.shiprocket.in/v1/external/courier/assign/awb", {
+        const awbPayload: any = {
+          shipment_id: shipmentId,
+        };
+        if (cheapestCourierId) {
+          awbPayload.courier_id = cheapestCourierId;
+        }
+
+        let awbRes = await fetch("https://apiv2.shiprocket.in/v1/external/courier/assign/awb", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            shipment_id: shipmentId,
-          }),
+          body: JSON.stringify(awbPayload),
         });
 
-        const awbData = await awbRes.json();
+        let awbData = await awbRes.json();
+
+        // If specific cheapest courier fails, retry with default assignment to prevent orders getting stuck
+        if ((!awbData || (awbData.awb_assign_status !== 1 && !awbData.response?.data?.awb_code)) && cheapestCourierId) {
+          console.warn(`Cheapest courier assignment (ID: ${cheapestCourierId}) failed, falling back to auto-assign:`, awbData);
+          awbRes = await fetch("https://apiv2.shiprocket.in/v1/external/courier/assign/awb", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ shipment_id: shipmentId }),
+          });
+          awbData = await awbRes.json();
+        }
+
         if (awbData && (awbData.awb_assign_status === 1 || awbData.response?.data?.awb_code)) {
           const resData = awbData.response?.data || {};
           awbCode = resData.awb_code || awbCode;
           courierName = resData.courier_name || courierName;
         } else {
-          console.warn("Shiprocket AWB auto-assign response:", awbData);
+          console.warn("Shiprocket AWB assign response:", awbData);
         }
       } catch (awbErr) {
         console.error("Failed to auto-assign AWB in Shiprocket:", awbErr);

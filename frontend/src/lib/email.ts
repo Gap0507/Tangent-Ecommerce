@@ -156,7 +156,7 @@ function buildReceiptHTML(order: OrderEmailData): string {
                 <img src="cid:tangent-logo" alt="Tangent" width="130" style="display: block; width: 130px; height: auto; border: 0; outline: none; margin: 0 auto;" />
               </a>
               <p class="tx-navy" style="margin: 8px 0 0; font-family: ${fontStack}; font-size: 10px; font-weight: 700; color: #091E33; letter-spacing: 2.5px; text-transform: uppercase; opacity: 0.55;">
-                Functional Energy Drinks
+                Infused Vitamin Drinks
               </p>
             </td>
           </tr>

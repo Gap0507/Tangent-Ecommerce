@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDB from "@/lib/db";
 import { Order } from "@/models/Order";
+import { syncOrderWithShiprocket } from "@/lib/shiprocket-sync";
 
 function maskName(name: string): string {
   if (!name) return "";
@@ -64,6 +65,15 @@ export async function GET(request: Request) {
         { success: false, message: "No order found matching that Order Number. Please check your confirmation email for your correct Order ID." },
         { status: 404 }
       );
+    }
+
+    // Auto-sync live status from Shiprocket if AWB exists
+    if (order.awbCode) {
+      const syncResult = await syncOrderWithShiprocket(order);
+      if (syncResult.changed) {
+        order.orderStatus = syncResult.orderStatus as any;
+        order.shipmentStatus = syncResult.shipmentStatus as any;
+      }
     }
 
     // If customer provided contact verification, check match
