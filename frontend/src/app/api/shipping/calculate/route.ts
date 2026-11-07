@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
           if (token) {
             // Use the pickup pincode from Shiprocket (user's warehouse in Ahmedabad)
-            const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || "382443";
+            const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || "382445";
             let totalWeight = 0;
             let maxLength = 25, maxBreadth = 18, maxHeight = 12; // defaults for Pack of 4
             if (items.length > 0) {

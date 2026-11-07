@@ -305,7 +305,7 @@ export async function POST(request: Request) {
         try {
           const token = await getShiprocketToken(shiprocketEmail, shiprocketApiKey);
           if (token) {
-            const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || "382443";
+            const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || "382445";
             let totalWeight = 0;
             let maxLength = 25, maxBreadth = 18, maxHeight = 12;
 

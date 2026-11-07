@@ -119,7 +119,7 @@ export async function POST(request: Request) {
 
     // Get estimated shipping cost via serviceability check
     try {
-      const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || "382443";
+      const pickupPincode = process.env.SHIPROCKET_PICKUP_PINCODE || "382445";
       const deliveryPincode = order.shippingAddress?.pincode || "000000";
 
       const rateRes = await fetch(
@@ -175,7 +175,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         order_id: order.orderNumber,
         order_date: new Date().toISOString().split("T")[0],
-        pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "Primary",
+        pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "warehouse",
         billing_customer_name: order.customerName,
         billing_last_name: "",
         billing_address: order.shippingAddress.street,
