@@ -6,6 +6,7 @@ export interface ISettings extends Document {
   shiprocketEmail: string;
   shiprocketApiKey: string;
   useRealTimeRates: boolean;
+  isFreeDelivery: boolean;
   flatShippingRate: number;
   storeEmail: string;
   storePhone: string;
@@ -32,6 +33,7 @@ const settingsSchema = new Schema<ISettings>(
     shiprocketEmail: { type: String, default: '' },
     shiprocketApiKey: { type: String, default: '' },
     useRealTimeRates: { type: Boolean, default: false },
+    isFreeDelivery: { type: Boolean, default: false },
     flatShippingRate: { type: Number, default: 49 },
     storeEmail: { type: String, default: 'info@tangentfnb.com' },
     storePhone: { type: String, default: '9724565952' },

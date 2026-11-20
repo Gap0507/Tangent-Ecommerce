@@ -324,6 +324,7 @@ export async function POST(request: Request) {
     order.orderStatus = OrderStatus.SHIPPED;
     order.awbCode = awbCode;
     order.courierName = courierName || "Shiprocket Express";
+    order.shiprocketFreight = estimatedShippingCost;
 
     await order.save();
 
@@ -334,8 +335,11 @@ export async function POST(request: Request) {
       message: successMessage,
       data: order,
       walletBalance,
+      deductedAmount: estimatedShippingCost,
+      newWalletBalance: Math.max(0, walletBalance - estimatedShippingCost),
       awbCode,
       courierName: order.courierName,
+      customerLocation: `${order.shippingAddress.city}, ${order.shippingAddress.state} (${order.shippingAddress.pincode})`,
       pickupScheduled,
     });
   } catch (error: any) {

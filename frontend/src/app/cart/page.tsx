@@ -1,46 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, ArrowLeft, Trash2, Plus, Minus, Lock, RotateCcw, Leaf, Tag, ShoppingBag, Truck, Check } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-
-
-const RECOMMENDATIONS = [
-  {
-    id: "watermelon-cranberry",
-    name: "Watermelon Cranberry",
-    size: "Pack of 4",
-    price: 320.0,
-    image: "/can1.png",
-    canImg: "/can1.png",
-  },
-  {
-    id: "yuzu-mint",
-    name: "Yuzu Mint",
-    size: "Pack of 4",
-    price: 480.0,
-    image: "/can4.png",
-    canImg: "/can4.png",
-  },
-  {
-    id: "guava-chilli",
-    name: "Guava Chilli",
-    size: "Pack of 4",
-    price: 400.0,
-    image: "/can3.png",
-    canImg: "/can3.png",
-  },
-  {
-    id: "watermelon-mint",
-    name: "Watermelon Mint",
-    size: "Pack of 4",
-    price: 520.0,
-    image: "/can2.png",
-    canImg: "/can2.png",
-  },
-];
+import { ProductCard, ProductItem } from "@/components/shop/ProductCard";
+import { BASE_CATALOG, createDefaultPackPrices } from "@/components/shop/ShopProductGrid";
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, totalItems, subtotal, addToCart } = useCart();
@@ -48,33 +14,93 @@ export default function CartPage() {
   const [discount, setDiscount] = useState(0);
   const [couponApplied, setCouponApplied] = useState(false);
   const [showCouponInput, setShowCouponInput] = useState(false);
-  const [addedRecId, setAddedRecId] = useState<string | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponMessage, setCouponMessage] = useState<{ text: string; isError: boolean } | null>(null);
+  const [recommendations, setRecommendations] = useState<ProductItem[]>(BASE_CATALOG);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success && Array.isArray(resData.data) && resData.data.length > 0) {
+          const inventoryProducts = resData.data;
+          setRecommendations((prev) =>
+            prev.map((item) => {
+              const dbProd = inventoryProducts.find(
+                (p: any) =>
+                  p.name.toLowerCase().includes(item.id.replace("-", " ")) ||
+                  item.id.toLowerCase().includes(p.name.toLowerCase().replace(/\s+/g, "-")) ||
+                  p.sku.toLowerCase().includes(item.id.substring(0, 4))
+              );
+              if (dbProd && dbProd.price) {
+                const baseP = dbProd.price;
+                return {
+                  ...item,
+                  packPrices: createDefaultPackPrices(baseP),
+                };
+              }
+              return item;
+            })
+          );
+        }
+      })
+      .catch((err) => console.error("Failed to load inventory prices for cart recommendations", err));
+  }, []);
 
   const grandTotal = Math.max(0, subtotal - discount);
 
-  const handleApplyCoupon = (e: React.FormEvent) => {
+  const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (couponCode.trim().toUpperCase() === "TANGENT10") {
-      setDiscount(subtotal * 0.1);
-      setCouponApplied(true);
-    } else if (couponCode.trim().length > 0) {
-      setDiscount(100.0);
-      setCouponApplied(true);
+    if (!couponCode.trim()) return;
+
+    setCouponLoading(true);
+    setCouponMessage(null);
+
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode, orderValue: subtotal }),
+      });
+      const data = await res.json();
+
+      if (data.success && data.data) {
+        if (data.data.isFreeShipping) {
+          setDiscount(0);
+          setCouponApplied(true);
+          setCouponMessage({
+            text: `Coupon '${couponCode.toUpperCase()}' applied! FREE SHIPPING unlocked at checkout!`,
+            isError: false,
+          });
+        } else {
+          setDiscount(data.data.discountAmount);
+          setCouponApplied(true);
+          setCouponMessage({
+            text: `Coupon '${couponCode.toUpperCase()}' applied! Saved ₹${data.data.discountAmount.toFixed(2)}`,
+            isError: false,
+          });
+        }
+      } else {
+        setDiscount(0);
+        setCouponApplied(false);
+        setCouponMessage({
+          text: data.error || "Invalid coupon code",
+          isError: true,
+        });
+      }
+    } catch (err) {
+      console.error("Coupon validation error:", err);
+      setDiscount(0);
+      setCouponApplied(false);
+      setCouponMessage({
+        text: "Unable to validate coupon",
+        isError: true,
+      });
+    } finally {
+      setCouponLoading(false);
     }
   };
 
-  const handleAddRecToCart = (rec: typeof RECOMMENDATIONS[0]) => {
-    addToCart({
-      productId: rec.id,
-      name: rec.name,
-      size: rec.size,
-      price: rec.price,
-      quantity: 1,
-      image: rec.canImg,
-    });
-    setAddedRecId(rec.id);
-    setTimeout(() => setAddedRecId(null), 1800);
-  };
 
   return (
     <div className="bg-[#FAF8F5] min-h-screen text-navy py-8 md:py-12">
@@ -308,14 +334,18 @@ export default function CartPage() {
                       type="text"
                       placeholder="Enter Coupon Code"
                       value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                      className="flex-1 bg-[#FAF7F2] border border-navy/15 rounded-xl px-3.5 py-2.5 text-[13px] text-navy focus:outline-none focus:border-navy"
+                      onChange={(e) => {
+                        setCouponCode(e.target.value);
+                        if (couponMessage) setCouponMessage(null);
+                      }}
+                      className="flex-1 bg-[#FAF7F2] border border-navy/15 rounded-xl px-3.5 py-2.5 text-[13px] text-navy focus:outline-none focus:border-navy uppercase font-semibold"
                     />
                     <button
                       type="submit"
-                      className="bg-navy text-white text-[13px] font-bold px-4 py-2.5 rounded-xl hover:bg-navy/90 transition-all cursor-pointer"
+                      disabled={couponLoading || !couponCode.trim()}
+                      className="bg-navy text-white text-[13px] font-bold px-4 py-2.5 rounded-xl hover:bg-navy/90 transition-all cursor-pointer disabled:opacity-50"
                     >
-                      Apply
+                      {couponLoading ? "Checking..." : "Apply"}
                     </button>
                   </form>
                 ) : (
@@ -327,9 +357,14 @@ export default function CartPage() {
                     <Tag className="w-4 h-4 text-navy/60" />
                   </button>
                 )}
-                {couponApplied && (
-                  <p className="text-[12px] font-bold text-[#6A9A4A] text-center">
-                    ✓ Coupon code applied successfully!
+                {couponMessage && (
+                  <p
+                    className={`text-[12px] font-bold text-center ${
+                      couponMessage.isError ? "text-red-600" : "text-[#6A9A4A]"
+                    }`}
+                  >
+                    {couponMessage.isError ? "✕ " : "✓ "}
+                    {couponMessage.text}
                   </p>
                 )}
               </div>
@@ -369,58 +404,10 @@ export default function CartPage() {
             You May Also Like
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {RECOMMENDATIONS.map((rec) => {
-              const isAdded = addedRecId === rec.id;
-              return (
-                <div
-                  key={rec.id}
-                  className="group bg-white rounded-3xl border border-navy/10 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col"
-                >
-                  {/* Visual Container */}
-                  <Link href={`/shop/${rec.id}`} className="relative w-full aspect-[4/3] overflow-hidden bg-cream/40 flex items-center justify-center p-3 cursor-pointer">
-                    <Image
-                      src={rec.image}
-                      alt={rec.name}
-                      fill
-                      className="object-contain object-center group-hover:scale-105 transition-transform duration-500 p-4"
-                      unoptimized
-                    />
-                  </Link>
-
-                  {/* Card Content */}
-                  <div className="p-5 flex items-center justify-between mt-auto">
-                    <div>
-                      <Link href={`/shop/${rec.id}`} className="hover:text-[#6A9A4A] transition-colors">
-                        <h3 className="font-fraunces font-bold text-navy text-[17px] leading-tight mb-1">
-                          {rec.name}
-                        </h3>
-                      </Link>
-                      <span className="font-fraunces font-black text-navy text-[18px]">
-                        ₹{rec.price.toFixed(2)}
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => handleAddRecToCart(rec)}
-                      disabled={isAdded}
-                      className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all cursor-pointer shadow-sm ${
-                        isAdded
-                          ? "bg-[#6A9A4A] text-white"
-                          : "bg-white border border-navy/20 text-navy hover:bg-navy hover:text-white hover:border-navy"
-                      }`}
-                      aria-label={`Add ${rec.name} to cart`}
-                    >
-                      {isAdded ? (
-                        <Check className="w-5 h-5" />
-                      ) : (
-                        <ShoppingBag className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            {recommendations.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
         </div>
 

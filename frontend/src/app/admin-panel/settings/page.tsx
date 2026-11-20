@@ -18,6 +18,7 @@ export default function SettingsPage() {
     shiprocketEmail: "",
     shiprocketApiKey: "",
     useRealTimeRates: false,
+    isFreeDelivery: false,
     flatShippingRate: 49,
     storeEmail: "hello@tangentdrinks.com",
     storePhone: "+9724565952",
@@ -49,6 +50,7 @@ export default function SettingsPage() {
             shiprocketEmail: d.shiprocketEmail || "",
             shiprocketApiKey: d.shiprocketApiKey || "",
             useRealTimeRates: d.useRealTimeRates || false,
+            isFreeDelivery: d.isFreeDelivery || false,
             flatShippingRate: d.flatShippingRate !== undefined ? d.flatShippingRate : 49,
             storeEmail: d.storeEmail || "hello@tangentdrinks.com",
             storePhone: d.storePhone || "+9724565952",
@@ -93,6 +95,7 @@ export default function SettingsPage() {
           shiprocketEmail: updated.shiprocketEmail || "",
           shiprocketApiKey: updated.shiprocketApiKey || "",
           useRealTimeRates: updated.useRealTimeRates || false,
+          isFreeDelivery: updated.isFreeDelivery || false,
           flatShippingRate: updated.flatShippingRate !== undefined ? updated.flatShippingRate : 49,
           storeEmail: updated.storeEmail || "hello@tangentdrinks.com",
           storePhone: updated.storePhone || "+9724565952",
@@ -289,14 +292,14 @@ export default function SettingsPage() {
 
           <div className="space-y-6 flex-1">
 
-            {/* Toggle Row */}
+            {/* Toggle Row: Real-time Rates */}
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3 mb-1">
                   <h4 className="text-[13.5px] font-bold text-navy">Use Shiprocket Rates (Real-time)</h4>
                   <span className="bg-[#E6F4EA] text-[#1E7B34] text-[11px] font-bold px-2 py-0.5 rounded-full">Recommended</span>
                 </div>
-                <p className="text-[13px] text-ink/60">Get real-time shipping rates from Shiprocket at checkout.</p>
+                <p className="text-[13px] text-ink/60">Get real-time shipping rates and check serviceability from Shiprocket.</p>
               </div>
 
               <button
@@ -307,6 +310,39 @@ export default function SettingsPage() {
                 <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${formData.useRealTimeRates ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
             </div>
+
+            {/* Toggle Row: Free Delivery for Customers */}
+            <div className="flex items-start justify-between gap-4 pt-4 border-t border-navy/5">
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <h4 className="text-[13.5px] font-bold text-navy">Free Delivery (Customer Offers)</h4>
+                  <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${formData.isFreeDelivery ? 'bg-[#E6F4EA] text-[#1E7B34]' : 'bg-gray-100 text-gray-600'}`}>
+                    {formData.isFreeDelivery ? 'Active: Free for Customers' : 'Off'}
+                  </span>
+                </div>
+                <p className="text-[13px] text-ink/60">
+                  When enabled, customers get 100% Free Delivery at checkout. When you click &quot;Push to Shiprocket&quot;, courier freight will be deducted from your Shiprocket wallet.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, isFreeDelivery: !formData.isFreeDelivery })}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${formData.isFreeDelivery ? 'bg-[#4B7322]' : 'bg-gray-200'}`}
+              >
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${formData.isFreeDelivery ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            </div>
+
+            {/* Free Delivery Banner */}
+            {formData.isFreeDelivery && (
+              <div className="bg-[#EDF5E6] rounded-xl p-4 flex gap-3 text-[#1E7B34]">
+                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                <p className="text-[13px] leading-relaxed font-semibold">
+                  Free Delivery is active: Customer checkout will show ₹0.00 / FREE Shipping. Carrier charges will be deducted from your Shiprocket wallet upon dispatch.
+                </p>
+              </div>
+            )}
 
             {/* Info Banner */}
             {!formData.useRealTimeRates && (

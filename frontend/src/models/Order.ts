@@ -61,6 +61,7 @@ export interface IOrder extends Document {
   couponCode?: string;
   shiprocketOrderId?: string;
   shiprocketShipmentId?: string;
+  shiprocketFreight?: number;
   awbCode?: string;
   courierName?: string;
   createdAt: Date;
@@ -117,6 +118,7 @@ const orderSchema = new Schema<IOrder>(
     couponCode: { type: String, uppercase: true },
     shiprocketOrderId: { type: String },
     shiprocketShipmentId: { type: String },
+    shiprocketFreight: { type: Number },
     awbCode: { type: String },
     courierName: { type: String },
   },

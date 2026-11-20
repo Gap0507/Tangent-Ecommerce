@@ -110,7 +110,10 @@ export default function CheckoutPage() {
       .then((data) => {
         if (data.success && data.data) {
           setStoreSettings(data.data);
-          if (!data.data.useRealTimeRates) {
+          if (data.data.isFreeDelivery) {
+            setShippingFee(0);
+            setEtd("Free Delivery (Store Offer)");
+          } else if (!data.data.useRealTimeRates) {
             setShippingFee(data.data.flatShippingRate ?? 49);
           }
         }
@@ -136,6 +139,12 @@ export default function CheckoutPage() {
     if (isFreeShippingCoupon) {
       setShippingFee(0);
       setEtd("Free Express Shipping (Coupon Applied)");
+      return;
+    }
+
+    if (storeSettings && storeSettings.isFreeDelivery) {
+      setShippingFee(0);
+      setEtd("Free Delivery (Store Offer)");
       return;
     }
 

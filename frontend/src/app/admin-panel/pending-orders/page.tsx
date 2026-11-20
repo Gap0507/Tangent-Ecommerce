@@ -77,6 +77,9 @@ interface Order {
   items: OrderItem[];
   pricing: {
     total: number;
+    subtotal?: number;
+    shipping?: number;
+    discount?: number;
   };
   paymentStatus: string;
   orderStatus: string;
@@ -89,6 +92,7 @@ interface Order {
   };
   shiprocketOrderId?: string;
   shiprocketShipmentId?: string;
+  shiprocketFreight?: number;
   awbCode?: string;
   courierName?: string;
 }
@@ -101,6 +105,62 @@ export default function PendingOrdersPage() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "wallet" } | null>(null);
   const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [dispatchedResultModal, setDispatchedResultModal] = useState<{
+    orderNumber: string;
+    customerName: string;
+    customerLocation: string;
+    deductedAmount: number;
+    carrierName: string;
+    awbCode: string;
+    newWalletBalance?: number;
+  } | null>(null);
+  const [confirmPushModal, setConfirmPushModal] = useState<{
+    order: Order;
+    estimatedCost: number | null;
+    isEstimating: boolean;
+  } | null>(null);
+
+  const openConfirmPushModal = async (order: Order) => {
+    if (order.paymentStatus !== "PAID") {
+      setToast({ message: "Cannot push unpaid orders to Shiprocket.", type: "error" });
+      return;
+    }
+
+    setConfirmPushModal({
+      order,
+      estimatedCost: order.shiprocketFreight || null,
+      isEstimating: true,
+    });
+
+    try {
+      const res = await fetch("/api/shipping/calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pincode: order.shippingAddress?.pincode,
+          items: order.items,
+          subtotal: order.pricing?.subtotal || order.pricing?.total,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        const walletDeduction =
+          data.data.courierCost !== undefined
+            ? data.data.courierCost
+            : (data.data.shippingCost || order.pricing?.shipping || 0);
+
+        setConfirmPushModal((prev) =>
+          prev && prev.order._id === order._id
+            ? { ...prev, estimatedCost: walletDeduction, isEstimating: false }
+            : prev
+        );
+      } else {
+        setConfirmPushModal((prev) => (prev ? { ...prev, isEstimating: false } : null));
+      }
+    } catch {
+      setConfirmPushModal((prev) => (prev ? { ...prev, isEstimating: false } : null));
+    }
+  };
 
   const handleSyncShipment = async (orderId: string) => {
     setSyncingId(orderId);
@@ -178,9 +238,14 @@ export default function PendingOrdersPage() {
       if (data.success) {
         // Remove from pending list once shipped
         setOrders((prev) => prev.filter((o) => o._id !== order._id));
-        setToast({
-          message: data.message || `Shipment created! AWB: ${data.data?.awbCode || "Pending"}`,
-          type: "success"
+        setDispatchedResultModal({
+          orderNumber: order.orderNumber,
+          customerName: order.customerName,
+          customerLocation: data.customerLocation || `${order.shippingAddress?.city}, ${order.shippingAddress?.state} (${order.shippingAddress?.pincode})`,
+          deductedAmount: data.deductedAmount || 0,
+          carrierName: data.courierName || "Shiprocket Express",
+          awbCode: data.awbCode || "Assigned",
+          newWalletBalance: data.newWalletBalance,
         });
       } else if (data.errorType === "INSUFFICIENT_BALANCE") {
         setToast({
@@ -399,7 +464,7 @@ export default function PendingOrdersPage() {
                     <td className="py-4 px-2 text-right whitespace-nowrap">
                       <div className="flex flex-col items-end gap-2">
                         <button
-                          onClick={() => handlePushToShiprocket(ord)}
+                          onClick={() => openConfirmPushModal(ord)}
                           disabled={isProcessing || ord.paymentStatus !== 'PAID'}
                           className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-[12.5px] font-bold transition-all shadow-sm w-44
                             ${isProcessing || ord.paymentStatus !== 'PAID'
@@ -542,13 +607,46 @@ export default function PendingOrdersPage() {
                       <span className="font-bold text-navy">{selectedOrderModal.shiprocketShipmentId}</span>
                     </div>
                   )}
+
+                  <div className="sm:col-span-2 pt-2 border-t border-[#166534]/15 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-ink/60 font-semibold block text-[10.5px] uppercase">Customer Location</span>
+                      <span className="font-extrabold text-navy text-[13px]">
+                        {selectedOrderModal.shippingAddress?.city}, {selectedOrderModal.shippingAddress?.state} ({selectedOrderModal.shippingAddress?.pincode})
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-ink/60 font-semibold block text-[10.5px] uppercase">Rupees Deducted from Wallet</span>
+                      <span className="font-black text-[#166534] text-[15px]">
+                        ₹{(selectedOrderModal.shiprocketFreight || selectedOrderModal.pricing?.shipping || 0).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               ) : (
-                <div className="text-[12px] text-ink/60 flex items-center justify-between">
-                  <span>Shipment has not been pushed to Shiprocket yet.</span>
-                  <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-[11px]">
-                    Pending Dispatch
-                  </span>
+                <div className="space-y-3">
+                  <div className="text-[12px] text-ink/60 flex items-center justify-between">
+                    <span>Shipment has not been pushed to Shiprocket yet.</span>
+                    <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-[11px]">
+                      Pending Dispatch
+                    </span>
+                  </div>
+                  <div className="pt-2.5 border-t border-[#166534]/15 grid grid-cols-1 sm:grid-cols-2 gap-3 text-[12.5px]">
+                    <div>
+                      <span className="text-ink/60 font-semibold block text-[10.5px] uppercase">Customer Location</span>
+                      <span className="font-extrabold text-navy text-[13px]">
+                        {selectedOrderModal.shippingAddress?.city}, {selectedOrderModal.shippingAddress?.state} ({selectedOrderModal.shippingAddress?.pincode})
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-ink/60 font-semibold block text-[10.5px] uppercase">Estimated Wallet Deduction</span>
+                      <span className="font-black text-[#166534] text-[14px]">
+                        {(selectedOrderModal.pricing?.shipping || 0) > 0 
+                          ? `₹${(selectedOrderModal.pricing?.shipping ?? 0).toFixed(2)}` 
+                          : "Calculated upon push"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -584,6 +682,186 @@ export default function PendingOrdersPage() {
             >
               Close Window
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Dispatched Result Modal (Customer Location & Rupees Deducted) */}
+      {dispatchedResultModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border border-navy/10 relative my-auto animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-navy/10">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-fraunces font-black text-[20px] text-navy">
+                  Dispatched to Shiprocket!
+                </h3>
+                <p className="text-[12px] text-ink/60">
+                  Order #{dispatchedResultModal.orderNumber} successfully booked
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3.5 mb-6 text-[13px]">
+              {/* Customer & Location */}
+              <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-black/5">
+                <span className="text-ink/60 font-semibold block text-[11px] uppercase tracking-wider mb-1">
+                  Customer & Delivery Location
+                </span>
+                <p className="font-extrabold text-navy text-[14px]">
+                  {dispatchedResultModal.customerName}
+                </p>
+                <p className="text-navy font-semibold text-[13px] mt-0.5">
+                  📍 {dispatchedResultModal.customerLocation}
+                </p>
+              </div>
+
+              {/* Rupees Deducted Card */}
+              <div className="bg-[#F0FDF4] p-4 rounded-2xl border border-[#166534]/20 flex items-center justify-between">
+                <div>
+                  <span className="text-[#166534] font-bold block text-[11px] uppercase tracking-wider">
+                    Rupees Deducted from Wallet
+                  </span>
+                  <span className="font-fraunces font-black text-[#166534] text-[26px]">
+                    ₹{dispatchedResultModal.deductedAmount.toFixed(2)}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-ink/60 font-semibold block text-[11px] uppercase tracking-wider">
+                    Assigned Courier
+                  </span>
+                  <span className="font-bold text-navy text-[13px] block">
+                    {dispatchedResultModal.carrierName}
+                  </span>
+                  <span className="text-[11px] font-mono text-ink/60">
+                    AWB: {dispatchedResultModal.awbCode}
+                  </span>
+                </div>
+              </div>
+
+              {dispatchedResultModal.newWalletBalance !== undefined && (
+                <div className="text-right text-[11.5px] text-ink/60 font-medium">
+                  Remaining Wallet Balance: <span className="font-bold text-navy">₹{dispatchedResultModal.newWalletBalance.toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => setDispatchedResultModal(null)}
+              className="w-full bg-[#091E33] hover:bg-[#071728] text-white font-bold text-[14px] py-3.5 rounded-2xl transition-all cursor-pointer shadow-md"
+            >
+              Done & Return to Orders
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal: Pre-Dispatch Review */}
+      {confirmPushModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border border-navy/10 relative my-auto animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-navy/10 mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#091E33] text-white flex items-center justify-center">
+                  <Truck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-fraunces font-black text-[20px] text-navy">
+                    Confirm Dispatch
+                  </h3>
+                  <p className="text-[12px] text-ink/60">
+                    Order #{confirmPushModal.order.orderNumber}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setConfirmPushModal(null)}
+                className="w-8 h-8 rounded-full bg-cream flex items-center justify-center text-navy font-bold text-[13px] hover:bg-navy hover:text-white transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content Details */}
+            <div className="space-y-3.5 mb-6 text-[13px]">
+              {/* Customer & Destination Location */}
+              <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-black/5">
+                <span className="text-ink/60 font-semibold block text-[11px] uppercase tracking-wider mb-1">
+                  Customer & Delivery Location
+                </span>
+                <p className="font-extrabold text-navy text-[14px]">
+                  {confirmPushModal.order.customerName} ({confirmPushModal.order.customerPhone})
+                </p>
+                <p className="text-navy/80 text-[12.5px] mt-1">
+                  {confirmPushModal.order.shippingAddress?.street}
+                </p>
+                <p className="font-bold text-navy text-[13px] mt-0.5">
+                  📍 {confirmPushModal.order.shippingAddress?.city}, {confirmPushModal.order.shippingAddress?.state} - {confirmPushModal.order.shippingAddress?.pincode}
+                </p>
+              </div>
+
+              {/* Wallet Deduction Highlight Card */}
+              <div className="bg-[#F0FDF4] p-4.5 rounded-2xl border border-[#166534]/25">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[#166534] font-bold text-[11px] uppercase tracking-wider">
+                    Rupees to be Deducted from Wallet
+                  </span>
+                  <span className="bg-[#DCFCE7] text-[#166534] text-[10.5px] font-extrabold px-2 py-0.5 rounded-full">
+                    Shiprocket Wallet
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-fraunces font-black text-[#166534] text-[28px]">
+                    {confirmPushModal.isEstimating ? (
+                      <span className="text-[15px] font-sans font-bold text-ink/50 flex items-center gap-1.5 py-1">
+                        <Loader2 className="w-4 h-4 animate-spin text-[#166534]" /> Calculating live courier fee...
+                      </span>
+                    ) : (
+                      `₹${(confirmPushModal.estimatedCost ?? 0).toFixed(2)}`
+                    )}
+                  </span>
+                </div>
+                <p className="text-[11.5px] text-[#166534]/85 mt-1 font-medium leading-relaxed">
+                  Clicking continue will assign the lowest-rate courier and deduct this freight charge from your Shiprocket recharge wallet.
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons: Cancel vs Continue */}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmPushModal(null)}
+                className="flex-1 bg-cream hover:bg-navy/5 text-navy font-bold text-[14px] py-3.5 rounded-2xl transition-all cursor-pointer border border-navy/10 text-center"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const ord = confirmPushModal.order;
+                  setConfirmPushModal(null);
+                  handlePushToShiprocket(ord);
+                }}
+                disabled={processingId === confirmPushModal.order._id}
+                className="flex-[1.5] bg-[#091E33] hover:bg-[#071728] text-white font-bold text-[14px] py-3.5 rounded-2xl transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
+              >
+                {processingId === confirmPushModal.order._id ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Booking...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Continue & Push</span>
+                    <Send className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

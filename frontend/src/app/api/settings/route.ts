@@ -15,6 +15,7 @@ export async function GET() {
         shiprocketEmail: "",
         shiprocketApiKey: "",
         useRealTimeRates: false,
+        isFreeDelivery: false,
         flatShippingRate: 49,
         storeEmail: "hello@tangentdrinks.com",
         storePhone: "+9724565952",
@@ -39,6 +40,7 @@ export async function GET() {
       // For public / customer requests (e.g. checkout), only expose safe store settings
       const publicSettings = {
         useRealTimeRates: settings.useRealTimeRates,
+        isFreeDelivery: Boolean(settings.isFreeDelivery),
         flatShippingRate: settings.flatShippingRate,
         storeEmail: settings.storeEmail,
         storePhone: settings.storePhone,
@@ -82,6 +84,7 @@ export async function POST(request: Request) {
       shiprocketEmail,
       shiprocketApiKey,
       useRealTimeRates,
+      isFreeDelivery,
       flatShippingRate,
       storeEmail,
       storePhone,
@@ -106,6 +109,7 @@ export async function POST(request: Request) {
       shiprocketEmail: shiprocketEmail ?? "",
       shiprocketApiKey: shiprocketApiKey ?? "",
       useRealTimeRates: Boolean(useRealTimeRates),
+      isFreeDelivery: Boolean(isFreeDelivery),
       flatShippingRate: Number(flatShippingRate) || 49,
       storeEmail: storeEmail || "hello@tangentdrinks.com",
       storePhone: storePhone || "+9724565952",

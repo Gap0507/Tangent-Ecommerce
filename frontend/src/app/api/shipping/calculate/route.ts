@@ -116,14 +116,24 @@ export async function POST(request: Request) {
         finalRate = settings.flatShippingRate || 49;
       }
     } else if (settings) {
-      finalRate = settings.flatShippingRate;
+      finalRate = settings.flatShippingRate || 49;
+    }
+
+    // Actual courier freight charge (what Shiprocket will deduct from Admin wallet)
+    const courierCost = finalRate;
+
+    // If Admin enabled Free Delivery, customer delivery charge is strictly ₹0
+    if (settings?.isFreeDelivery) {
+      finalRate = 0;
     }
 
     return NextResponse.json({
       success: true,
       data: {
         shippingCost: finalRate,
+        courierCost,
         isRealTime: settings?.useRealTimeRates || false,
+        isFreeDelivery: Boolean(settings?.isFreeDelivery),
         etd
       }
     });

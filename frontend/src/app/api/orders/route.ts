@@ -291,9 +291,9 @@ export async function POST(request: Request) {
     }
 
     // 5. Determine verified Shipping Fee on server
-    // Free shipping is ONLY granted when the admin explicitly creates and applies a FREE_SHIPPING coupon
+    // Free shipping is granted when Admin enabled Free Delivery toggle in settings OR customer applied a valid FREE_SHIPPING coupon
     let serverShipping = 0;
-    const hasFreeShippingPromise = isFreeShippingCoupon;
+    const hasFreeShippingPromise = isFreeShippingCoupon || Boolean(settings?.isFreeDelivery);
 
     if (hasFreeShippingPromise) {
       serverShipping = 0;

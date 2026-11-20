@@ -77,6 +77,9 @@ interface Order {
   items: OrderItem[];
   pricing: {
     total: number;
+    subtotal?: number;
+    shipping?: number;
+    discount?: number;
   };
   paymentStatus: string;
   orderStatus: string;
@@ -89,6 +92,7 @@ interface Order {
   };
   shiprocketOrderId?: string;
   shiprocketShipmentId?: string;
+  shiprocketFreight?: number;
   awbCode?: string;
   courierName?: string;
 }
@@ -437,13 +441,46 @@ export default function AllOrdersPage() {
                       <span className="font-bold text-navy">{selectedOrderModal.shiprocketShipmentId}</span>
                     </div>
                   )}
+
+                  <div className="sm:col-span-2 pt-2 border-t border-[#166534]/15 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-ink/60 font-semibold block text-[10.5px] uppercase">Customer Location</span>
+                      <span className="font-extrabold text-navy text-[13px]">
+                        {selectedOrderModal.shippingAddress?.city}, {selectedOrderModal.shippingAddress?.state} ({selectedOrderModal.shippingAddress?.pincode})
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-ink/60 font-semibold block text-[10.5px] uppercase">Rupees Deducted from Wallet</span>
+                      <span className="font-black text-[#166534] text-[15px]">
+                        ₹{(selectedOrderModal.shiprocketFreight || selectedOrderModal.pricing?.shipping || 0).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               ) : (
-                <div className="text-[12px] text-ink/60 flex items-center justify-between">
-                  <span>Shipment has not been pushed to Shiprocket yet.</span>
-                  <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-[11px]">
-                    Pending Dispatch
-                  </span>
+                <div className="space-y-3">
+                  <div className="text-[12px] text-ink/60 flex items-center justify-between">
+                    <span>Shipment has not been pushed to Shiprocket yet.</span>
+                    <span className="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-[11px]">
+                      Pending Dispatch
+                    </span>
+                  </div>
+                  <div className="pt-2.5 border-t border-[#166534]/15 grid grid-cols-1 sm:grid-cols-2 gap-3 text-[12.5px]">
+                    <div>
+                      <span className="text-ink/60 font-semibold block text-[10.5px] uppercase">Customer Location</span>
+                      <span className="font-extrabold text-navy text-[13px]">
+                        {selectedOrderModal.shippingAddress?.city}, {selectedOrderModal.shippingAddress?.state} ({selectedOrderModal.shippingAddress?.pincode})
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-ink/60 font-semibold block text-[10.5px] uppercase">Estimated Wallet Deduction</span>
+                      <span className="font-black text-[#166534] text-[14px]">
+                        {(selectedOrderModal.pricing?.shipping || 0) > 0 
+                          ? `₹${(selectedOrderModal.pricing?.shipping ?? 0).toFixed(2)}` 
+                          : "Calculated upon push"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
