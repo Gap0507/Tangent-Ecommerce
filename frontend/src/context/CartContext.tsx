@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { trackAddToCart } from "@/lib/metaPixel";
 
 export interface CartItem {
   id: string;
@@ -84,6 +85,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     });
     openCartTemporarily();
+
+    // Trigger Meta Pixel AddToCart event
+    trackAddToCart({
+      id: newItem.productId,
+      name: newItem.name,
+      price: newItem.price,
+      quantity: newItem.quantity,
+    });
   };
 
   const removeFromCart = (id: string) => {

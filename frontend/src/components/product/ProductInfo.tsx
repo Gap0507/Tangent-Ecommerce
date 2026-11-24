@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Star, ShoppingCart, Check, Zap, Shield, Plus, Minus } from "lucide-react";
 import { ProductDetails, calculatePackPrices } from "@/data/products";
 import { useCart } from "@/context/CartContext";
+import { trackViewContent } from "@/lib/metaPixel";
 
 export function ProductInfo({ product }: { product: ProductDetails }) {
   const router = useRouter();
@@ -15,6 +16,20 @@ export function ProductInfo({ product }: { product: ProductDetails }) {
   const [packPrices, setPackPrices] = useState(product.packPrices);
   const [dbStock, setDbStock] = useState<number | null>(null);
   const [allDbProducts, setAllDbProducts] = useState<any[]>([]);
+  const lastTrackedProductRef = useRef<string | null>(null);
+
+  // Track Meta Pixel ViewContent when viewing any of the beverage product pages
+  useEffect(() => {
+    if (lastTrackedProductRef.current !== product.id) {
+      lastTrackedProductRef.current = product.id;
+      trackViewContent({
+        id: product.id,
+        name: product.name,
+        price: packPrices[0]?.price || product.packPrices[0]?.price || 0,
+        category: "Beverages",
+      });
+    }
+  }, [product.id, product.name, packPrices, product.packPrices]);
 
   useEffect(() => {
     fetch("/api/products")

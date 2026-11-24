@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,7 @@ import {
 import { useCart } from "@/context/CartContext";
 import { State, City } from "country-state-city";
 import { parsePhoneNumberFromString, isValidPhoneNumber } from "libphonenumber-js";
+import { trackInitiateCheckout, trackPurchase } from "@/lib/metaPixel";
 
 declare global {
   interface Window {
@@ -102,6 +103,22 @@ export default function CheckoutPage() {
   const [completedOrder, setCompletedOrder] = useState<any>(null);
 
   const [storeSettings, setStoreSettings] = useState<any>(null);
+  const hasTrackedCheckoutRef = useRef(false);
+
+  // Trigger Meta Pixel InitiateCheckout when checkout loads with items
+  useEffect(() => {
+    if (!hasTrackedCheckoutRef.current && items.length > 0) {
+      hasTrackedCheckoutRef.current = true;
+      trackInitiateCheckout({
+        items: items.map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          price: i.price,
+        })),
+        total: subtotal,
+      });
+    }
+  }, [items, subtotal]);
 
   // Fetch store settings on mount
   useEffect(() => {
@@ -311,8 +328,21 @@ export default function CheckoutPage() {
 
         const verifyData = await verifyRes.json();
         if (verifyData.success) {
-          setCompletedOrder(verifyData.data || createdOrder);
+          const finalOrder = verifyData.data || createdOrder;
+          setCompletedOrder(finalOrder);
           clearCart();
+
+          // Trigger Meta Pixel Purchase only after payment gateway & backend confirmation
+          trackPurchase({
+            orderId: finalOrder.orderNumber || finalOrder._id,
+            total: finalOrder.pricing?.total ?? finalTotal,
+            items: (finalOrder.items && finalOrder.items.length > 0 ? finalOrder.items : items).map((item: any) => ({
+              id: item.productId || item.sku || item.name,
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+            })),
+          });
         } else {
           throw new Error(verifyData.error || "Payment verification failed");
         }
